@@ -12,7 +12,7 @@
 	<artifactId>wikidata-universe-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>wikidata-universe-api</name>
-	<description>Demo project for Spring Boot</description>
+	<description>supports-wikidata-appliacation</description>
 	<url/>
 	<licenses>
 		<license/>
