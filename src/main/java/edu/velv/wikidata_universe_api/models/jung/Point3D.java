@@ -56,17 +56,6 @@ public class Point3D extends Point2D.Double {
   }
 
   /**
-   * Sets the location of the point to the coordinates of the specified Point2D object and the specified z-coordinate.
-   *
-   * @param p The Point2D object whose coordinates will be used.
-   * @param z The z-coordinate of the point.
-   */
-  public void setLocation(Point2D p, double z) {
-    super.setLocation(p);
-    this.z = z;
-  }
-
-  /**
    * Returns the square of the Euclidean distance between two points in 3D space.
    *
    * @param x1 The x-coordinate of the first point.
