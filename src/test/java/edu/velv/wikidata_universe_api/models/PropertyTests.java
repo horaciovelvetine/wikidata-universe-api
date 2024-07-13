@@ -16,7 +16,7 @@ import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
 
-public class PropertyTest {
+public class PropertyTests {
   private PropertyDocument propertyDoc;
 
   @BeforeEach
@@ -36,38 +36,38 @@ public class PropertyTest {
   @Test
   public void init_wDefaults_Jackson() {
     Property property = new Property();
-    assertNull(property.id());
-    assertNull(property.label());
-    assertNull(property.description());
+    assertNull(property.id(), "id should be null");
+    assertNull(property.label(), "label should be null");
+    assertNull(property.description(), "description should be null");
   }
 
   @Test
   public void init_wPropertyDocument_WDTK_Default() {
     Property property = new Property(propertyDoc);
-    assertEquals("P1", property.id());
-    assertEquals("test label", property.label());
-    assertEquals("test description", property.description());
+    assertEquals("P1", property.id(), "id should be: P1");
+    assertEquals("test label", property.label(), "label should be: test label");
+    assertEquals("test description", property.description(), "description should be: test description");
   }
 
   @Test
   public void setsId() {
     Property property = new Property();
     property.setId("P1");
-    assertEquals("P1", property.id());
+    assertEquals("P1", property.id(), "id should be: P1");
   }
 
   @Test
   public void setsLabel() {
     Property property = new Property();
     property.setLabel("test label");
-    assertEquals("test label", property.label());
+    assertEquals("test label", property.label(), "label should be: test label");
   }
 
   @Test
   public void setsDescription() {
     Property property = new Property();
     property.setDescription("test description");
-    assertEquals("test description", property.description());
+    assertEquals("test description", property.description(), "description should be: test description");
   }
 
 }

@@ -6,7 +6,7 @@ import java.awt.Dimension;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RandomLocation3DTest {
+public class RandomLocation3DTests {
   private RandomLocation3D<Object> randomLocation3D;
   private Dimension dimension;
 

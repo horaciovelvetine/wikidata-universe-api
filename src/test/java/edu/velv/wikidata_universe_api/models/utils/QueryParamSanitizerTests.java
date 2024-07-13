@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class QueryParamSanitizerTest {
+public class QueryParamSanitizerTests {
 
   @Test
   public void sanitize_NullInput_ReturnsNull() {

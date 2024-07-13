@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-public class VertexTest {
+public class VertexTests {
   private ItemDocument itemDoc;
   // private WbSearchEntitiesResult result;
 
