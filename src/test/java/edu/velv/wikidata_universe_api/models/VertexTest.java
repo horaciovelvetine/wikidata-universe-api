@@ -58,15 +58,6 @@ public class VertexTest {
   }
 
   @Test
-  public void init_wWBSearchEntitiesResult_WDTK_Default() {
-    // Vertex vertex = new Vertex(result);
-    // assertEquals("Q1", vertex.id(), "Id should be Q1");
-    // assertEquals("Earth", vertex.label(), "Label should be Earth");
-    // assertEquals("planet", vertex.description(), "Description should be planet");
-    fail("Not implemented::WBSearchEntitiesResult is implemented as an Interface, and not a class.");
-  }
-
-  @Test
   public void setsLabel() {
     Vertex vertex = new Vertex();
     vertex.setLabel("Earth");
