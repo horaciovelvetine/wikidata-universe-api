@@ -1,14 +1,14 @@
 package edu.velv.wikidata_universe_api.models.api;
 
-public abstract class RequestResponse {
+public abstract class RequestResponses {
 
-  public record StatusResponse(String status) {
-    public StatusResponse(String status) {
-      this.status = status;
+  public record StatusResponse(String message) {
+    public StatusResponse(String message) {
+      this.message = message;
     }
 
     public StatusResponse() {
-      this("A-OK 200");
+      this("API Online.");
     }
   }
 
