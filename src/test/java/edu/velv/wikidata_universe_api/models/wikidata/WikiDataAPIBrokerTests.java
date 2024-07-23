@@ -10,7 +10,7 @@ public class WikiDataAPIBrokerTests {
   private static final String douglasAdamsTitle = "Douglas Adams";
   private static final String kevinBaconQID = "Q3454165";
   private static final String givenNamePQID = "P735";
-  private final WikiDataAPIBroker broker = new WikiDataAPIBroker();
+  private final FetchBroker broker = new FetchBroker();
 
   @Test
   public void getsOriginByQuery_wItemQID() {
