@@ -6,18 +6,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.velv.wikidata_universe_api.models.Graphset;
+import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.utils.QueryParamSanitizer;
 
 @CrossOrigin
 @RestController
-public class APIv1SessionController {
+public class APISessionController {
   @GetMapping("/api/v1/init-session")
-  public ResponseEntity<Graphset> initSession(
-      @RequestParam(value = "query", defaultValue = "Kevin Bacon") String query) {
-    Graphset graphset = new Graphset(QueryParamSanitizer.sanitize(query));
-
-    return ResponseEntity.ok(graphset);
+  public ResponseEntity<String> initSession(
+      @RequestParam(value = "query", defaultValue = "Kevin Bacon") String query,
+      @RequestParam(value = "dimensions", defaultValue = "1600x900") String dimensions) {
+    query = QueryParamSanitizer.sanitize(query);
+    ClientSession session = new ClientSession(query, dimensions);
+    // Subject emits init event => new session create, needs dimesnions & query
+    return ResponseEntity.ok("Session Initializing[query=" + query + ", dimensions=" + dimensions + "]");
   }
 
   @GetMapping("/api/v1/update-session")
