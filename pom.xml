@@ -59,6 +59,11 @@
 			<version>33.2.1-jre</version>
 		</dependency>
 		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr</artifactId>
+			<version>0.10.4</version>
+		</dependency>
+		<dependency>
 			<groupId>org.wikidata.wdtk</groupId>
 			<artifactId>wdtk-datamodel</artifactId>
 			<version>${wikidataToolkitVersion}</version>
