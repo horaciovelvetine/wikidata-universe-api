@@ -7,10 +7,10 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 
-public class WikiDataAPIBroker {
+public class FetchBroker {
   private WikibaseDataFetcher wbdf;
 
-  public WikiDataAPIBroker() {
+  public FetchBroker() {
     wbdf = WikibaseDataFetcher.getWikidataDataFetcher();
   }
 
