@@ -2,7 +2,10 @@ package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
 
+import edu.velv.wikidata_universe_api.models.err.WikiverseError;
+import edu.velv.wikidata_universe_api.models.utils.QueryParamSanitizer;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
+import io.vavr.control.Either;
 
 public class ClientSession {
   private final String originalQuery;
@@ -10,11 +13,15 @@ public class ClientSession {
   private final Graphset graphset;
   private final WikidataManager wikidata;
 
-  public ClientSession(String originalQuery, String dimensions) {
-    this.originalQuery = originalQuery;
+  private ClientSession(String query, String dimensions) {
+    this.originalQuery = QueryParamSanitizer.sanitize(query);
     this.subjectDimensions = getDimensionsFromClient(dimensions);
     this.graphset = new Graphset();
     this.wikidata = new WikidataManager(this);
+  }
+
+  public static Either<WikiverseError, ClientSession> initialize(String query, String dimensions) {
+    return Either.right(new ClientSession(query, dimensions));
   }
 
   public Graphset graphset() {
