@@ -15,7 +15,6 @@ public class ClientSession {
     this.subjectDimensions = getDimensionsFromClient(dimensions);
     this.graphset = new Graphset();
     this.wikidata = new WikidataManager(this);
-    wikidata.fetchInitSessionData(originalQuery);
   }
 
   public Graphset graphset() {
