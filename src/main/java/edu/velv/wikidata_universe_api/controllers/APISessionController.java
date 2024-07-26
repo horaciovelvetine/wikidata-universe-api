@@ -14,8 +14,7 @@ import edu.velv.wikidata_universe_api.models.utils.QueryParamSanitizer;
 public class APISessionController {
   @GetMapping("/api/init-session")
   public ResponseEntity<String> initSession(
-      @RequestParam(value = "query", defaultValue = "Kevin Bacon") String query,
-      @RequestParam(value = "dimensions", defaultValue = "900x900") String dimensions) {
+      @RequestParam(required = true) String query, @RequestParam(required = true) String dimensions) {
     query = QueryParamSanitizer.sanitize(query);
     ClientSession session = new ClientSession(query, dimensions);
     // Subject emits init event => new session create, needs dimesnions & query
