@@ -16,7 +16,6 @@ import edu.velv.wikidata_universe_api.models.jung.Point3D;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -36,8 +35,6 @@ public class VertexTests {
     long revisionId = 0;
 
     itemDoc = new ItemDocumentImpl(itemId, labels, descriptions, aliases, statementGroups, siteLinks, revisionId);
-
-    // result = new WbSearchEntitiesResult("Q1", "Earth", "planet", "http://www.wikidata.org/entity/Q1");
   }
 
   @Test
