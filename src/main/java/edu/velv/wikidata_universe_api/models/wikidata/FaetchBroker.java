@@ -92,7 +92,7 @@ public class FaetchBroker {
   private <T> Either<WikiverseError, T> fetchEntityWithErrorHandler(CheckedFunction0<T> supplier) {
     return Try.of(supplier)
         .toEither()
-        .mapLeft(e -> new WikiverseError.WikidataServiceError.ApiRequestFailed(e.getMessage()));
+        .mapLeft(e -> new WikiverseError.WikidataServiceError.ApiRequestFailed(e.getMessage(), e));
   }
 
   private boolean entIdIsItemDoc(String s) {
