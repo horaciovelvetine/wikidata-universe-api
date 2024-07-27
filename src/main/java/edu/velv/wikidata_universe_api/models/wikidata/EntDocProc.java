@@ -1,19 +1,20 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.Iterator;
 
+import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
+import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
+import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.Vertex;
-import edu.velv.wikidata_universe_api.models.wikidata.ValueData.ValueType;
+import edu.velv.wikidata_universe_api.models.utils.Loggable;
 
-public class EntDocProc {
+public class EntDocProc implements Loggable {
   private final ClientSession session;
 
   private static final Set<String> EXCLUDED_DATA = Set.of("external-id", "monolingualtext",
@@ -34,10 +35,10 @@ public class EntDocProc {
   }
 
   public void processWikiEntDocument(EntityDocument doc) {
-    if (doc instanceof ItemDocument) {
-      processItemDocument((ItemDocument) doc);
-    } else if (doc instanceof PropertyDocument) {
-      processPropertyDocument((PropertyDocument) doc);
+    if (doc instanceof ItemDocumentImpl) {
+      processItemDocument((ItemDocumentImpl) doc);
+    } else if (doc instanceof PropertyDocumentImpl) {
+      processPropertyDocument((PropertyDocumentImpl) doc);
     }
   }
 
@@ -45,59 +46,55 @@ public class EntDocProc {
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
 
-  private void processItemDocument(ItemDocument doc) {
+  private void processItemDocument(ItemDocumentImpl doc) {
     Vertex v = new Vertex(doc);
     session.graphset().addVertex(v);
-    CompletableFuture.runAsync(() -> processItemsStatements(doc));
+    processItemsStatements(doc);
   }
 
-  private void processPropertyDocument(PropertyDocument docu) {
-    //TBD... 
+  private void processPropertyDocument(PropertyDocumentImpl doc) {
+    Property p = new Property(doc);
+    session.graphset().addProperty(p);
   }
 
-  private void processItemsStatements(ItemDocument doc) {
+  private void processItemsStatements(ItemDocumentImpl doc) {
     String srcVertexId = doc.getEntityId().getId();
+    Iterator<Statement> stmts = doc.getAllStatements();
 
-    while (doc.getAllStatements().hasNext()) {
-      Statement stmt = doc.getAllStatements().next();
+    while (stmts.hasNext()) {
+      Statement stmt = stmts.next();
       SnakData mainSnak = stmt.getMainSnak().accept(new SnakData());
-
-      if (definesRelevantData(mainSnak)) {
-        createEdgeFromSnakData(mainSnak, srcVertexId);
+      if (snakDefinesRelevantData(mainSnak)) {
+        createEdgeFromSnak(mainSnak, srcVertexId);
       }
     }
   }
 
-  private void createEdgeFromSnakData(SnakData ms, String srcVertexId) {
+  private void createEdgeFromSnak(SnakData ms, String srcVertexId) {
     Edge e = new Edge(srcVertexId, ms);
     session.graphset().addEdge(e);
     session.wikidataManager().addUnfetchedEdgeDetailsToQueue(e);
   }
 
-  private boolean definesRelevantData(SnakData ms) {
-    return !isNonNull(ms) &&
-        !isExcludedDataType(ms) &&
-        !isExcludedEntityId(ms) &&
-        isEntityIdType(ms.snakValue.type);
+  private boolean snakDefinesRelevantData(SnakData ms) {
+    if (hasNullValues(ms))
+      return false;
+    if (hasExcludedDataType(ms))
+      return false;
+    if (hasExcludedEntityId(ms))
+      return false;
+    return true;
   }
 
-  private boolean isNonNull(SnakData ms) {
-    // Checks properties are not null
-    return ms != null && ms.property != null && ms.snakValue != null;
+  private boolean hasNullValues(SnakData ms) {
+    return ms == null || ms.snakValue == null || ms.property == null;
   }
 
-  private boolean isExcludedDataType(SnakData ms) {
-    // Checks SnakData datatype against excluded types
+  private boolean hasExcludedDataType(SnakData ms) {
     return EXCLUDED_DATA.contains(ms.datatype);
   }
 
-  private boolean isExcludedEntityId(SnakData ms) {
-    // Checks if invalidating entity ids are present
+  private boolean hasExcludedEntityId(SnakData ms) {
     return EXCLUDED_ENT_IDS.contains(ms.property.value) || EXCLUDED_ENT_IDS.contains(ms.snakValue.value);
   }
-
-  private boolean isEntityIdType(ValueType valueType) {
-    return valueType == ValueType.EntityId;
-  }
-
 }
