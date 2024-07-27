@@ -3,47 +3,36 @@ package edu.velv.wikidata_universe_api.models;
 import edu.velv.wikidata_universe_api.models.wikidata.SnakData;
 import edu.velv.wikidata_universe_api.models.wikidata.ValueData.ValueType;
 
-public class Edge {
-  private String srcEntId;
-  private String tgtEntId;
-  private String propertyId;
-  private String label;
-  private ValueType type;
+public record Edge(String srcEntId, String tgtEntId, String propertyId, String label, ValueType type) {
 
   public Edge(String srcVertexId, SnakData mainSnak) {
-    this.srcEntId = srcVertexId;
-    this.propertyId = mainSnak.property.value;
-
+    this(srcVertexId, getTgtEntIdIfNotDateType(mainSnak), mainSnak.property.value, getLabelIfDateTypePresent(mainSnak),
+        mainSnak.snakValue.type);
   }
 
-  public String srcEntId() {
-    return srcEntId;
+  /**
+   * Returns the edge string attributes which have *typically* not been 
+   * fetched yet as a part of the import process in a new array.
+   */
+  public String[] unfetchedEdgeDetailStrings() {
+    return new String[] { tgtEntId, propertyId, label };
   }
 
-  public String tgtEndId() {
-    return tgtEntId;
+  private static String getLabelIfDateTypePresent(SnakData mainSnak) {
+    if (mainSnak.snakValue.type == ValueType.DateTime) {
+      return mainSnak.snakValue.value;
+    }
+    return null;
   }
 
-  public String propertyId() {
-    return propertyId;
+  private static String getTgtEntIdIfNotDateType(SnakData mainSnak) {
+    if (mainSnak.snakValue.type != ValueType.DateTime) {
+      return mainSnak.snakValue.value;
+    }
+    return null;
   }
 
-  public String label() {
-    return label;
-  }
-  public ValueType type() {
-    return type;
-  }
-
-  public void setSrcEntId(String srcEntId) {
-    this.srcEntId = srcEntId;
-  }
-
-  public void setTgtEndId(String tgtEntId) {
-    this.tgtEntId = tgtEntId;
-  }
-
-  public void setPropertyId(String propertyId) {
-    this.propertyId = propertyId;
+  public boolean definesDateValue() {
+    return type == ValueType.DateTime;
   }
 }
