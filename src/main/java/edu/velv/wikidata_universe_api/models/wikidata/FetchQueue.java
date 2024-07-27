@@ -1,102 +1,107 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.concurrent.ConcurrentHashMap;
 
 import edu.velv.wikidata_universe_api.models.Edge;
-import edu.velv.wikidata_universe_api.models.wikidata.ValueData.ValueType;
 
 public class FetchQueue {
-  private final Set<EntTgt> entities;
-  private final Set<DateTgt> dates;
-  private final Set<PropertyTgt> properties;
-  private final Set<InvalidTgt> invalid;
-  private final Set<FetchedTgt> fetched;
+  private static final int MAX_QUERY_SIZE = 50;
+  private final Set<Target.Entity> entities;
+  private final Set<Target.Invalid> invalid;
+  private final Set<Target.Fetched> fetched;
 
   public FetchQueue() {
-    //default constructor
     entities = ConcurrentHashMap.newKeySet();
-    dates = ConcurrentHashMap.newKeySet();
-    properties = ConcurrentHashMap.newKeySet();
     invalid = ConcurrentHashMap.newKeySet();
     fetched = ConcurrentHashMap.newKeySet();
   }
 
-  public void addUnfetchedEdgeDetails(Edge e, Integer n) {
-    Integer nPlus = n + 1;
-    addEntity(nPlus, e.tgtEndId());
-    addProperty(nPlus, e.propertyId());
-    if (e.type() == ValueType.DateTime) {
-      addDate(nPlus, e.label());
-    }
+  public void addUnfetchedEdgeValues(Edge e, Integer n) {
+    Integer nP = n + 1;
+    addEntityIfNotPresent(nP, e.propertyId());
+    addEntityIfNotPresent(nP, e.label());
+    addEntityIfNotPresent(nP, e.srcEntId());
   }
 
-  public boolean isEmpty(Integer n) {
-    return !nDepthStillInQueue(entities, n) && !nDepthStillInQueue(dates, n) && !nDepthStillInQueue(properties, n);
+  public boolean isEmptyAtNDepth(Integer n) {
+    return entities.stream().noneMatch(t -> t.n().equals(n));
+  }
+
+  public List<String> getQueriesAtNDepth(Integer n) {
+    return entities.stream()
+        .filter(t -> t.n().equals(n))
+        .map(Target::query)
+        .limit(MAX_QUERY_SIZE)
+        .collect(Collectors.toList());
+  }
+
+  public void fetchSuccess(String query) {
+    entities.removeIf(t -> t.query().equals(query));
+    fetched.add(new Target.Fetched(query));
+  }
+
+  public void fetchInvalid(String query) {
+    entities.removeIf(t -> t.query().equals(query));
+    invalid.add(new Target.Invalid(query));
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
 
-  private void addEntity(Integer n, String query) {
-    if (queryAlreadyInQueue(entities, query)) {
+  private void addEntityIfNotPresent(Integer nP, String query) {
+    if (isInvalid(query)
+        || isAlreadyFetched(query)
+        || isAlreadyQueued(query)) {
       return;
     }
-    entities.add(new EntTgt(n, query));
+    entities.add(new Target.Entity(nP, query));
   }
 
-  private void addDate(Integer n, String query) {
-    if (queryAlreadyInQueue(dates, query)) {
-      return;
-    }
-    dates.add(new DateTgt(n, query));
+  private boolean isInvalid(String query) {
+    return query == null || isQueryPresentInSet(invalid, query);
   }
 
-  private void addProperty(Integer n, String query) {
-    if (queryAlreadyInQueue(properties, query)) {
-      return;
-    }
-    properties.add(new PropertyTgt(n, query));
+  private boolean isAlreadyFetched(String query) {
+    return isQueryPresentInSet(fetched, query);
   }
 
-  private boolean queryAlreadyInQueue(Set<? extends Queryable> set, String query) {
-
-    return queryAlreadyInSet(set, query) || queryAlreadyInSet(fetched, query) || queryAlreadyInSet(invalid, query);
+  private boolean isAlreadyQueued(String query) {
+    return isQueryPresentInSet(entities, query);
   }
 
-  private boolean queryAlreadyInSet(Set<? extends Queryable> set, String query) {
+  private boolean isQueryPresentInSet(Set<? extends Target> set, String query) {
     return set.stream().anyMatch(t -> t.query().equals(query));
   }
 
-  private boolean nDepthStillInQueue(Set<? extends Fetchable> set, Integer n) {
-    return set.stream().anyMatch(t -> t.nDepth().equals(n));
-  }
-
   //* RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS *//
   //* RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS *//
   //* RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS *//
 
-  protected interface Queryable {
-    String query();
+  interface Fetchable {
+    public Integer n();
   }
 
-  protected interface Fetchable {
-    Integer nDepth();
-  }
+  interface Target {
+    public String query();
 
-  protected record EntTgt(Integer nDepth, String query) implements Queryable, Fetchable {
-  }
+    record Entity(Integer n, String query) implements Target, Fetchable {
+    }
 
-  protected record DateTgt(Integer nDepth, String query) implements Queryable, Fetchable {
-  }
+    record Date(Integer n, String query) implements Target, Fetchable {
+    }
 
-  protected record PropertyTgt(Integer nDepth, String query) implements Queryable, Fetchable {
-  }
+    record Property(Integer n, String query) implements Target, Fetchable {
+    }
 
-  protected record InvalidTgt(String query) implements Queryable {
-  }
+    record Invalid(String query) implements Target {
+    }
 
-  protected record FetchedTgt(String query) implements Queryable {
+    record Fetched(String query) implements Target {
+    }
+
   }
 }
