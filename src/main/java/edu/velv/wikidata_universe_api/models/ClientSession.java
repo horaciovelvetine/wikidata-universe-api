@@ -1,6 +1,7 @@
 package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
+import java.util.Optional;
 
 import edu.velv.wikidata_universe_api.models.err.WikiverseError;
 import edu.velv.wikidata_universe_api.models.utils.QueryParamSanitizer;
@@ -22,7 +23,11 @@ public class ClientSession {
 
   public static Either<WikiverseError, ClientSession> initialize(String query, String dimensions) {
     ClientSession sesh = new ClientSession(query, dimensions);
-    sesh.wikidata.fetchInitSessionData();
+    Optional<WikiverseError> fetchTask = sesh.wikidata.fetchInitSessionData();
+
+    if (fetchTask.isPresent()) {
+      return Either.left(fetchTask.get());
+    }
 
     return Either.right(sesh);
   }

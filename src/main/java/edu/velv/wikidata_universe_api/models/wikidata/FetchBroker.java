@@ -1,21 +1,15 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
 import java.util.List;
+import java.util.Map;
 
 import io.vavr.CheckedFunction0;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 
-import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder;
-import org.wikidata.wdtk.datamodel.helpers.PropertyDocumentBuilder;
-import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl;
-import org.wikidata.wdtk.datamodel.implementation.PropertyIdValueImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
-import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue;
 
 import edu.velv.wikidata_universe_api.models.err.WikiverseError;
 
@@ -34,7 +28,7 @@ public class FetchBroker {
    * @param query the query to search for the origin entity
    * @return an Either object containing either the retrieved EntityDocument or a WikiverseError
    */
-  public Either<WikiverseError, EntityDocument> getOriginEntityByAny(String query) {
+  protected Either<WikiverseError, EntityDocument> getOriginEntityByAny(String query) {
     Either<WikiverseError, EntityDocument> entityByTitle = fetchEntityByTitle(query);
 
     if (entityByTitle.isRight() || isFailedApiRequest(entityByTitle.getLeft())) {
@@ -43,11 +37,22 @@ public class FetchBroker {
 
     Either<WikiverseError, WbSearchEntitiesResult> entityByAny = fetchEntityByAny(query);
 
-    if (isNoSuchEntityError(entityByAny.getLeft())) {
+    if (entityByAny.isLeft() && isNoSuchEntityError(entityByAny.getLeft())) {
       return fetchEntityById(DEFAULT_FALLBACK_ID);
     }
 
-    return entityByAny.map(this::convertAnyResultToEntityDoc);
+    return fetchEntityById(entityByAny.get().getEntityId());
+  }
+
+  protected Either<WikiverseError, Map<String, EntityDocument>> fetchEntitiesByQueueList(List<String> ids) {
+    return Try.of(() -> fetcher.getEntityDocuments(ids))
+        .toEither()
+        .mapLeft(e -> new WikiverseError.WikidataServiceError.ApiRequestFailed(e.getMessage(), e));
+  }
+
+  protected Either<WikiverseError, Map<String, EntityDocument>> fetchNonEntsByQueueList(List<String> qNonEnts) {
+    //TODO: The string or DateTime queries -- dont forget possible date format needed
+    return Either.left(new WikiverseError.UnimplementedError("getNonEntsByQueueList not implemented"));
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
@@ -69,7 +74,17 @@ public class FetchBroker {
   }
 
   private Either<WikiverseError, EntityDocument> fetchEntityById(String query) {
-    return fetchEntityWithErrorHandler(() -> fetcher.getEntityDocument(query));
+    Either<WikiverseError, EntityDocument> entityById = fetchEntityWithErrorHandler(
+        () -> fetcher.getEntityDocument(query));
+
+    if (entityById.isLeft()) {
+      return Either.left(entityById.getLeft());
+    }
+
+    return entityById.get() == null
+        ? Either
+            .left(new WikiverseError.WikidataServiceError.NoSuchEntityFound("Unable to find entity by id: " + query))
+        : entityById;
   }
 
   private Either<WikiverseError, List<WbSearchEntitiesResult>> fetchEntitiesBySearch(String query) {
@@ -94,13 +109,7 @@ public class FetchBroker {
         .mapLeft(e -> new WikiverseError.WikidataServiceError.ApiRequestFailed(e.getMessage(), e));
   }
 
-  private boolean entIdIsItemDoc(String s) {
-    return s.matches("[Q]\\d*");
-  }
-
-  private boolean entIdIsPropertyDoc(String s) {
-    return s.matches("[P]\\d*");
-  }
+  //TODO: duplicate fetchEntityWithError adding different errors?
 
   private boolean isNoSuchEntityError(WikiverseError error) {
     return error instanceof WikiverseError.WikidataServiceError.NoSuchEntityFound;
@@ -110,41 +119,4 @@ public class FetchBroker {
     return error instanceof WikiverseError.WikidataServiceError.ApiRequestFailed;
   }
 
-  private EntityDocument convertAnyResultToEntityDoc(WbSearchEntitiesResult searchResult) {
-    String entId = searchResult.getEntityId();
-    String entIri = searchResult.getConceptUri().replace(entId, "");
-    String entDesc = searchResult.getDescription();
-    String entLabel = searchResult.getLabel();
-    String langCode = "en";
-    EntityDocument doc = null;
-
-    if (entIdIsItemDoc(entId)) {
-      doc = createItemDocument(entId, entIri, entDesc, entLabel, langCode);
-    } else if (entIdIsPropertyDoc(entId)) {
-      doc = createPropertyDocument(entId, entIri, entDesc, entLabel, langCode);
-    } else {
-      throw new IllegalArgumentException("Entity ID is not a valid QID or PID.");
-    }
-    return doc;
-  }
-
-  private EntityDocument createItemDocument(String itemId, String itemIri, String description, String label,
-      String SITE_KEYCode) {
-    ItemIdValue idValue = new ItemIdValueImpl(itemId, itemIri);
-    ItemDocumentBuilder builder = ItemDocumentBuilder.forItemId(idValue);
-    builder.withDescription(description, SITE_KEYCode);
-    builder.withLabel(label, SITE_KEYCode);
-    return builder.build();
-  }
-
-  @SuppressWarnings("deprecation") //DT_PROPERTY is deprecated, required lib is not included in pom
-  private EntityDocument createPropertyDocument(String propertyId, String propertyIri, String description, String label,
-      String SITE_KEYCode) {
-    PropertyIdValue idValue = new PropertyIdValueImpl(propertyId, propertyIri);
-    PropertyDocumentBuilder builder = PropertyDocumentBuilder.forPropertyIdAndDatatype(idValue,
-        DatatypeIdValue.DT_PROPERTY);
-    builder.withDescription(description, SITE_KEYCode);
-    builder.withLabel(label, SITE_KEYCode);
-    return builder.build();
-  }
 }

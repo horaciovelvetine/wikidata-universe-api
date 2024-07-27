@@ -1,18 +1,24 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-
-import edu.velv.wikidata_universe_api.models.ClientSession;
-import edu.velv.wikidata_universe_api.models.Edge;
-import edu.velv.wikidata_universe_api.models.err.WikiverseError;
 import io.vavr.control.Either;
 
-public class WikidataManager {
+import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+
+import edu.velv.wikidata_universe_api.models.Edge;
+import edu.velv.wikidata_universe_api.models.ClientSession;
+import edu.velv.wikidata_universe_api.models.utils.Loggable;
+import edu.velv.wikidata_universe_api.models.err.WikiverseError;
+
+public class WikidataManager implements Loggable {
   private final Integer MAX_FETCH_DEPTH = 2;
   private Integer n;
   private final ClientSession session;
   private final FetchBroker api;
-  private final FaetchBroker tApi;
   private final FetchQueue queue;
   private final EntDocProc entProc;
 
@@ -20,21 +26,28 @@ public class WikidataManager {
     this.n = 0;
     this.session = parentSession;
     this.api = new FetchBroker();
-    this.tApi = new FaetchBroker();
     this.queue = new FetchQueue();
     this.entProc = new EntDocProc(parentSession);
   }
 
-  public void fetchInitSessionData() {
-    Either<WikiverseError, EntityDocument> originDocTry = tApi.getOriginEntityByAny(session.query());
+  public Optional<WikiverseError> fetchInitSessionData() {
+    Either<WikiverseError, EntityDocument> originDocTry = api.getOriginEntityByAny(session.query());
+
+    if (originDocTry.isLeft()) {
+      return Optional.of(originDocTry.getLeft());
+    }
+
     entProc.processWikiEntDocument(originDocTry.get());
 
     while (n <= MAX_FETCH_DEPTH) {
-      // get from queue
-      if (queue.isEmpty(n)) {
+      // init a fetch from the queue
+      fetchTargetsFromQueue();
+      if (queue.isEmptyAtNDepth(n)) {
+        print("stop!");
         n++;
       }
     }
+    return Optional.empty();
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
@@ -42,7 +55,33 @@ public class WikidataManager {
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
 
   protected void addUnfetchedEdgeDetailsToQueue(Edge e) {
-    queue.addUnfetchedEdgeDetails(e, n);
+    queue.addUnfetchedEdgeValues(e, n);
+  }
+
+  private void fetchTargetsFromQueue() {
+    queue.getQueriesAtNDepth(n).forEach(q -> {
+      queue.fetchSuccess(q);
+    });
+    print("fetching targets at depth " + n);
+  }
+
+  private Optional<WikiverseError> fetchTargetsInQueue() {
+    //TODO: probably move this target parsing to the FetchQueue class
+    List<String> qAll = queue.getQueriesAtNDepth(n);
+    List<String> qNonEnts = filterNonEntQueries(qAll);
+    List<String> qEnts = qAll.stream().filter(q -> !qNonEnts.contains(q)).collect(Collectors.toList());
+
+    //CONSIDERS: nonEntDocs src edge will have no tgtEntId, needs handled
+    Either<WikiverseError, Map<String, EntityDocument>> entDocsTry = api.fetchEntitiesByQueueList(qEnts);
+    Either<WikiverseError, Map<String, EntityDocument>> nonEntDocsTry = api.fetchNonEntsByQueueList(qNonEnts);
+
+    return Optional.empty();
+  }
+
+  private List<String> filterNonEntQueries(List<String> queries) {
+    return queries.stream()
+        .filter(q -> !q.matches("[PQ]\\d+"))
+        .collect(Collectors.toList());
   }
 
 }
