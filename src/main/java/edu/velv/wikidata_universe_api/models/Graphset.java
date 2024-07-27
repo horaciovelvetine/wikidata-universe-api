@@ -45,4 +45,11 @@ public class Graphset {
     }
     edges.add(e);
   }
+
+  public void addProperty(Property p) {
+    if (properties().contains(p)) {
+      return;
+    }
+    properties.add(p);
+  }
 }
