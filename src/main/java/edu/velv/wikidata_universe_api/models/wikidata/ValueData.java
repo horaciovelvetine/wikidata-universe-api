@@ -35,16 +35,18 @@ public class ValueData implements ValueVisitor<ValueData> {
     return this;
   }
 
-  //! Below value types are a required implementation for the ValueVisitor interface
-  //! For this application they are uneeded and will return null
-
   @Override
-  public ValueData visit(QuantityValue value) {
+  public ValueData visit(StringValue value) {
+    // if (value != null) {
+    //   this.value = value.getString();
+    //   this.type = ValueType.String;
+    // }
+    // return this;
     return null;
   }
 
   @Override
-  public ValueData visit(StringValue value) {
+  public ValueData visit(QuantityValue value) {
     return null;
   }
 

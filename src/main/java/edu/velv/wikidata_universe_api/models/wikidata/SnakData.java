@@ -6,20 +6,30 @@ import org.wikidata.wdtk.datamodel.interfaces.SnakVisitor;
 import org.wikidata.wdtk.datamodel.interfaces.SomeValueSnak;
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
 
-public class SnakData implements SnakVisitor<SnakData> {
+import edu.velv.wikidata_universe_api.models.utils.Loggable;
+
+public class SnakData implements SnakVisitor<SnakData>, Loggable {
   public String datatype;
   public ValueData property;
   public ValueData snakValue;
+
+  public SnakData() {
+  }
+
+  public SnakData(String type, ValueData property, ValueData value) {
+    this.datatype = type;
+    this.property = property;
+    this.snakValue = value;
+  }
 
   @Override
   public SnakData visit(ValueSnak snak) {
     if (snak instanceof ValueSnakImpl) {
       ValueSnakImpl valueSnak = (ValueSnakImpl) snak;
-      this.datatype = valueSnak.getDatatype();
-      this.property = valueSnak.getPropertyId().accept(new ValueData());
-      this.snakValue = valueSnak.getValue().accept(new ValueData());
-      return this;
+      return new SnakData(valueSnak.getDatatype(), valueSnak.getPropertyId().accept(new ValueData()),
+          valueSnak.getValue().accept(new ValueData()));
     }
+    log("Unhandled ValueSnak: " + snak.getClass().getName());
     return null;
   }
 
