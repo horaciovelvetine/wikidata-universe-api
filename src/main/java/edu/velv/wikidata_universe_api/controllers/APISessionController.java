@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.velv.wikidata_universe_api.err.SessionControllerErrorResponse;
+import edu.velv.wikidata_universe_api.err.APISessionResponseErr;
 import edu.velv.wikidata_universe_api.function.ClientSessionBuilder;
 
 @CrossOrigin
@@ -17,7 +17,7 @@ public class APISessionController {
       @RequestParam(required = true) String query,
       @RequestParam(required = true) String dimensions) {
     return ClientSessionBuilder.initialize(query, dimensions)
-        .mapLeft(SessionControllerErrorResponse::mapWikiverseErrorToResponse)
+        .mapLeft(APISessionResponseErr::map)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
@@ -35,7 +35,7 @@ public class APISessionController {
     return ResponseEntity.status(200).body(body.toString());
   }
 
-  private ResponseEntity<String> buildErrorResponse(SessionControllerErrorResponse err) {
+  private ResponseEntity<String> buildErrorResponse(APISessionResponseErr err) {
     return ResponseEntity.status(err.status()).body(err.message());
   }
 }
