@@ -49,12 +49,14 @@ public class EntDocProc implements Loggable {
   private void processItemDocument(ItemDocumentImpl doc) {
     Vertex v = new Vertex(doc);
     session.graphset().addVertex(v);
+    session.wikidataManager().removeFetchedDetailsFromQueue(v.id());
     processItemsStatements(doc);
   }
 
   private void processPropertyDocument(PropertyDocumentImpl doc) {
     Property p = new Property(doc);
     session.graphset().addProperty(p);
+    session.wikidataManager().removeFetchedDetailsFromQueue(p.id());
   }
 
   private void processItemsStatements(ItemDocumentImpl doc) {
@@ -77,13 +79,7 @@ public class EntDocProc implements Loggable {
   }
 
   private boolean snakDefinesRelevantData(SnakData ms) {
-    if (hasNullValues(ms))
-      return false;
-    if (hasExcludedDataType(ms))
-      return false;
-    if (hasExcludedEntityId(ms))
-      return false;
-    return true;
+    return !(hasNullValues(ms) || hasExcludedDataType(ms) || hasExcludedEntityId(ms));
   }
 
   private boolean hasNullValues(SnakData ms) {
