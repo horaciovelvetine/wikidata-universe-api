@@ -2,12 +2,14 @@ package edu.velv.wikidata_universe_api.models.wikidata;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+import java.util.function.Predicate;
 
 import edu.velv.wikidata_universe_api.models.Edge;
 
 public class FetchQueue {
+  private static final String ENT_ID_PATTERN = "[PQ]\\d+";
   private static final int MAX_QUERY_SIZE = 50;
   private final Set<Target.Entity> entities;
   private final Set<Target.Invalid> invalid;
@@ -19,6 +21,9 @@ public class FetchQueue {
     fetched = ConcurrentHashMap.newKeySet();
   }
 
+  /**
+   * Adds the unfetched values from a newly created edge into the Queue.
+   */
   public void addUnfetchedEdgeValues(Edge e, Integer n) {
     Integer nP = n + 1;
     addEntityIfNotPresent(nP, e.propertyId());
@@ -26,31 +31,60 @@ public class FetchQueue {
     addEntityIfNotPresent(nP, e.srcEntId());
   }
 
+  /**
+   * Checks if the Queue is empty at a given depth of n.
+   */
   public boolean isEmptyAtNDepth(Integer n) {
     return entities.stream().noneMatch(t -> t.n().equals(n));
   }
 
-  public List<String> getQueriesAtNDepth(Integer n) {
-    return entities.stream()
-        .filter(t -> t.n().equals(n))
-        .map(Target::query)
-        .limit(MAX_QUERY_SIZE)
-        .collect(Collectors.toList());
+  /**
+   * Retrieves the next batch of entity ID's at a given depth of n.
+   */
+  public List<String> getEntTargetsBatchAtN(Integer n) {
+    return getTargetBatchAtN(n, q -> q.matches(ENT_ID_PATTERN));
   }
 
+  /**
+   * Retrieves the next batch of any value which is not an entitiy ID a given depth of n.
+   */
+  public List<String> getDateTargetsBatchAtN(Integer n) {
+    return getTargetBatchAtN(n, q -> !q.matches(ENT_ID_PATTERN));
+  }
+
+  /**
+   * Marks a query as successfully fetched.
+   */
   public void fetchSuccess(String query) {
-    entities.removeIf(t -> t.query().equals(query));
+    removeQueryTargetFromQueue(query);
     fetched.add(new Target.Fetched(query));
   }
 
+  /**
+   * Marks a query as an invalid target.
+   */
   public void fetchInvalid(String query) {
-    entities.removeIf(t -> t.query().equals(query));
+    removeQueryTargetFromQueue(query);
     invalid.add(new Target.Invalid(query));
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+
+  private void removeQueryTargetFromQueue(String query) {
+    entities.removeIf(t -> t.query().equals(query));
+  }
+
+  private List<String> getTargetBatchAtN(Integer n, Predicate<String> batchCondition) {
+    return getTargetsAtN(n).filter(batchCondition).limit(MAX_QUERY_SIZE).toList();
+  }
+
+  private Stream<String> getTargetsAtN(Integer n) {
+    return entities.stream()
+        .filter(t -> t.n().equals(n))
+        .map(Target::query);
+  }
 
   private void addEntityIfNotPresent(Integer nP, String query) {
     if (isInvalid(query)
@@ -76,10 +110,6 @@ public class FetchQueue {
   private boolean isQueryPresentInSet(Set<? extends Target> set, String query) {
     return set.stream().anyMatch(t -> t.query().equals(query));
   }
-
-  //* RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS *//
-  //* RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS *//
-  //* RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS || RECORDS *//
 
   interface Fetchable {
     public Integer n();
