@@ -10,17 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.err.SessionControllerErrorResponse;
-import edu.velv.wikidata_universe_api.models.err.WikiverseError;
 
 @CrossOrigin
 @RestController
 public class APISessionController {
   @GetMapping("/api/init-session")
   public ResponseEntity<String> initSession(
-      @RequestParam(required = true) String query, @RequestParam(required = true) String dimensions) {
-    Either<WikiverseError, ClientSession> session = ClientSession.initialize(query, dimensions);
-
-    return session.mapLeft(SessionControllerErrorResponse::mapWikiverseErrorToResponse)
+      @RequestParam(required = true) String query,
+      @RequestParam(required = true) String dimensions) {
+    return ClientSession.initialize(query, dimensions)
+        .mapLeft(SessionControllerErrorResponse::mapWikiverseErrorToResponse)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
