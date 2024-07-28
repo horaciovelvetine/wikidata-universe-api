@@ -1,18 +1,16 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
-import io.vavr.control.Either;
-
-import java.util.Map;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.utils.Loggable;
 import edu.velv.wikidata_universe_api.models.err.WikiverseError;
+import edu.velv.wikidata_universe_api.models.err.WikiverseError.WikidataServiceError.FetchRelatedDataTimeout;
 
 public class WikidataManager implements Loggable {
   private final Integer MAX_FETCH_DEPTH = 2;
@@ -21,6 +19,7 @@ public class WikidataManager implements Loggable {
   private final FetchBroker api;
   private final FetchQueue queue;
   private final EntDocProc entProc;
+  private final ScheduledExecutorService timeoutExecutor;
 
   public WikidataManager(ClientSession parentSession) {
     this.n = 0;
@@ -28,26 +27,28 @@ public class WikidataManager implements Loggable {
     this.api = new FetchBroker();
     this.queue = new FetchQueue();
     this.entProc = new EntDocProc(parentSession);
+    this.timeoutExecutor = Executors.newSingleThreadScheduledExecutor();
   }
 
-  public Optional<WikiverseError> fetchInitSessionData() {
-    Either<WikiverseError, EntityDocument> originDocTry = api.getOriginEntityByAny(session.query());
+  public Optional<WikiverseError> fetchInitQueryData() {
+    return api.getOriginEntityByAny(session.query()).fold(e -> {
+      return Optional.of(e);
+    }, doc -> {
+      entProc.processWikiEntDocument(doc);
+      return Optional.empty();
+    });
+  }
 
-    if (originDocTry.isLeft()) {
-      return Optional.of(originDocTry.getLeft());
+  public Optional<WikiverseError> fetchRelatedDataWithTimeout() {
+    Future<Optional<WikiverseError>> fetchTaskFuture = timeoutExecutor.submit(this::fetchRelatedTask);
+
+    try {
+      return fetchTaskFuture.get(10, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      return Optional.of(new FetchRelatedDataTimeout("fetchRelatedData timed out", e));
+    } finally {
+      fetchTaskFuture.cancel(true);
     }
-
-    entProc.processWikiEntDocument(originDocTry.get());
-
-    while (n <= MAX_FETCH_DEPTH) {
-      // init a fetch from the queue
-      fetchTargetsFromQueue();
-      if (queue.isEmptyAtNDepth(n)) {
-        print("stop!");
-        n++;
-      }
-    }
-    return Optional.empty();
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
@@ -58,30 +59,11 @@ public class WikidataManager implements Loggable {
     queue.addUnfetchedEdgeValues(e, n);
   }
 
-  private void fetchTargetsFromQueue() {
-    queue.getQueriesAtNDepth(n).forEach(q -> {
-      queue.fetchSuccess(q);
-    });
-    print("fetching targets at depth " + n);
-  }
-
-  private Optional<WikiverseError> fetchTargetsInQueue() {
-    //TODO: probably move this target parsing to the FetchQueue class
-    List<String> qAll = queue.getQueriesAtNDepth(n);
-    List<String> qNonEnts = filterNonEntQueries(qAll);
-    List<String> qEnts = qAll.stream().filter(q -> !qNonEnts.contains(q)).collect(Collectors.toList());
-
-    //CONSIDERS: nonEntDocs src edge will have no tgtEntId, needs handled
-    Either<WikiverseError, Map<String, EntityDocument>> entDocsTry = api.fetchEntitiesByQueueList(qEnts);
-    Either<WikiverseError, Map<String, EntityDocument>> nonEntDocsTry = api.fetchNonEntsByQueueList(qNonEnts);
-
+  private Optional<WikiverseError> fetchRelatedTask() {
+    try {
+      Thread.sleep(12000);
+    } catch (Exception e) {
+    }
     return Optional.empty();
   }
-
-  private List<String> filterNonEntQueries(List<String> queries) {
-    return queries.stream()
-        .filter(q -> !q.matches("[PQ]\\d+"))
-        .collect(Collectors.toList());
-  }
-
 }
