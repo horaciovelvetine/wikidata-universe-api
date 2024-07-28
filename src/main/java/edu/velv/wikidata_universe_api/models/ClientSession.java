@@ -1,12 +1,9 @@
 package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
-import java.util.Optional;
 
-import edu.velv.wikidata_universe_api.err.WikiverseError;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
 import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
-import io.vavr.control.Either;
 
 public class ClientSession {
   private final String query;
