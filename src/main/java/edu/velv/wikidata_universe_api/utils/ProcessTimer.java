@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models.utils;
+package edu.velv.wikidata_universe_api.utils;
 
 public class ProcessTimer {
   private long startTime;

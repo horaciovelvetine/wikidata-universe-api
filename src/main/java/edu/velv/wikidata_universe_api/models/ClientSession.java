@@ -3,9 +3,9 @@ package edu.velv.wikidata_universe_api.models;
 import java.awt.Dimension;
 import java.util.Optional;
 
-import edu.velv.wikidata_universe_api.models.err.WikiverseError;
-import edu.velv.wikidata_universe_api.models.utils.QueryParamSanitizer;
+import edu.velv.wikidata_universe_api.err.WikiverseError;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
+import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
 import io.vavr.control.Either;
 
 public class ClientSession {
@@ -14,32 +14,11 @@ public class ClientSession {
   private final Graphset graphset;
   private final WikidataManager wikidata;
 
-  private ClientSession(String query, String dimensions) {
+  public ClientSession(String query, String dimensions) {
     this.query = QueryParamSanitizer.sanitize(query);
     this.subjectDimensions = getDimensionsFromClient(dimensions);
     this.graphset = new Graphset();
     this.wikidata = new WikidataManager(this);
-  }
-
-  public static Either<WikiverseError, ClientSession> initialize(String query, String dimensions) {
-    ClientSession sesh = new ClientSession(query, dimensions);
-    // Fetch Initial Query Data
-    Optional<WikiverseError> fetchInitQueryTask = sesh.wikidata.fetchInitQueryData();
-    if (fetchInitQueryTask.isPresent()) {
-      return Either.left(fetchInitQueryTask.get());
-    }
-    //? optionally... => earlier response return, and fetchRelatedDataTask is run next || optomistically 
-    // Fetch Related Data
-    Optional<WikiverseError> fetchRelatedDataTask = sesh.wikidata.fetchRelatedDataWithTimeout();
-    if (fetchRelatedDataTask.isPresent()) {
-      return Either.left(fetchRelatedDataTask.get());
-    }
-    //TODO: below...
-    // * verify that graphset has been populated
-    // * initialize layout coords for set
-    // * create a response from a pruned client session
-
-    return Either.right(sesh);
   }
 
   public Graphset graphset() {

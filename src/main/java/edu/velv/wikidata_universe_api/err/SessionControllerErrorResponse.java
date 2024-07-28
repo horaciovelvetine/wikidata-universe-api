@@ -1,6 +1,6 @@
-package edu.velv.wikidata_universe_api.models.err;
+package edu.velv.wikidata_universe_api.err;
 
-import edu.velv.wikidata_universe_api.models.err.WikiverseError.*;
+import edu.velv.wikidata_universe_api.err.WikiverseError.*;
 
 public record SessionControllerErrorResponse(int status, String message) {
 

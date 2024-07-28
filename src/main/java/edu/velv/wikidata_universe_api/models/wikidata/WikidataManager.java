@@ -7,10 +7,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import edu.velv.wikidata_universe_api.models.Edge;
+import edu.velv.wikidata_universe_api.utils.Loggable;
+import edu.velv.wikidata_universe_api.err.WikiverseError;
+import edu.velv.wikidata_universe_api.err.WikiverseError.WikidataServiceError.FetchRelatedDataTimeout;
 import edu.velv.wikidata_universe_api.models.ClientSession;
-import edu.velv.wikidata_universe_api.models.utils.Loggable;
-import edu.velv.wikidata_universe_api.models.err.WikiverseError;
-import edu.velv.wikidata_universe_api.models.err.WikiverseError.WikidataServiceError.FetchRelatedDataTimeout;
 
 public class WikidataManager implements Loggable {
   private final Integer MAX_FETCH_DEPTH = 2;

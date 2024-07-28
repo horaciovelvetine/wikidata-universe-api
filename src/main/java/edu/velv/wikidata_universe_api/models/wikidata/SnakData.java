@@ -6,7 +6,7 @@ import org.wikidata.wdtk.datamodel.interfaces.SnakVisitor;
 import org.wikidata.wdtk.datamodel.interfaces.SomeValueSnak;
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
 
-import edu.velv.wikidata_universe_api.models.utils.Loggable;
+import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class SnakData implements SnakVisitor<SnakData>, Loggable {
   public String datatype;

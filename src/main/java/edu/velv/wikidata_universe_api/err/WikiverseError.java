@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models.err;
+package edu.velv.wikidata_universe_api.err;
 
 public sealed interface WikiverseError
     permits WikiverseError.WikidataServiceError, WikiverseError.UnimplementedError, WikiverseError.JavaRuntimeError {

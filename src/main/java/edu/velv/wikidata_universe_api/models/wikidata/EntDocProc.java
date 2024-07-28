@@ -12,7 +12,7 @@ import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.Vertex;
-import edu.velv.wikidata_universe_api.models.utils.Loggable;
+import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class EntDocProc implements Loggable {
   private final ClientSession session;

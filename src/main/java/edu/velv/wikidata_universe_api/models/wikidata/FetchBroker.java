@@ -11,7 +11,7 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 
-import edu.velv.wikidata_universe_api.models.err.WikiverseError;
+import edu.velv.wikidata_universe_api.err.WikiverseError;
 
 public class FetchBroker {
   private static final String WIKI_SITE_KEY = "enwiki";
