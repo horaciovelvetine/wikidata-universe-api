@@ -11,7 +11,8 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 
-import edu.velv.wikidata_universe_api.err.WikiverseError;
+import edu.velv.wikidata_universe_api.err.Err;
+import edu.velv.wikidata_universe_api.err.WikidataServiceError.*;
 
 public class FetchBroker {
   private static final String WIKI_SITE_KEY = "enwiki";
@@ -23,100 +24,89 @@ public class FetchBroker {
   }
 
   /**
-   * Retrieves the origin entity by first searching by title, then widening to search all Entities.
+   * Retrieves the EntityDocument which best matches the original query by first trying a title search,
+   * then expanding to search across all entities in the Wikidata database.
    *
    * @param query the query to search for the origin entity
-   * @return an Either object containing either the retrieved EntityDocument or a WikiverseError
+   * @return an Either object containing either the retrieved EntityDocument or an encountered error
    */
-  protected Either<WikiverseError, EntityDocument> getOriginEntityByAny(String query) {
-    Either<WikiverseError, EntityDocument> entityByTitle = fetchEntityByTitle(query);
 
-    if (entityByTitle.isRight() || isFailedApiRequest(entityByTitle.getLeft())) {
-      return entityByTitle;
-    }
-
-    Either<WikiverseError, WbSearchEntitiesResult> entityByAny = fetchEntityByAny(query);
-
-    if (entityByAny.isLeft() && isNoSuchEntityError(entityByAny.getLeft())) {
-      return fetchEntityById(DEFAULT_FALLBACK_ID);
-    }
-
-    return fetchEntityById(entityByAny.get().getEntityId());
+  protected Either<Err, EntityDocument> fetchOriginEntityByAny(String query) {
+    return fetchEntityDocumentByTitle(query).fold((Err err) -> {
+      return handleNoTitleResults(err, query);
+    }, (EntityDocument doc) -> {
+      return Either.right(doc);
+    });
   }
 
-  protected Either<WikiverseError, Map<String, EntityDocument>> fetchEntitiesByQueueList(List<String> ids) {
-    return Try.of(() -> fetcher.getEntityDocuments(ids))
-        .toEither()
-        .mapLeft(e -> new WikiverseError.WikidataServiceError.ApiRequestFailed(e.getMessage(), e));
-  }
-
-  protected Either<WikiverseError, Map<String, EntityDocument>> fetchNonEntsByQueueList(List<String> qNonEnts) {
-    //TODO: The string or DateTime queries -- dont forget possible date format needed
-    return Either.left(new WikiverseError.UnimplementedError("getNonEntsByQueueList not implemented"));
+  protected Either<Err, Map<String, EntityDocument>> fetchEntitiesByIdList(List<String> tgtIds) {
+    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocuments(tgtIds));
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
 
-  private Either<WikiverseError, EntityDocument> fetchEntityByTitle(String query) {
-    Either<WikiverseError, EntityDocument> entityByTitle = fetchEntityWithErrorHandler(
-        () -> fetcher.getEntityDocumentByTitle(WIKI_SITE_KEY, query));
+  // BY TITLE...
 
-    if (entityByTitle.isLeft()) {
-      return Either.left(entityByTitle.getLeft());
-    }
-
-    return entityByTitle.get() == null
-        ? Either.left(
-            new WikiverseError.WikidataServiceError.NoSuchEntityFound("Unable to find entity by title: " + query))
-        : entityByTitle;
+  private Either<Err, EntityDocument> fetchEntityDocumentByTitle(String title) {
+    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocumentByTitle(WIKI_SITE_KEY, title))
+        .flatMap(this::handleNoSuchEntityResults);
   }
 
-  private Either<WikiverseError, EntityDocument> fetchEntityById(String query) {
-    Either<WikiverseError, EntityDocument> entityById = fetchEntityWithErrorHandler(
-        () -> fetcher.getEntityDocument(query));
+  // BY ID..
 
-    if (entityById.isLeft()) {
-      return Either.left(entityById.getLeft());
-    }
-
-    return entityById.get() == null
-        ? Either
-            .left(new WikiverseError.WikidataServiceError.NoSuchEntityFound("Unable to find entity by id: " + query))
-        : entityById;
+  private Either<Err, EntityDocument> fetchEntityDocumentById(String id) {
+    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocument(id))
+        .flatMap(this::handleNoSuchEntityResults);
   }
 
-  private Either<WikiverseError, List<WbSearchEntitiesResult>> fetchEntitiesBySearch(String query) {
-    return fetchEntityWithErrorHandler(() -> fetcher.searchEntities(query));
+  // BY ANY...
+
+  private Either<Err, WbSearchEntitiesResult> fetchSearchResultsByAny(String query) {
+    return fetchWithApiUnavailableHandler(() -> fetcher.searchEntities(query))
+        .flatMap(this::handleSearchedEntitiesResults);
+  }
+  // BY ANY || DEFAULT...
+
+  private Either<Err, EntityDocument> fetchQueryByAnyOrDefault(String query) {
+    return fetchSearchResultsByAny(query).fold((Err err) -> {
+      if (err instanceof NoSuchEntityFoundError) {
+        return fetchEntityDocumentById(DEFAULT_FALLBACK_ID);
+      }
+      return Either.left(err);
+    }, (WbSearchEntitiesResult result) -> {
+      return fetchEntityDocumentById(result.getEntityId());
+    });
   }
 
-  private Either<WikiverseError, WbSearchEntitiesResult> fetchEntityByAny(String query) {
-    return fetchEntitiesBySearch(query).flatMap(this::handleSearchedEntitiesResults);
+  // HANDLER(S)
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
+  private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument doc) {
+    return doc == null ? Either.left(new NoSuchEntityFoundError("@ searchByTitle()"))
+        : Either.right(doc);
   }
 
-  private Either<WikiverseError, WbSearchEntitiesResult> handleSearchedEntitiesResults(
+  private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(
       List<WbSearchEntitiesResult> results) {
     return results.isEmpty()
-        ? Either
-            .left(new WikiverseError.WikidataServiceError.NoSuchEntityFound("Unable to find entity search:" + results))
+        ? Either.left(new NoSuchEntityFoundError("@ searchByAny()"))
         : Either.right(results.get(0));
   }
 
-  private <T> Either<WikiverseError, T> fetchEntityWithErrorHandler(CheckedFunction0<T> supplier) {
+  private <T> Either<Err, T> fetchWithApiUnavailableHandler(CheckedFunction0<T> supplier) {
     return Try.of(supplier)
         .toEither()
-        .mapLeft(e -> new WikiverseError.WikidataServiceError.ApiRequestFailed(e.getMessage(), e));
+        .mapLeft(e -> new ApiUnavailableError(e.getMessage(), e));
   }
 
-  //TODO: duplicate fetchEntityWithError adding different errors?
-
-  private boolean isNoSuchEntityError(WikiverseError error) {
-    return error instanceof WikiverseError.WikidataServiceError.NoSuchEntityFound;
+  private Either<Err, EntityDocument> handleNoTitleResults(Err err, String query) {
+    if (err instanceof NoSuchEntityFoundError) {
+      return fetchQueryByAnyOrDefault(query); // Widens search to all entities
+    }
+    return Either.left(err);
   }
-
-  private boolean isFailedApiRequest(WikiverseError error) {
-    return error instanceof WikiverseError.WikidataServiceError.ApiRequestFailed;
-  }
-
 }
