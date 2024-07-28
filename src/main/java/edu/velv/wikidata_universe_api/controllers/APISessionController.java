@@ -1,7 +1,5 @@
 package edu.velv.wikidata_universe_api.controllers;
 
-import io.vavr.control.Either;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
