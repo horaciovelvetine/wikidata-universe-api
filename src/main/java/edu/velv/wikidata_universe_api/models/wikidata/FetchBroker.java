@@ -1,7 +1,9 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
+// import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import io.vavr.CheckedFunction0;
 import io.vavr.control.Either;
@@ -13,9 +15,11 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 
 import edu.velv.wikidata_universe_api.err.Err;
 import edu.velv.wikidata_universe_api.err.WikidataServiceError.*;
+import edu.velv.wikidata_universe_api.utils.Loggable;
 
-public class FetchBroker {
-  private static final String WIKI_SITE_KEY = "enwiki";
+public class FetchBroker implements Loggable {
+  private static final String EN_WIKI_IRI = "enwiki";
+  private static final String EN_LANG_WIKI = "en";
   private static final String DEFAULT_FALLBACK_ID = "Q3454165";
   private final WikibaseDataFetcher fetcher;
 
@@ -25,7 +29,8 @@ public class FetchBroker {
 
   /**
    * Retrieves the EntityDocument which best matches the original query by first trying a title search,
-   * then expanding to search across all entities in the Wikidata database.
+   * then expanding to search across all entities in the Wikidata database, finally returning a default
+   * if unable to find a good match for the provided query.
    *
    * @param query the query to search for the origin entity
    * @return an Either object containing either the retrieved EntityDocument or an encountered error
@@ -39,8 +44,38 @@ public class FetchBroker {
     });
   }
 
-  protected Either<Err, Map<String, EntityDocument>> fetchEntitiesByIdList(List<String> tgtIds) {
-    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocuments(tgtIds));
+  /**
+   * Fetches a list of EntityDocuments which match the provided list of tgtId queries.
+   * 
+   * @param tgtIds the List of IdValue's to search for
+   * @return an Either object containing either the retrrieved Documents or an error
+   */
+  protected Either<Err, Map<String, Either<Err, EntityDocument>>> fetchEntitiesByIdList(List<String> tgtIds) {
+    Map<String, Either<Err, EntityDocument>> results = new HashMap<>();
+    return fetchEntityDocumentsByIds(tgtIds).fold((Err e) -> {
+      return Either.left(e);
+    }, (Map<String, EntityDocument> fetched) -> {
+      fetched.entrySet().forEach((entry) -> {
+        results.put(entry.getKey(), handleNoSuchEntityResults(entry.getValue()));
+      });
+      return Either.right(results);
+    });
+  }
+
+  /**
+   * Fetches a list of EntityDocuments which match the provided list of tgtDates.
+   * 
+   * @param tgtDates the List of IdValue's to search for
+   * @return an Either object containing either the retrrieved Documents or an error
+   */
+  protected Map<String, Either<Err, EntityDocument>> fetchEntitiesByDateList(List<String> tgtDates) {
+    Map<String, Either<Err, EntityDocument>> results = new HashMap<>();
+    for (String tgtDate : tgtDates) {
+      results.put(tgtDate, fetchSearchResultsByAny(tgtDate).flatMap(searchResult -> {
+        return fetchEntityDocumentById(searchResult.getEntityId());
+      }));
+    }
+    return results;
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
@@ -50,21 +85,27 @@ public class FetchBroker {
   // BY TITLE...
 
   private Either<Err, EntityDocument> fetchEntityDocumentByTitle(String title) {
-    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocumentByTitle(WIKI_SITE_KEY, title))
+    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocumentByTitle(EN_WIKI_IRI, title))
         .flatMap(this::handleNoSuchEntityResults);
   }
 
-  // BY ID..
+  // BY ID...
 
   private Either<Err, EntityDocument> fetchEntityDocumentById(String id) {
     return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocument(id))
         .flatMap(this::handleNoSuchEntityResults);
   }
 
+  // BY IDS...
+
+  private Either<Err, Map<String, EntityDocument>> fetchEntityDocumentsByIds(List<String> tgtIds) {
+    return fetchWithApiUnavailableHandler(() -> fetcher.getEntityDocuments(tgtIds));
+  }
+
   // BY ANY...
 
   private Either<Err, WbSearchEntitiesResult> fetchSearchResultsByAny(String query) {
-    return fetchWithApiUnavailableHandler(() -> fetcher.searchEntities(query))
+    return fetchWithApiUnavailableHandler(() -> fetcher.searchEntities(query, EN_LANG_WIKI))
         .flatMap(this::handleSearchedEntitiesResults);
   }
   // BY ANY || DEFAULT...
@@ -86,14 +127,14 @@ public class FetchBroker {
   //=====================================================================================================================>
 
   private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument doc) {
-    return doc == null ? Either.left(new NoSuchEntityFoundError("@ searchByTitle()"))
+    return doc == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFound()"))
         : Either.right(doc);
   }
 
   private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(
       List<WbSearchEntitiesResult> results) {
     return results.isEmpty()
-        ? Either.left(new NoSuchEntityFoundError("@ searchByAny()"))
+        ? Either.left(new NoSuchEntityFoundError("@handleSearchedEntities()"))
         : Either.right(results.get(0));
   }
 
