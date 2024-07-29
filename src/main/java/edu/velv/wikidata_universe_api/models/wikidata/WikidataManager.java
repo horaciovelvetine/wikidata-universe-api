@@ -21,7 +21,7 @@ import edu.velv.wikidata_universe_api.utils.Loggable;
 import io.vavr.control.Either;
 
 public class WikidataManager implements Loggable {
-  private final Integer MAX_FETCH_DEPTH = 30;
+  private final Integer MAX_FETCH_DEPTH = 3;
   private Integer n;
   private final ClientSession session;
   private final FetchBroker api;
@@ -57,31 +57,6 @@ public class WikidataManager implements Loggable {
       fetchTaskFuture.cancel(true);
     }
   }
-
-  // public Optional<Err> fetchWithTimeoutTest() {
-  //   Future<Optional<Err>> testTask = timeoutExecutor.submit(this::relatedTaskRebuild);
-  //   try {
-  //     return testTask.get(1, TimeUnit.MINUTES);
-  //   } catch (Exception e) {
-  //     return Optional.of(new FetchRelatedWithTimeoutError("Fails @ Test", e));
-  //   } finally {
-  //     testTask.cancel(true);
-  //   }
-  // }
-
-  // public Optional<Err> relatedTaskRebuild() {
-  //   while (n <= MAX_FETCH_DEPTH) {
-  //     try {
-  //       Thread.sleep(1000);
-  //       n++;
-  //       print("n=" + n);
-  //     } catch (InterruptedException e) {
-  //       print("Interrupt Call");
-  //       return Optional.of(new FetchRelatedWithTimeoutError("Interrupted Exception call", e));
-  //     }
-  //   }
-  //   return Optional.empty();
-  // }
 
   public String toString() {
     return "Wikidata={ n=" + n + ", " + queue.toString() + " }\n";

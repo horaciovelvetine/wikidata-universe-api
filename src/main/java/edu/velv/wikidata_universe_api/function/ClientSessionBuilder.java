@@ -14,8 +14,8 @@ public class ClientSessionBuilder {
       return Either.left(fetchInitQueryTask.get());
     }
 
-    Optional<Err> fetchRelatedDataTask = sesh.wikidataManager().fetchWithTimeoutTest();
-    
+    Optional<Err> fetchRelatedDataTask = sesh.wikidataManager().fetchRelatedWithTimeout();
+
     if (fetchRelatedDataTask.isPresent()) {
       return Either.left(fetchRelatedDataTask.get());
     }
