@@ -1,6 +1,9 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -28,7 +31,7 @@ public class FetchQueue {
     Integer nP = n + 1;
     addEntityIfNotPresent(nP, e.propertyId());
     addEntityIfNotPresent(nP, e.label());
-    addEntityIfNotPresent(nP, e.srcEntId());
+    addEntityIfNotPresent(nP, e.tgtEntId());
   }
 
   /**
@@ -42,14 +45,14 @@ public class FetchQueue {
    * Retrieves the next batch of entity ID's at a given depth of n.
    */
   public List<String> getEntTargetsBatchAtN(Integer n) {
-    return getTargetBatchAtN(n, q -> q.matches(ENT_ID_PATTERN));
+    return getTargetBatchAtN((n), q -> q.matches(ENT_ID_PATTERN));
   }
 
   /**
    * Retrieves the next batch of any value which is not an entitiy ID a given depth of n.
    */
   public List<String> getDateTargetsBatchAtN(Integer n) {
-    return getTargetBatchAtN(n, q -> !q.matches(ENT_ID_PATTERN));
+    return getTargetBatchAtN((n), q -> !q.matches(ENT_ID_PATTERN));
   }
 
   /**
@@ -68,9 +71,41 @@ public class FetchQueue {
     invalid.add(new Target.Invalid(query));
   }
 
+  @Override
+  public String toString() {
+    int totalInQueue = 0;
+    for (Target.Entity entity : entities) {
+      String keyValue = entity.query();
+      int count = (int) entities.stream()
+          .filter(e -> e.query().equals(keyValue))
+          .count();
+      totalInQueue += count;
+    }
+    // I wnat to know invalid queue size
+    return "Queue={ Queued=" + totalInQueue + ", Fetched=" + fetched.size() + countTargetsByN() + ", Invalid="
+        + invalid.size() + " }";
+  }
+
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+
+  //TODO: remove debug details code
+  
+  private List<String> countTargetsByN() {
+    Map<Integer, Integer> countByN = new HashMap<>();
+    for (Target.Entity entity : entities) {
+      int n = entity.n();
+      countByN.put(n, countByN.getOrDefault(n, 0) + 1);
+    }
+    List<String> formattedCount = new ArrayList<>();
+    for (Map.Entry<Integer, Integer> entry : countByN.entrySet()) {
+      int n = entry.getKey();
+      int count = entry.getValue();
+      formattedCount.add("{n: " + n + ", count: " + count + "}");
+    }
+    return formattedCount;
+  }
 
   private void removeQueryTargetFromQueue(String query) {
     entities.removeIf(t -> t.query().equals(query));
@@ -115,7 +150,7 @@ public class FetchQueue {
     public Integer n();
   }
 
-  interface Target {
+  public interface Target {
     public String query();
 
     record Entity(Integer n, String query) implements Target, Fetchable {
