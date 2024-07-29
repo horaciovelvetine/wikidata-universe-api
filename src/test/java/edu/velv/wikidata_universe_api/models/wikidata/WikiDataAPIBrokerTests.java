@@ -1,16 +1,16 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+// import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 
 public class WikiDataAPIBrokerTests {
-  private static final String douglasAdamsQID = "Q42";
-  private static final String douglasAdamsTitle = "Douglas Adams";
-  private static final String kevinBaconQID = "Q3454165";
-  private static final String givenNamePQID = "P735";
-  private final FetchBroker broker = new FetchBroker();
+  // private static final String douglasAdamsQID = "Q42";
+  // private static final String douglasAdamsTitle = "Douglas Adams";
+  // private static final String kevinBaconQID = "Q3454165";
+  // private static final String givenNamePQID = "P735";
+  // private final FetchBroker broker = new FetchBroker();
 
   @Test
   public void getsOriginByQuery_wItemQID() {
