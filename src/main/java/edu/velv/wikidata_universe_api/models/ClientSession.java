@@ -34,10 +34,22 @@ public class ClientSession {
     return this.wikidata;
   }
 
+  public String details() {
+    String br = "\n";
+    return this.toString() + br + graphset.toString() + br + wikidata.toString();
+  }
+
+  @Override
+  public String toString() {
+    return "Session={ query=" + query + ", dimensions=" + subjectDimensions.width + "x" + subjectDimensions.height
+        + " }";
+  }
+
   private Dimension getDimensionsFromClient(String dimensions) {
     String[] split = dimensions.split("x");
     int width = (int) Math.floor(Double.parseDouble(split[0]));
     int height = (int) Math.floor(Double.parseDouble(split[1]));
     return new Dimension(width, height);
   }
+
 }

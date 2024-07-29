@@ -52,4 +52,10 @@ public class Graphset {
     }
     properties.add(p);
   }
+
+  @Override
+  public String toString() {
+    return "Graphset={ vertices=" + vertices.size() + ", " + "properties=" + properties.size() + ", " + "edges="
+        + edges.size() + " }";
+  }
 }
