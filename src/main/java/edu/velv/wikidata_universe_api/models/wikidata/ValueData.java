@@ -45,11 +45,6 @@ public class ValueData implements ValueVisitor<ValueData>, Loggable {
 
   @Override
   public ValueData visit(StringValue value) {
-    // if (value != null) {
-    //   this.value = value.getString();
-    //   this.type = ValueType.String;
-    // }
-    // return this;
     return null;
   }
 
@@ -74,15 +69,14 @@ public class ValueData implements ValueVisitor<ValueData>, Loggable {
   }
 
   private String convertToWikidataSearchableDate(TimeValue time) {
-    //TODO: double check this formatting is the correct conversion, that MMMM has me a bit worried
+    String punc = time.toString().replaceAll(WDATA_PUNC_FORMATTING, "");
     SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat outputFormat = new SimpleDateFormat("MMMM d, yyyy");
-    String punc = value.toString().replaceAll(WDATA_PUNC_FORMATTING, "");
     try {
       return outputFormat.format(inputFormat.parse(punc));
     } catch (Exception e) {
-      //TODO: BACK HERE YOU JABRONI
-      return null;
+      print("Exception Encountered while formatting TimeValue");
+      return punc;
     }
   }
 
