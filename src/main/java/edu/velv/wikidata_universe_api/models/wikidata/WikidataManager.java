@@ -5,15 +5,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+
+import edu.velv.wikidata_universe_api.err.Err;
+import edu.velv.wikidata_universe_api.err.WikidataServiceError.FetchRelatedWithTimeoutError;
+import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.utils.Loggable;
-import edu.velv.wikidata_universe_api.err.WikiverseError;
-import edu.velv.wikidata_universe_api.err.WikiverseError.WikidataServiceError.FetchRelatedDataTimeout;
-import edu.velv.wikidata_universe_api.models.ClientSession;
+
+import io.vavr.control.Either;
 
 public class WikidataManager implements Loggable {
-  private final Integer MAX_FETCH_DEPTH = 2;
+  private final Integer MAX_FETCH_DEPTH = 30;
   private Integer n;
   private final ClientSession session;
   private final FetchBroker api;
@@ -30,25 +38,53 @@ public class WikidataManager implements Loggable {
     this.timeoutExecutor = Executors.newSingleThreadScheduledExecutor();
   }
 
-  public Optional<WikiverseError> fetchInitQueryData() {
-    return api.getOriginEntityByAny(session.query()).fold(e -> {
+  public Optional<Err> fetchInitQueryData() {
+    return api.fetchOriginEntityByAny(session.query()).fold(e -> {
       return Optional.of(e);
-    }, doc -> {
-      entProc.processWikiEntDocument(doc);
+    }, entDoc -> {
+      entProc.processWikiEntDocument(entDoc);
       return Optional.empty();
     });
   }
 
-  public Optional<WikiverseError> fetchRelatedDataWithTimeout() {
-    Future<Optional<WikiverseError>> fetchTaskFuture = timeoutExecutor.submit(this::fetchRelatedTask);
-
+  public Optional<Err> fetchRelatedWithTimeout() {
+    Future<Optional<Err>> fetchTaskFuture = timeoutExecutor.submit(this::fetchRelatedTask);
     try {
-      return fetchTaskFuture.get(10, TimeUnit.SECONDS);
+      return fetchTaskFuture.get(1, TimeUnit.MINUTES);
     } catch (Exception e) {
-      return Optional.of(new FetchRelatedDataTimeout("fetchRelatedData timed out", e));
+      return Optional.of(new FetchRelatedWithTimeoutError("fetchRelatedData timed out", e));
     } finally {
       fetchTaskFuture.cancel(true);
     }
+  }
+
+  // public Optional<Err> fetchWithTimeoutTest() {
+  //   Future<Optional<Err>> testTask = timeoutExecutor.submit(this::relatedTaskRebuild);
+  //   try {
+  //     return testTask.get(1, TimeUnit.MINUTES);
+  //   } catch (Exception e) {
+  //     return Optional.of(new FetchRelatedWithTimeoutError("Fails @ Test", e));
+  //   } finally {
+  //     testTask.cancel(true);
+  //   }
+  // }
+
+  // public Optional<Err> relatedTaskRebuild() {
+  //   while (n <= MAX_FETCH_DEPTH) {
+  //     try {
+  //       Thread.sleep(1000);
+  //       n++;
+  //       print("n=" + n);
+  //     } catch (InterruptedException e) {
+  //       print("Interrupt Call");
+  //       return Optional.of(new FetchRelatedWithTimeoutError("Interrupted Exception call", e));
+  //     }
+  //   }
+  //   return Optional.empty();
+  // }
+
+  public String toString() {
+    return "Wikidata={ n=" + n + ", " + queue.toString() + " }\n";
   }
 
   //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
@@ -59,11 +95,51 @@ public class WikidataManager implements Loggable {
     queue.addUnfetchedEdgeValues(e, n);
   }
 
-  private Optional<WikiverseError> fetchRelatedTask() {
-    try {
-      Thread.sleep(12000);
-    } catch (Exception e) {
+  private Optional<Err> fetchRelatedTask() {
+    while (n <= MAX_FETCH_DEPTH) {
+      try {
+
+        List<String> dateBatch = queue.getDateTargetsBatchAtN(n);
+        List<String> qBatch = queue.getEntTargetsBatchAtN(n);
+        Either<Err, Map<String, Either<Err, EntityDocument>>> qResults = api.fetchEntitiesByIdList(qBatch);
+        Map<String, Either<Err, EntityDocument>> dateResults = api.fetchEntitiesByDateList(dateBatch);
+
+        if (qResults.isLeft()) {
+          return Optional.of(qResults.getLeft());
+        }
+
+        qResults.get().entrySet().forEach(entry -> {
+          if (entry.getValue().isLeft()) {
+            log(buildInvalidLogString(entry));
+            queue.fetchInvalid(entry.getKey());
+          }
+          entProc.processWikiEntDocument(entry.getValue().get());
+          queue.fetchSuccess(entry.getKey());
+        });
+
+        dateResults.entrySet().forEach(entry -> {
+          if (entry.getValue().isLeft()) {
+            log(buildInvalidLogString(entry));
+            queue.fetchInvalid(entry.getKey());
+          }
+          entProc.processWikiEntDocument(entry.getValue().get());
+          queue.fetchSuccess(entry.getKey());
+        });
+
+        if (queue.isEmptyAtNDepth(n)) {
+          n += 1;
+        }
+        //stop
+        print(session.details());
+      } catch (Exception e) {
+        print("here");
+        return Optional.of(new FetchRelatedWithTimeoutError("@fetchRelatedTask()", e));
+      }
     }
     return Optional.empty();
+  }
+
+  private String buildInvalidLogString(Entry<String, Either<Err, EntityDocument>> entry) {
+    return "Invalid/Error: (" + entry.getKey() + ") query.";
   }
 }
