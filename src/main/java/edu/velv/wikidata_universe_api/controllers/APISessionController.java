@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.velv.wikidata_universe_api.err.APISessionResponseErr;
+import edu.velv.wikidata_universe_api.err.*;
+import edu.velv.wikidata_universe_api.err.Err.DebugDetailsResponse;
 import edu.velv.wikidata_universe_api.function.ClientSessionBuilder;
+import edu.velv.wikidata_universe_api.models.ClientSession;
 
 @CrossOrigin
 @RestController
@@ -17,7 +19,7 @@ public class APISessionController {
       @RequestParam(required = true) String query,
       @RequestParam(required = true) String dimensions) {
     return ClientSessionBuilder.initialize(query, dimensions)
-        .mapLeft(APISessionResponseErr::map)
+        .mapLeft(Err::mapDebug)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
@@ -31,11 +33,11 @@ public class APISessionController {
     // Subject emits click event => update graphset w/ newly fetched ents 
   }
 
-  private ResponseEntity<String> buildSuccessResponse(Object body) {
-    return ResponseEntity.status(200).body(body.toString());
+  private ResponseEntity<String> buildSuccessResponse(ClientSession session) {
+    return ResponseEntity.status(200).body(session.details());
   }
 
-  private ResponseEntity<String> buildErrorResponse(APISessionResponseErr err) {
+  private ResponseEntity<String> buildErrorResponse(DebugDetailsResponse err) {
     return ResponseEntity.status(err.status()).body(err.message());
   }
 }
