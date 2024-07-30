@@ -3,19 +3,22 @@ package edu.velv.wikidata_universe_api.models;
 import java.awt.Dimension;
 
 import edu.velv.wikidata_universe_api.models.jung_ish.Graphset;
+import edu.velv.wikidata_universe_api.models.jung_ish.FR3DLayout;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
 import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
 
 public class ClientSession {
-  private final String query;
-  private final Dimension subjectDimensions;
-  private final Graphset graphset;
-  private final WikidataManager wikidata;
+  protected String query;
+  protected Dimension subjectDimensions;
+  protected Graphset graphset;
+  protected WikidataManager wikidata;
+  protected FR3DLayout layout;
 
   public ClientSession(String query, String dimensions) {
     this.query = QueryParamSanitizer.sanitize(query);
     this.subjectDimensions = getDimensionsFromClient(dimensions);
     this.graphset = new Graphset();
+    this.layout = new FR3DLayout(this);
     this.wikidata = new WikidataManager(this);
   }
 
@@ -33,6 +36,10 @@ public class ClientSession {
 
   public WikidataManager wikidataManager() {
     return this.wikidata;
+  }
+
+  public FR3DLayout layout() {
+    return this.layout;
   }
 
   public String details() {
