@@ -30,7 +30,6 @@
 	<properties>
 		<java.version>22</java.version>
 		<wikidata.toolkit.version>0.14.7</wikidata.toolkit.version>
-		<jung.version>2.1.1</jung.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -73,16 +72,6 @@
 			<groupId>org.wikidata.wdtk</groupId>
 			<artifactId>wdtk-wikibaseapi</artifactId>
 			<version>${wikidata.toolkit.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-algorithms</artifactId>
-			<version>${jung.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jung</groupId>
-			<artifactId>jung-graph-impl</artifactId>
-			<version>${jung.version}</version>
 		</dependency>
 	</dependencies>
 
