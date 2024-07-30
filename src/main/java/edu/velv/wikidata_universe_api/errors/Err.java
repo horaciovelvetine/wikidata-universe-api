@@ -1,13 +1,16 @@
-package edu.velv.wikidata_universe_api.err;
+package edu.velv.wikidata_universe_api.errors;
 
-import edu.velv.wikidata_universe_api.err.WikidataServiceError.ApiUnavailableError;
-import edu.velv.wikidata_universe_api.err.WikidataServiceError.FetchRelatedWithTimeoutError;
-import edu.velv.wikidata_universe_api.err.WikidataServiceError.NoSuchEntityFoundError;
+import edu.velv.wikidata_universe_api.errors.WikidataServiceError.ApiUnavailableError;
+import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
+import edu.velv.wikidata_universe_api.errors.WikidataServiceError.NoSuchEntityFoundError;
 
-public sealed interface Err permits WikidataServiceError, Err.DebugDetailsResponse {
+public sealed interface Err permits WikidataServiceError, Err.DebugDetailsResponse, Err.LayoutDebug {
   static final int ERR_CODE = 404;
 
   record DebugDetailsResponse(int status, String message, Err e) implements Err {
+  }
+
+  record LayoutDebug(Exception e) implements Err {
   }
 
   public static DebugDetailsResponse mapDebug(Err err) {

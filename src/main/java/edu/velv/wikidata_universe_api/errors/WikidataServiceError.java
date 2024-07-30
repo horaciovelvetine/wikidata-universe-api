@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.err;
+package edu.velv.wikidata_universe_api.errors;
 
 public sealed interface WikidataServiceError extends Err {
 
