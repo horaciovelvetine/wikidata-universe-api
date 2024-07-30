@@ -13,8 +13,8 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 
-import edu.velv.wikidata_universe_api.err.Err;
-import edu.velv.wikidata_universe_api.err.WikidataServiceError.*;
+import edu.velv.wikidata_universe_api.errors.Err;
+import edu.velv.wikidata_universe_api.errors.WikidataServiceError.*;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class FetchBroker implements Loggable {

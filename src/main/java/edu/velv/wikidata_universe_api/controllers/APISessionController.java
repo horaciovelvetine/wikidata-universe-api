@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.velv.wikidata_universe_api.err.*;
-import edu.velv.wikidata_universe_api.err.Err.DebugDetailsResponse;
+import edu.velv.wikidata_universe_api.errors.*;
+import edu.velv.wikidata_universe_api.errors.Err.DebugDetailsResponse;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.ClientSessionBuilder;
 

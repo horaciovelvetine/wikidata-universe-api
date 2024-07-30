@@ -13,8 +13,8 @@ import java.util.Map.Entry;
 
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 
-import edu.velv.wikidata_universe_api.err.Err;
-import edu.velv.wikidata_universe_api.err.WikidataServiceError.FetchRelatedWithTimeoutError;
+import edu.velv.wikidata_universe_api.errors.Err;
+import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.utils.Loggable;

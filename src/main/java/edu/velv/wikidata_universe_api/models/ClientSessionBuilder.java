@@ -2,7 +2,7 @@ package edu.velv.wikidata_universe_api.models;
 
 import java.util.Optional;
 
-import edu.velv.wikidata_universe_api.err.Err;
+import edu.velv.wikidata_universe_api.errors.Err;
 import io.vavr.control.Either;
 
 public class ClientSessionBuilder {
@@ -18,6 +18,8 @@ public class ClientSessionBuilder {
     if (fetchRelatedDataTask.isPresent()) {
       return Either.left(fetchRelatedDataTask.get());
     }
+
+    Optional<Err> createLayoutTask = sesh.layout().initialize();
 
     //TODO: below...
     // * initialize layout coords for set
