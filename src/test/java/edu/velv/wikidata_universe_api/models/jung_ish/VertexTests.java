@@ -12,9 +12,6 @@ import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
 import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
 import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
 
-import edu.velv.wikidata_universe_api.models.jung_ish.Point3D;
-import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
