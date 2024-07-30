@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.velv.wikidata_universe_api.err.*;
 import edu.velv.wikidata_universe_api.err.Err.DebugDetailsResponse;
-import edu.velv.wikidata_universe_api.function.ClientSessionBuilder;
 import edu.velv.wikidata_universe_api.models.ClientSession;
+import edu.velv.wikidata_universe_api.models.ClientSessionBuilder;
 
 @CrossOrigin
 @RestController

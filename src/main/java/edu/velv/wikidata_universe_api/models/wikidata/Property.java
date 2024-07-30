@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api.models.wikidata;
 
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 

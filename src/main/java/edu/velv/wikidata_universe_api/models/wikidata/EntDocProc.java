@@ -8,14 +8,13 @@ import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
-import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.ClientSession;
-import edu.velv.wikidata_universe_api.models.Edge;
-import edu.velv.wikidata_universe_api.models.Vertex;
+import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class EntDocProc implements Loggable {
-  private final ClientSession session;
+  protected ClientSession session;
 
   private static final Set<String> EXCLUDED_DATA = Set.of("external-id", "monolingualtext",
       "commonsMedia", "url", "globe-coordinate", "geo-shape", "wikibase-lexeme");
@@ -48,13 +47,14 @@ public class EntDocProc implements Loggable {
 
   private void processItemDocument(ItemDocumentImpl doc) {
     Vertex v = new Vertex(doc);
+    //TODO: update with graph
     session.graphset().addVertex(v);
     processItemsStatements(doc);
   }
 
   private void processPropertyDocument(PropertyDocumentImpl doc) {
     Property p = new Property(doc);
-    session.graphset().addProperty(p);
+    session.wikidataManager().addProperty(p);
   }
 
   private void processItemsStatements(ItemDocumentImpl doc) {

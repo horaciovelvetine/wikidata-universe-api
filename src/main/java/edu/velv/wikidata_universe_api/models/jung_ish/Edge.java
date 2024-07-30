@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import edu.velv.wikidata_universe_api.models.wikidata.SnakData;
 import edu.velv.wikidata_universe_api.models.wikidata.ValueData.ValueType;

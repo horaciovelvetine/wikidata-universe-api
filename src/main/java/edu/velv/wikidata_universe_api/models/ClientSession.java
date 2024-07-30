@@ -2,6 +2,7 @@ package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
 
+import edu.velv.wikidata_universe_api.models.jung_ish.Graphset;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
 import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
 

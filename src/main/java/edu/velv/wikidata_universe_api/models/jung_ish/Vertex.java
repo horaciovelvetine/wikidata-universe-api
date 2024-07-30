@@ -1,16 +1,14 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import java.awt.geom.Point2D;
 
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
 
-import edu.velv.wikidata_universe_api.models.jung.Point3D;
-
 public class Vertex {
-  private String id;
-  private String label;
-  private String description;
-  private LayoutCoords layoutCoords;
+  protected String id;
+  protected String label;
+  protected String description;
+  protected LayoutCoords layoutCoords;
 
   public Vertex() {
     // Default constructor
@@ -21,12 +19,6 @@ public class Vertex {
     this.label = itemDoc.findLabel("en");
     this.description = itemDoc.findDescription("en");
   }
-
-  // public Vertex(WbSearchEntitiesResult result) {
-  //   this.id = result.getEntityId();
-  //   this.label = result.getLabel();
-  //   this.description = result.getDescription();
-  // }
 
   public String id() {
     return id;
@@ -60,7 +52,7 @@ public class Vertex {
     this.layoutCoords = new LayoutCoords(coords2D, coords3D);
   }
 
-  protected record LayoutCoords(Point2D coords2D, Point3D coords3D) {
+  public record LayoutCoords(Point2D c2, Point3D c3) {
   }
 
 }

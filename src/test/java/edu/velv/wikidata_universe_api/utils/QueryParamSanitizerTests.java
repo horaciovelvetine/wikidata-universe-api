@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models.utils;
+package edu.velv.wikidata_universe_api.utils;
 
 import org.junit.jupiter.api.Test;
 

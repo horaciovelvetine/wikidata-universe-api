@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
-import java.util.function.Predicate;
 
-import edu.velv.wikidata_universe_api.models.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+
+import java.util.function.Predicate;
 
 public class FetchQueue {
   private static final String ENT_ID_PATTERN = "[PQ]\\d+";

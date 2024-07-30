@@ -1,9 +1,8 @@
-package edu.velv.wikidata_universe_api.function;
+package edu.velv.wikidata_universe_api.models;
 
 import java.util.Optional;
 
 import edu.velv.wikidata_universe_api.err.Err;
-import edu.velv.wikidata_universe_api.models.ClientSession;
 import io.vavr.control.Either;
 
 public class ClientSessionBuilder {

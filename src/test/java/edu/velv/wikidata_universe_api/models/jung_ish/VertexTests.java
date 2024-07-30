@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,8 @@ import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
 import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
 import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
 
-import edu.velv.wikidata_universe_api.models.jung.Point3D;
+import edu.velv.wikidata_universe_api.models.jung_ish.Point3D;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -74,7 +75,7 @@ public class VertexTests {
     Point2D coords2D = new Point2D.Double(0.0, 0.0);
     Point3D coords3D = new Point3D(0.0, 0.0, 0.0);
     vertex.setLayoutCoords(coords2D, coords3D);
-    assertEquals(coords2D, vertex.layoutCoords().coords2D(), "2D Coords should be (0.0, 0.0)");
-    assertEquals(coords3D, vertex.layoutCoords().coords3D(), "3D Coords should be (0.0, 0.0, 0.0)");
+    assertEquals(coords2D, vertex.layoutCoords().c2(), "2D Coords should be (0.0, 0.0)");
+    assertEquals(coords3D, vertex.layoutCoords().c3(), "3D Coords should be (0.0, 0.0, 0.0)");
   }
 }
