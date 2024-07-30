@@ -77,10 +77,10 @@ public class FetchBroker implements Loggable {
     }
     return results;
   }
-
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+  // WDTK Fetches 
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
   // BY TITLE...
 

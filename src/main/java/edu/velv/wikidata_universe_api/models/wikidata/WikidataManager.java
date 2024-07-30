@@ -21,7 +21,8 @@ import edu.velv.wikidata_universe_api.utils.Loggable;
 import io.vavr.control.Either;
 
 public class WikidataManager implements Loggable {
-  private final Integer MAX_FETCH_DEPTH = 3;
+  private final Integer MAX_FETCH_TIMEOUT = 1;
+  private final Integer MAX_FETCH_DEPTH = 1;
   private Integer n;
   private final ClientSession session;
   private final FetchBroker api;
@@ -50,7 +51,7 @@ public class WikidataManager implements Loggable {
   public Optional<Err> fetchRelatedWithTimeout() {
     Future<Optional<Err>> fetchTaskFuture = timeoutExecutor.submit(this::fetchRelatedTask);
     try {
-      return fetchTaskFuture.get(1, TimeUnit.MINUTES);
+      return fetchTaskFuture.get(MAX_FETCH_TIMEOUT, TimeUnit.MINUTES);
     } catch (Exception e) {
       return Optional.of(new FetchRelatedWithTimeoutError("fetchRelatedData timed out", e));
     } finally {

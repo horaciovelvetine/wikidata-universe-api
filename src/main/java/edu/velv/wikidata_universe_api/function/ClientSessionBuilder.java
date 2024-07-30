@@ -21,7 +21,6 @@ public class ClientSessionBuilder {
     }
 
     //TODO: below...
-    // * verify that graphset has been populated
     // * initialize layout coords for set
     // * create a response from a pruned client session
 
