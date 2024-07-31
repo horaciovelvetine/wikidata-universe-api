@@ -16,31 +16,29 @@ import com.google.common.cache.CacheLoader;
 import io.vavr.Tuple2;
 import edu.velv.wikidata_universe_api.errors.*;
 import edu.velv.wikidata_universe_api.errors.Err.LayoutDebug;
-import edu.velv.wikidata_universe_api.models.ClientSession;
 
 public class FR3DLayout {
   protected Graphset graph;
-
-  // PHYSICAL CONSTANTS
-  protected double attrMult = 0.75; // biasses tendency of vertices to move towards each other
-  protected double repMult = 0.75; // biasses tendency of vertices to move away from each other
+  protected Dimension size;
+  // CONST
+  protected final int MAX_ITER = 700;
+  protected final int ITER_MVMNT_MAX = 5;
+  protected final int DITH_MAGN = 2;
+  protected final int BRDR_FACT = 50;
+  protected final double EPSILON = 0.000001;
+  protected final double ATTR_MULT = 0.75;
+  protected final double REP_MULT = 0.75;
+  // CALC'D
   protected double forceConst;
   protected double temperature;
   protected double attrConst;
   protected double repConst;
-  protected double maxDimension; // a-directional maximum of the layout
-  protected Dimension size;
-  protected double EPSILON = 0.000001; // avoid division by zero
-  // ITERATIVE CONTEXT
-  protected boolean initialized = false;
-  protected int currentIteration;
-  protected int maxIterations = 700;
-  protected int iterMvmntMax = 5; // limit on 'unit' movement per iteration
-  protected int dithMagMult = 2; // randomize position jitter magnitude 
+  protected double maxDimension;
   protected double borderWidth;
   // 'STATE'
+  protected int currentIteration;
+  protected boolean initialized = false;
   protected Set<Vertex> lockedVertices = new HashSet<>();
-
   // DATA STORAGE
   @SuppressWarnings("null")
   LoadingCache<Vertex, Point3D> locationData = CacheBuilder.newBuilder().build(new CacheLoader<Vertex, Point3D>() {
@@ -56,99 +54,17 @@ public class FR3DLayout {
         }
       });
 
-  public FR3DLayout(ClientSession session) {
-    this.graph = session.graphset();
-  }
-
   public FR3DLayout(Graphset graph, Dimension size) {
     if (graph == null || size == null) {
       throw new IllegalArgumentException("Graph and size must be non-null");
     }
     this.graph = graph;
     this.size = size;
-    setAndInitPositions(new RandomLocation3D<Vertex>(size));
-    doInit();
   }
 
   /**
-   * Main function of the layout. Given a vertex, returns a set of 3D coordinates.
+   * Attempts to initialize a layout with the sessions current graph
    */
-  public Point3D apply(Vertex v) {
-    return getLocationData(v);
-  }
-
-  //------------------------------------------------------------------------------------------------------------
-  //
-  //* GETTERS AND SETTERS * GETTERS AND SETTERS * GETTERS AND SETTERS * GETTERS AND SETTERS * GETTERS AND SETTERS
-  //
-  //------------------------------------------------------------------------------------------------------------
-
-  public void setGraph(Graphset graph) {
-    this.graph = graph;
-    if (size != null && graph != null) {
-      initialize();
-    }
-  }
-
-  public Graphset getGraph() {
-    return graph;
-  }
-
-  public void setSize(Dimension size) {
-    if (initialized == false) {
-      setAndInitPositions(new RandomLocation3D<Vertex>(size));
-    }
-    if (size != null && graph != null) {
-
-      Dimension oldSize = getSize();
-      this.size = size;
-      doInit();
-
-      if (!oldSize.equals(size) && oldSize != null) {
-        adjustLocations(oldSize, size);
-        maxDimension = Math.max(size.width, size.height);
-      }
-    }
-  }
-
-  public Dimension getSize() {
-    return size;
-  }
-
-  public void setLocation(Vertex v, Point3D location) {
-    Point3D coords = getLocationData(v);
-    coords.setLocation(location);
-  }
-
-  public void setLocation(Vertex v, double x, double y, double z) {
-    Point3D coords = getLocationData(v);
-    coords.setLocation(x, y, z);
-  }
-
-  public void lock(Vertex v, boolean state) {
-    if (state) {
-      lockedVertices.add(v);
-    } else {
-      lockedVertices.remove(v);
-    }
-  }
-
-  public void lock(boolean lock) {
-    for (Vertex v : graph.vertices()) {
-      lock(v, lock);
-    }
-  }
-
-  public boolean isLocked(Vertex v) {
-    return lockedVertices.contains(v);
-  }
-
-  //------------------------------------------------------------------------------------------------------------
-  //
-  //!    LAYOUT METHODS * LAYOUT METHODS * LAYOUT METHODS * LAYOUT METHODS * LAYOUT METHODS * LAYOUT METHODS 
-  //
-  //------------------------------------------------------------------------------------------------------------
-
   public Optional<Err> initialize() {
     try {
       doInit();
@@ -158,28 +74,40 @@ public class FR3DLayout {
     }
   }
 
-  public void reset() {
-    doInit();
+  /**
+   * Main function of the layout. Given a vertex, returns the 3D coordinates representing that point
+   * in the layout.
+   */
+  public Point3D apply(Vertex v) {
+    return getLocationData(v);
   }
 
-  protected void doInit() {
-    Graphset graph = getGraph();
-    Dimension d = getSize();
-    if (graph != null && d != null) {
-      currentIteration = 0;
-      temperature = d.getWidth() / 10;
-      forceConst = Math.sqrt(d.getHeight() * d.getWidth() / graph.getVertexCount());
-      attrConst = forceConst * attrMult;
-      repConst = forceConst * repMult;
-      maxDimension = Math.max(d.width, d.height);
-      borderWidth = Math.min(d.width, d.height) / 50;
+  /**
+   * Reverse the lock state of the given vertex
+   */
+  public void lock(Vertex v, boolean state) {
+    if (state) {
+      lockedVertices.add(v);
+    } else {
+      lockedVertices.remove(v);
     }
   }
 
+  /**
+   * Locks or unlock the state of all vertices in the graph
+   */
+  public void lock(boolean lock) {
+    for (Vertex v : graph.vertices()) {
+      lock(v, lock);
+    }
+  }
+
+  /**
+   * Run the layout calculations and increase the currentIteration by 1
+   */
   public void step() {
     currentIteration++;
-    Collection<Vertex> vLoc = getGraph().vertices();
-    // REPULSION
+    Collection<Vertex> vLoc = graph.vertices();
     while (true) {
       try {
         for (Vertex v : vLoc) {
@@ -187,21 +115,17 @@ public class FR3DLayout {
         }
         break;
       } catch (ConcurrentModificationException cme) {
-        // ignore and retry
       }
     }
-    // ATTRACTION
     while (true) {
       try {
-        for (Edge e : getGraph().edges()) {
+        for (Edge e : graph.edges()) {
           calcAttraction(e);
         }
         break;
       } catch (ConcurrentModificationException cme) {
-        // ignore and retry
       }
     }
-    // POSITION
     while (true) {
       try {
         for (Vertex v : vLoc) {
@@ -211,33 +135,53 @@ public class FR3DLayout {
         }
         break;
       } catch (ConcurrentModificationException cme) {
-        // ignore and retry
       }
     }
     cool();
   }
 
+  /**
+   * Checks if this layout has reached the max allowed number of iterations or 
+   * a temperature which indicates this layout is a suitable representation of
+   * the Graphset. 
+   */
   public boolean done() {
-    if (currentIteration > maxIterations || temperature < 1.0 / maxDimension) {
+    if (currentIteration > MAX_ITER || temperature < 1.0 / maxDimension) {
       return true;
     }
     return false;
   }
 
-  //------------------------------------------------------------------------------------------------------------
-  //
-  //? FORCE CALCS * FORCE CALCS * FORCE CALCS * FORCE CALCS * FORCE CALCS * FORCE CALCS * FORCE CALCS * FORCE
-  //
-  //------------------------------------------------------------------------------------------------------------
+  protected void doInit() {
+    if (graph != null && size != null) {
+      Double width = size.getWidth();
+      Double height = size.getHeight();
+
+      setAndInitPositions(new RandomLocation3D<Vertex>(size));
+      currentIteration = 0;
+      temperature = width / 10;
+      forceConst = Math.sqrt(height * width / graph.getVertexCount());
+
+      // CALC'D
+
+      maxDimension = Math.max(width, height);
+      borderWidth = Math.min(width, height) / BRDR_FACT;
+    }
+  }
+
+  //===============================================================================================================>
+  // FORCE CALCS...
+  //===============================================================================================================>
 
   protected void calcRepulsion(Vertex v1) {
-    Point3D offset = getOffset(v1);
+    Point3D offset = getOffsetData(v1);
     if (offset == null)
       return;
-    offset.setLocation(0, 0, 0); // initialize offset on ea iteration
+
+    offset.setLocation(0, 0, 0); //! initialize offset on ea. iterations start...
 
     try {
-      for (Vertex v2 : getGraph().vertices()) {
+      for (Vertex v2 : graph.vertices()) {
         if (v1 == v2 || (isLocked(v1) && isLocked(v2)))
           continue;
 
@@ -259,7 +203,7 @@ public class FR3DLayout {
         double yDisp = dy * repForce;
         double zDisp = dz * repForce;
 
-        updateOffset(v1, xDisp, yDisp, zDisp, isLocked(v2)); //if v2 is locked, offset v1 2x
+        updateOffset(v1, xDisp, yDisp, zDisp, isLocked(v2)); //v2 is locked, offset v1 x 2
       }
     } catch (ConcurrentModificationException cme) {
       calcRepulsion(v1); // retry
@@ -267,10 +211,11 @@ public class FR3DLayout {
   }
 
   protected void calcAttraction(Edge e) {
-    Optional<Tuple2<Vertex, Vertex>> endpoints = getGraph().getEndpoints(e);
+    Optional<Tuple2<Vertex, Vertex>> endpoints = graph.getEndpoints(e);
     if (endpoints.isEmpty()) {
       return;
     }
+
     Vertex v1 = endpoints.get()._1();
     Vertex v2 = endpoints.get()._2();
     if ((isLocked(v1) && isLocked(v2)) || v1 == v2) {
@@ -287,7 +232,6 @@ public class FR3DLayout {
     double dz = p1.getZ() - p2.getZ();
     double dl = Math.max(EPSILON, p1.distance(p2));
     double force = dl * dl / attrConst;
-
     if (Double.isNaN(force))
       throw new IllegalArgumentException("NaN in attraction force calculation");
 
@@ -303,8 +247,8 @@ public class FR3DLayout {
     Point3D p = getLocationData(v);
     if (p == null)
       return;
-    Point3D offset = getOffset(v);
 
+    Point3D offset = getOffsetData(v);
     Double dl = Math.max(EPSILON, offset.distanceSq(offset));
 
     double xDisp = offset.getX() / dl * Math.min(dl, temperature);
@@ -314,12 +258,12 @@ public class FR3DLayout {
     if (Double.isNaN(xDisp) || Double.isNaN(yDisp) || Double.isNaN(zDisp))
       throw new IllegalArgumentException("NaN in position calculation");
 
-    double newX = p.getX() + Math.max(-iterMvmntMax, Math.min(iterMvmntMax, xDisp));
-    double newY = p.getY() + Math.max(-iterMvmntMax, Math.min(iterMvmntMax, yDisp));
-    double newZ = p.getZ() + Math.max(-iterMvmntMax, Math.min(iterMvmntMax, zDisp));
+    double newX = p.getX() + Math.max(-ITER_MVMNT_MAX, Math.min(ITER_MVMNT_MAX, xDisp));
+    double newY = p.getY() + Math.max(-ITER_MVMNT_MAX, Math.min(ITER_MVMNT_MAX, yDisp));
+    double newZ = p.getZ() + Math.max(-ITER_MVMNT_MAX, Math.min(ITER_MVMNT_MAX, zDisp));
 
-    double width = getSize().getWidth();
-    double height = getSize().getHeight();
+    double width = size.getWidth();
+    double height = size.getHeight();
 
     newX = adjustPositionToBorderBox(newX, width);
     newY = adjustPositionToBorderBox(newY, height);
@@ -328,15 +272,9 @@ public class FR3DLayout {
     p.setLocation(newX, newY, newZ);
   }
 
-  //------------------------------------------------------------------------------------------------------------
-  //
-  //! PRIVATE METHODS * PRIVATE METHODS * PRIVATE METHODS * PRIVATE METHODS * PRIVATE METHODS * PRIVATE METHODS
-  //
-  //------------------------------------------------------------------------------------------------------------
-
-  protected Point3D getLocationData(Vertex V) {
-    return locationData.getUnchecked(V);
-  }
+  //===============================================================================================================>
+  // UTILS...
+  //===============================================================================================================>
 
   protected void setAndInitPositions(Function<Vertex, Point3D> initializer) {
     Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
@@ -350,13 +288,17 @@ public class FR3DLayout {
   }
 
   protected void adjustLocations(Dimension oldSize, Dimension size) {
+    if (oldSize == size) {
+      return;
+    }
+
     int xOff = (size.width - oldSize.width) / 2;
     int yOff = (size.height - oldSize.height) / 2;
     int zOff = (size.height - oldSize.height) / 2;
 
     while (true) {
       try {
-        for (Vertex v : getGraph().vertices()) {
+        for (Vertex v : graph.vertices()) {
           offsetVertexLocation(v, xOff, yOff, zOff);
         }
         break;
@@ -366,8 +308,16 @@ public class FR3DLayout {
     }
   }
 
-  protected Point3D getOffset(Vertex v) {
+  protected boolean isLocked(Vertex v) {
+    return lockedVertices.contains(v);
+  }
+
+  protected Point3D getOffsetData(Vertex v) {
     return offsetData.getUnchecked(v);
+  }
+
+  protected Point3D getLocationData(Vertex V) {
+    return locationData.getUnchecked(V);
   }
 
   protected void offsetVertexLocation(Vertex v, double dx, double dy, double dz) {
@@ -378,25 +328,88 @@ public class FR3DLayout {
     p.setLocation(ox, oy, oz);
   }
 
-  protected void cool() {
-    temperature *= (1.0 - currentIteration / (double) maxIterations);
+  public void cool() {
+    temperature *= (1.0 - currentIteration / (double) MAX_ITER);
+    if (currentIteration % 100 == 0) {
+      adjustForceConstants();
+    }
   }
 
   protected void updateOffset(Vertex v, double xDisp, double yDisp, double zDisp,
       boolean opposingIsLocked) {
-    Point3D offset = getOffset(v);
+    Point3D offset = getOffsetData(v);
     int factor = opposingIsLocked ? 2 : 1;
+
     offset.setLocation(offset.getX() + factor * xDisp, offset.getY() + factor * yDisp,
         offset.getZ() + factor * zDisp);
   }
 
   protected double adjustPositionToBorderBox(double coordPos, double dimMax) {
     if (coordPos < borderWidth) {
-      return borderWidth + Math.random() * dithMagMult * borderWidth;
+
     } else if (coordPos > dimMax - borderWidth) {
-      return dimMax - borderWidth - Math.random() * dithMagMult * borderWidth;
+
     }
     return coordPos;
+  }
+
+  private void adjustForceConstants() {
+    double averageRepulsionForce = calculateAverageRepulsionForce();
+    double averageAttractionForce = calculateAverageAttractionForce();
+
+    if (averageRepulsionForce > averageAttractionForce) {
+      repConst *= 0.9;
+      attrConst *= 1.1;
+    } else if (averageAttractionForce > averageRepulsionForce) {
+      repConst *= 1.1;
+      attrConst *= 0.9;
+    }
+  }
+
+  private double calculateAverageRepulsionForce() {
+    double totalRepulsionForce = 0;
+    int count = 0;
+    Collection<Vertex> verts = graph.vertices();
+    for (Vertex v1 : verts) {
+      for (Vertex v2 : verts) {
+        if (v1 != v2) {
+          Point3D p1 = getLocationData(v1);
+          Point3D p2 = getLocationData(v2);
+          double dl = p1.distance(p2);
+          double repForce = (repConst * repConst) / dl;
+          totalRepulsionForce += repForce;
+          count++;
+        }
+      }
+    }
+
+    return totalRepulsionForce / count;
+  }
+
+  private double calculateAverageAttractionForce() {
+    double totalAttractionForce = 0;
+    int count = 0;
+    Collection<Edge> eds = graph.edges();
+
+    for (Edge e : eds) {
+      Optional<Tuple2<Vertex, Vertex>> endpoints = graph.getEndpoints(e);
+      if (endpoints.isEmpty()) {
+        continue;
+      }
+      Vertex v1 = endpoints.get()._1();
+      Vertex v2 = endpoints.get()._2();
+
+      Point3D p1 = getLocationData(v1);
+      Point3D p2 = getLocationData(v2);
+
+      double dl = p1.distance(p2);
+      double force = dl * dl / attrConst;
+      totalAttractionForce += force;
+
+      count++;
+    }
+
+    return totalAttractionForce / count;
   }
 
 }
