@@ -69,10 +69,8 @@ public class VertexTests {
   @Test
   public void setsLayoutCoords() {
     Vertex vertex = new Vertex();
-    Point2D coords2D = new Point2D.Double(0.0, 0.0);
     Point3D coords3D = new Point3D(0.0, 0.0, 0.0);
-    vertex.setLayoutCoords(coords2D, coords3D);
-    assertEquals(coords2D, vertex.layoutCoords().c2(), "2D Coords should be (0.0, 0.0)");
-    assertEquals(coords3D, vertex.layoutCoords().c3(), "3D Coords should be (0.0, 0.0, 0.0)");
+    vertex.setCoords(coords3D);
+    assertEquals(coords3D, vertex.coords(), "3D Coords should be (0.0, 0.0, 0.0)");
   }
 }
