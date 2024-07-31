@@ -18,7 +18,7 @@ public class ClientSession {
     this.query = QueryParamSanitizer.sanitize(query);
     this.subjectDimensions = getDimensionsFromClient(dimensions);
     this.graphset = new Graphset();
-    this.layout = new FR3DLayout(this);
+    this.layout = new FR3DLayout(graphset, getDimensionsFromClient(dimensions));
     this.wikidata = new WikidataManager(this);
   }
 
@@ -46,6 +46,8 @@ public class ClientSession {
     String br = "\n";
     return this.toString() + br + graphset.toString() + br + wikidata.toString();
   }
+
+  // need to mop up the Vertex location details... or check them all
 
   @Override
   public String toString() {

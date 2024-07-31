@@ -20,11 +20,18 @@ public class ClientSessionBuilder {
     }
 
     Optional<Err> createLayoutTask = sesh.layout().initialize();
+    if (createLayoutTask.isPresent()) {
+      return Either.left(createLayoutTask.get());
+    }
+
+    sesh.graphset().vertices().forEach(v -> {
+      v.setCoords(sesh.layout().apply(v));
+    });
 
     //TODO: below...
-    // * initialize layout coords for set
-    // * create a response from a pruned client session
-
+    // find some way to lock the origin @ (0,0,0)
+    // build a fetch data collection to log speed of fetching w/ timeout @ WikidataManager
+    // establish and build out responses, moving towards client resp...
     return Either.right(sesh);
   }
 }
