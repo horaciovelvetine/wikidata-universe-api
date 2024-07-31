@@ -1,14 +1,12 @@
 package edu.velv.wikidata_universe_api.models.jung_ish;
 
-import java.awt.geom.Point2D;
-
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
 
 public class Vertex {
   protected String id;
   protected String label;
   protected String description;
-  protected LayoutCoords layoutCoords;
+  protected Point3D coords;
 
   public Vertex() {
     // Default constructor
@@ -32,8 +30,8 @@ public class Vertex {
     return description;
   }
 
-  public LayoutCoords layoutCoords() {
-    return layoutCoords;
+  public Point3D coords() {
+    return coords;
   }
 
   public void setId(String id) {
@@ -48,11 +46,8 @@ public class Vertex {
     this.description = description;
   }
 
-  public void setLayoutCoords(Point2D coords2D, Point3D coords3D) {
-    this.layoutCoords = new LayoutCoords(coords2D, coords3D);
-  }
-
-  public record LayoutCoords(Point2D c2, Point3D c3) {
+  public void setCoords(Point3D point) {
+    this.coords = point;
   }
 
 }
