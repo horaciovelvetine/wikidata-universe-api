@@ -12,6 +12,7 @@ import io.vavr.control.Try;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
+import org.wikidata.wdtk.wikibaseapi.apierrors.NoSuchEntityErrorException;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.*;
@@ -52,9 +53,9 @@ public class FetchBroker implements Loggable {
    */
   protected Either<Err, Map<String, Either<Err, EntityDocument>>> fetchEntitiesByIdList(List<String> tgtIds) {
     Map<String, Either<Err, EntityDocument>> results = new HashMap<>();
-    return fetchEntityDocumentsByIds(tgtIds).fold((Err e) -> {
-      return Either.left(e);
-    }, (Map<String, EntityDocument> fetched) -> {
+    return fetchEntityDocumentsByIds(tgtIds).mapLeft(e -> {
+      return e;
+    }).flatMap(fetched -> {
       fetched.entrySet().forEach((entry) -> {
         results.put(entry.getKey(), handleNoSuchEntityResults(entry.getValue()));
       });
@@ -68,15 +69,20 @@ public class FetchBroker implements Loggable {
    * @param tgtDates the List of IdValue's to search for
    * @return an Either object containing either the retrrieved Documents or an error
    */
-  protected Map<String, Either<Err, EntityDocument>> fetchEntitiesByDateList(List<String> tgtDates) {
-    Map<String, Either<Err, EntityDocument>> results = new HashMap<>();
+  protected Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> fetchEntitiesByDateList(
+      List<String> tgtDates) {
+    Map<String, Either<Err, WbSearchEntitiesResult>> results = new HashMap<>();
     for (String tgtDate : tgtDates) {
-      results.put(tgtDate, fetchSearchResultsByAny(tgtDate).flatMap(searchResult -> {
-        return fetchEntityDocumentById(searchResult.getEntityId());
-      }));
+      fetchSearchResultsByAny(tgtDate).mapLeft(e -> {
+        return e;
+      }).flatMap(result -> {
+        results.put(tgtDate, handleNoSuchEntityResults(result));
+        return null;
+      });
     }
-    return results;
+    return Either.right(results);
   }
+
   // WDTK Fetches 
   //=====================================================================================================================>
   //=====================================================================================================================>
@@ -127,8 +133,13 @@ public class FetchBroker implements Loggable {
   //=====================================================================================================================>
 
   private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument doc) {
-    return doc == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFound()"))
+    return doc == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFoundID()"))
         : Either.right(doc);
+  }
+
+  private Either<Err, WbSearchEntitiesResult> handleNoSuchEntityResults(WbSearchEntitiesResult res) {
+    return res == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFoundID()"))
+        : Either.right(res);
   }
 
   private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(
