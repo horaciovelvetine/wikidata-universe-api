@@ -24,12 +24,19 @@ public class ClientSessionBuilder {
       return Either.left(createLayoutTask.get());
     }
 
+    while (!sesh.layout().done()) {
+      try {
+        sesh.layout().step();
+      } catch (Exception e) {
+        System.out.println("Step exception catch");
+      }
+    }
+
     sesh.graphset().vertices().forEach(v -> {
       v.setCoords(sesh.layout().apply(v));
     });
 
     //TODO: below...
-    // find some way to lock the origin @ (0,0,0)
     // build a fetch data collection to log speed of fetching w/ timeout @ WikidataManager
     // establish and build out responses, moving towards client resp...
     return Either.right(sesh);

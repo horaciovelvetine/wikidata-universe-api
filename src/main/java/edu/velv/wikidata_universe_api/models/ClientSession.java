@@ -44,10 +44,8 @@ public class ClientSession {
 
   public String details() {
     String br = "\n";
-    return this.toString() + br + graphset.toString() + br + wikidata.toString();
+    return br + this.toString() + br + graphset.toString() + br + wikidata.toString();
   }
-
-  // need to mop up the Vertex location details... or check them all
 
   @Override
   public String toString() {
