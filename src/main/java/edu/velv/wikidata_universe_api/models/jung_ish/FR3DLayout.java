@@ -62,6 +62,30 @@ public class FR3DLayout {
     this.size = size;
   }
 
+  protected void doInit() {
+    if (graph != null && size != null) {
+      Double width = size.getWidth();
+      Double height = size.getHeight();
+
+      setAndInitPositions(new RandomLocation3D<Vertex>(size));
+
+      Vertex origin = graph.getOriginRef();
+      if (origin == null) {
+
+      }
+      getLocationData(origin).setLocation(new Point3D(EPSILON, EPSILON, EPSILON));
+      lockedVertices.add(origin);
+
+      currentIteration = 0;
+      temperature = width / 10;
+      forceConst = Math.sqrt(height * width / graph.vertexCount());
+      attrConst = forceConst * ATTR_MULT;
+      repConst = forceConst * REP_MULT;
+      maxDimension = Math.max(width, height);
+      borderWidth = Math.min(width, height) / BRDR_FACT;
+    }
+  }
+
   /**
    * Attempts to initialize a layout with the sessions current graph
    */
@@ -107,10 +131,12 @@ public class FR3DLayout {
    */
   public void step() {
     currentIteration++;
-    Collection<Vertex> vLoc = graph.vertices();
     while (true) {
       try {
-        for (Vertex v : vLoc) {
+        for (Vertex v : graph.vertices()) {
+          if (isLocked(v)) {
+            continue;
+          }
           calcRepulsion(v);
         }
         break;
@@ -128,7 +154,7 @@ public class FR3DLayout {
     }
     while (true) {
       try {
-        for (Vertex v : vLoc) {
+        for (Vertex v : graph.vertices()) {
           if (isLocked(v))
             continue;
           calcPositions(v);
@@ -152,29 +178,17 @@ public class FR3DLayout {
     return false;
   }
 
-  protected void doInit() {
-    if (graph != null && size != null) {
-      Double width = size.getWidth();
-      Double height = size.getHeight();
-
-      setAndInitPositions(new RandomLocation3D<Vertex>(size));
-      currentIteration = 0;
-      temperature = width / 10;
-      forceConst = Math.sqrt(height * width / graph.getVertexCount());
-
-      // CALC'D
-
-      maxDimension = Math.max(width, height);
-      borderWidth = Math.min(width, height) / BRDR_FACT;
-    }
-  }
-
-  //===============================================================================================================>
-  // FORCE CALCS...
-  //===============================================================================================================>
+  // Force Calculations...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
   protected void calcRepulsion(Vertex v1) {
+    if (isLocked(v1))
+      return;
+
     Point3D offset = getOffsetData(v1);
+
     if (offset == null)
       return;
 
@@ -232,6 +246,7 @@ public class FR3DLayout {
     double dz = p1.getZ() - p2.getZ();
     double dl = Math.max(EPSILON, p1.distance(p2));
     double force = dl * dl / attrConst;
+
     if (Double.isNaN(force))
       throw new IllegalArgumentException("NaN in attraction force calculation");
 
@@ -239,11 +254,19 @@ public class FR3DLayout {
     double yDisp = dy * force / dl;
     double zDisp = dz * force / dl;
 
-    updateOffset(v1, -xDisp, -yDisp, -zDisp, isLocked(v2)); // opposite direction(s)
-    updateOffset(v2, xDisp, yDisp, zDisp, isLocked(v1));
+    if (!isLocked(v1)) {
+      updateOffset(v1, -xDisp, -yDisp, -zDisp, isLocked(v2)); // opposite direction(s)
+    }
+
+    if (!isLocked(v2)) {
+      updateOffset(v2, xDisp, yDisp, zDisp, isLocked(v1));
+    }
   }
 
   protected void calcPositions(Vertex v) {
+    if (isLocked(v))
+      return;
+
     Point3D p = getLocationData(v);
     if (p == null)
       return;
@@ -272,40 +295,22 @@ public class FR3DLayout {
     p.setLocation(newX, newY, newZ);
   }
 
-  //===============================================================================================================>
-  // UTILS...
-  //===============================================================================================================>
+  // Utils...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
   protected void setAndInitPositions(Function<Vertex, Point3D> initializer) {
+
     Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
       public Point3D apply(Point3D input) {
         return (Point3D) input.clone();
       }
-    }, initializer); //build func chain 
+    }, initializer);
+
     this.locationData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
     this.offsetData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
-    initialized = true; // set flag
-  }
-
-  protected void adjustLocations(Dimension oldSize, Dimension size) {
-    if (oldSize == size) {
-      return;
-    }
-
-    int xOff = (size.width - oldSize.width) / 2;
-    int yOff = (size.height - oldSize.height) / 2;
-    int zOff = (size.height - oldSize.height) / 2;
-
-    while (true) {
-      try {
-        for (Vertex v : graph.vertices()) {
-          offsetVertexLocation(v, xOff, yOff, zOff);
-        }
-        break;
-      } catch (ConcurrentModificationException cme) {
-        // ignore and retry
-      }
-    }
+    initialized = true;
   }
 
   protected boolean isLocked(Vertex v) {
@@ -325,6 +330,7 @@ public class FR3DLayout {
     double ox = p.getX() + dx;
     double oy = p.getY() + dy;
     double oz = p.getZ() + dz;
+
     p.setLocation(ox, oy, oz);
   }
 
@@ -337,6 +343,9 @@ public class FR3DLayout {
 
   protected void updateOffset(Vertex v, double xDisp, double yDisp, double zDisp,
       boolean opposingIsLocked) {
+    if (isLocked(v)) {
+      return;
+    }
     Point3D offset = getOffsetData(v);
     int factor = opposingIsLocked ? 2 : 1;
 
