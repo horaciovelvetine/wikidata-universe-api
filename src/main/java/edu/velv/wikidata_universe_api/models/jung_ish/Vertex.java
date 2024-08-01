@@ -1,6 +1,7 @@
 package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
+import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 public class Vertex {
   protected String id;
@@ -16,6 +17,12 @@ public class Vertex {
     this.id = itemDoc.getEntityId().getId();
     this.label = itemDoc.findLabel("en");
     this.description = itemDoc.findDescription("en");
+  }
+
+  public Vertex(WbSearchEntitiesResult result) {
+    this.id = result.getEntityId();
+    this.label = result.getLabel();
+    this.description = result.getDescription();
   }
 
   public String id() {
@@ -48,6 +55,20 @@ public class Vertex {
 
   public void setCoords(Point3D point) {
     this.coords = point;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    Vertex other = (Vertex) obj;
+    return id.equals(other.id) &&
+        label.equals(other.label) &&
+        description.equals(other.description);
   }
 
 }
