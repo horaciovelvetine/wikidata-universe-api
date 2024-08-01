@@ -12,13 +12,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
-
+import edu.velv.wikidata_universe_api.utils.ProcessTimer;
 import io.vavr.control.Either;
 
 public class WikidataManager implements Loggable {
@@ -43,6 +45,11 @@ public class WikidataManager implements Loggable {
     this.timeoutExecutor = Executors.newSingleThreadScheduledExecutor();
   }
 
+  /**
+   * Uses the sanitized query to look through Wikidata's DB for a matching Entity which is then processed
+   * 
+   * @return An Optional<Err> if one is encountered
+   */
   public Optional<Err> fetchInitQueryData() {
     return wikidataApi.fetchOriginEntityByAny(session.query()).fold(e -> {
       return Optional.of(e);
@@ -52,6 +59,11 @@ public class WikidataManager implements Loggable {
     });
   }
 
+  /**
+   * Uses a perscribed amount of time to allow fetches to be made to the Wikidata API to collect related data
+   * 
+   * @return An Optional<Err> if one is encountered
+   */
   public Optional<Err> fetchRelatedWithTimeout() {
     Future<Optional<Err>> fetchTaskFuture = timeoutExecutor.submit(this::fetchRelatedTask);
     try {
@@ -64,15 +76,20 @@ public class WikidataManager implements Loggable {
   }
 
   public String toString() {
-    return "Wikidata={ n=" + n + ", " + queue.toString() + " }\n";
+    return "Wikidata={ n=" + n + ", " + queue.toString() + " }";
   }
 
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+  // Private...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
   protected void addUnfetchedEdgeDetailsToQueue(Edge e) {
     queue.addUnfetchedEdgeValues(e, n);
+  }
+
+  public void addSearchResultIDBackToQueue(Vertex v) {
+    queue.addUnfetchedVertexValue(v, n);
   }
 
   protected void addProperty(Property p) {
@@ -81,51 +98,76 @@ public class WikidataManager implements Loggable {
     properties.add(p);
   }
 
+  private String buildInvalidLogString(String tgtQuery) {
+    return "Invalid/Error: (" + tgtQuery + ") query.";
+  }
+
+  private void handleFetchResults(Map<String, Either<Err, EntityDocument>> results) {
+    for (Entry<String, Either<Err, EntityDocument>> result : results.entrySet()) {
+      if (result.getValue().isLeft()) {
+        log(buildInvalidLogString(result.getKey()));
+        queue.fetchInvalid(result.getKey());
+      }
+      entProc.processWikiEntDocument(result.getValue().get());
+      queue.fetchSuccess(result.getKey());
+    }
+  }
+
+  private void handleDateResults(Map<String, Either<Err, WbSearchEntitiesResult>> results) {
+    for (Entry<String, Either<Err, WbSearchEntitiesResult>> result : results.entrySet()) {
+      if (result.getValue().isLeft()) {
+        log(buildInvalidLogString(result.getKey()));
+        queue.fetchInvalid(result.getKey());
+      }
+      entProc.processSearchEntResult(result.getValue().get());
+      queue.fetchSuccess(result.getKey());
+    }
+  }
+
+  // Fetch Related Task...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
   private Optional<Err> fetchRelatedTask() {
+    ProcessTimer taskTimer = new ProcessTimer();
     while (n <= N_DEPTH_MAX) {
       try {
+        ProcessTimer fetchTimer = new ProcessTimer();
 
         List<String> dateBatch = queue.getDateTargetsBatchAtN(n);
         List<String> qBatch = queue.getEntTargetsBatchAtN(n);
+
         Either<Err, Map<String, Either<Err, EntityDocument>>> qResults = wikidataApi.fetchEntitiesByIdList(qBatch);
-        Map<String, Either<Err, EntityDocument>> dateResults = wikidataApi.fetchEntitiesByDateList(dateBatch);
+        Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> dateResults = wikidataApi
+            .fetchEntitiesByDateList(dateBatch);
 
         if (qResults.isLeft()) {
           return Optional.of(qResults.getLeft());
         }
-
-        qResults.get().entrySet().forEach(entry -> {
-          if (entry.getValue().isLeft()) {
-            log(buildInvalidLogString(entry));
-            queue.fetchInvalid(entry.getKey());
-          }
-          entProc.processWikiEntDocument(entry.getValue().get());
-          queue.fetchSuccess(entry.getKey());
-        });
-
-        dateResults.entrySet().forEach(entry -> {
-          if (entry.getValue().isLeft()) {
-            log(buildInvalidLogString(entry));
-            queue.fetchInvalid(entry.getKey());
-          }
-          entProc.processWikiEntDocument(entry.getValue().get());
-          queue.fetchSuccess(entry.getKey());
-        });
+        // Collect fetch details for eval
+        // === === === === === === === === === === === ===
+        fetchTimer.stop(); // dont time processing 
+        int totalFetched = 0;
+        totalFetched += qResults.get().entrySet().size();
+        totalFetched += dateResults.get().entrySet().size();
+        logFetch(fetchTimer.getElapsedTimeFormatted() + " :: " + totalFetched);
+        // === === === === === === === === === === === ===
+        handleDateResults(dateResults.get());
+        handleFetchResults(qResults.get());
 
         if (queue.isEmptyAtNDepth(n)) {
           n += 1;
         }
-        //stop
-        print(session.details());
       } catch (Exception e) {
-        print("here");
         return Optional.of(new FetchRelatedWithTimeoutError("@fetchRelatedTask()", e));
       }
     }
+    // === === === === === === === === === === === ===
+    taskTimer.stop();
+    logFetch(session.details());
+    logFetch(taskTimer.getElapsedTimeFormatted() + "\n");
+    // === === === === === === === === === === === ===
     return Optional.empty();
-  }
-
-  private String buildInvalidLogString(Entry<String, Either<Err, EntityDocument>> entry) {
-    return "Invalid/Error: (" + entry.getKey() + ") query.";
   }
 }

@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public interface Loggable extends Timestampable {
-  public static final String LOGFILE_DIR = "src/main/resources/logs";
+  static final String LOGFILE_DIR = "logs/";
+  static final String FETCH_LOG = LOGFILE_DIR + "fetch-timings.log";
 
   public default void print(String msg) {
     System.out.println(msg);
@@ -16,13 +17,31 @@ public interface Loggable extends Timestampable {
   }
 
   public default void log(String msg) {
-    try (FileWriter fileWriter = new FileWriter(LOGFILE_DIR + now() + ".log", true);
+    String now = now();
+    String log = LOGFILE_DIR + now + ".log";
+    String msgTrunc = msg.length() > 80 ? msg.substring(0, 80) + "..." : msg;
+
+    try (FileWriter fileWriter = new FileWriter(log, true);
         PrintWriter printWriter = new PrintWriter(fileWriter)) {
-      printWriter.println(now() + "::" + msg);
+      printWriter.println(now + "::" + msg);
     } catch (IOException e) {
-      throw new RuntimeException("Error writing to log file: " + e.getMessage());
+      throw new RuntimeException("Error @ log(): " + e.getMessage());
     } finally {
-      print("Logged@:: " + LOGFILE_DIR + now() + ".log");
+      print("Logged@::" + log + "\n" + msgTrunc);
+    }
+  }
+
+  default void logFetch(String txt) {
+    String now = now();
+    try (FileWriter fileWriter = new FileWriter(FETCH_LOG, true);
+        PrintWriter printWriter = new PrintWriter(fileWriter)) {
+
+      printWriter.println(now + "::" + txt);
+
+    } catch (IOException e) {
+      throw new RuntimeException("Error @ logFetchTiming(): " + e.getMessage());
+    } finally {
+      print("FetchDataLogged@::" + FETCH_LOG);
     }
   }
 

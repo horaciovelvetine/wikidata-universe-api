@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 
 import java.util.function.Predicate;
 
@@ -33,6 +34,10 @@ public class FetchQueue {
     addEntityIfNotPresent(nP, e.propertyId());
     addEntityIfNotPresent(nP, e.label());
     addEntityIfNotPresent(nP, e.tgtEntId());
+  }
+
+  public void addUnfetchedVertexValue(Vertex v, Integer n) {
+    addEntityIfNotPresent(n + 1, v.id());
   }
 
   /**
@@ -87,12 +92,11 @@ public class FetchQueue {
         + invalid.size() + " }";
   }
 
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+  // Private...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
-  //TODO: remove debug details code
-  
   private List<String> countTargetsByN() {
     Map<Integer, Integer> countByN = new HashMap<>();
     for (Target.Entity entity : entities) {

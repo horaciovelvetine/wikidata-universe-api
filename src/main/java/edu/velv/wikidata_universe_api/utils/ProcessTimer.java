@@ -1,8 +1,8 @@
 package edu.velv.wikidata_universe_api.utils;
 
 public class ProcessTimer {
-  private long startTime;
-  private long endTime;
+  protected long startTime;
+  protected long endTime;
 
   public ProcessTimer() {
     this.startTime = System.currentTimeMillis();
@@ -22,6 +22,6 @@ public class ProcessTimer {
     long minutes = seconds / 60;
     long hours = minutes / 60;
     String format = String.format("%02d:%02d:%02d", hours, minutes % 60, seconds % 60);
-    return format + " (" + elapsedTime + "ms).";
+    return format + " - " + elapsedTime + "ms";
   }
 }
