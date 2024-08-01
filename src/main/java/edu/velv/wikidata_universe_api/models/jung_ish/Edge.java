@@ -1,8 +1,11 @@
 package edu.velv.wikidata_universe_api.models.jung_ish;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import edu.velv.wikidata_universe_api.models.wikidata.SnakData;
 import edu.velv.wikidata_universe_api.models.wikidata.ValueData.ValueType;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record Edge(String srcEntId, String tgtEntId, String propertyId, String label, ValueType type) {
 
   public Edge(String srcVertexId, SnakData mainSnak) {

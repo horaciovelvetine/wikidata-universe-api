@@ -54,6 +54,9 @@ public class FR3DLayout {
         }
       });
 
+  protected FR3DLayout() {
+  }
+
   public FR3DLayout(Graphset graph, Dimension size) {
     if (graph == null || size == null) {
       throw new IllegalArgumentException("Graph and size must be non-null");

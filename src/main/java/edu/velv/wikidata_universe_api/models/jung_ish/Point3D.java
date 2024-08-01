@@ -2,6 +2,9 @@ package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import java.awt.geom.Point2D;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Point3D extends Point2D.Double {
   public double z;
 

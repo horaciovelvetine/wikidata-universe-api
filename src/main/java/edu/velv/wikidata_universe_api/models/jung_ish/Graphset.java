@@ -5,13 +5,18 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.vavr.Tuple2;
 
 //With <3 & credit to JUNG & it's contributors
 // @https://github.com/jrtom/jung - thanks!
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Graphset {
   protected Set<Vertex> vertices;
   protected Set<Edge> edges;
+  @JsonIgnore
   protected Vertex origin;
 
   public Graphset() {

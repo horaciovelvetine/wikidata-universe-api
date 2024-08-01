@@ -14,6 +14,9 @@ import java.util.Map.Entry;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
 import edu.velv.wikidata_universe_api.models.ClientSession;
@@ -23,16 +26,24 @@ import edu.velv.wikidata_universe_api.utils.Loggable;
 import edu.velv.wikidata_universe_api.utils.ProcessTimer;
 import io.vavr.control.Either;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class WikidataManager implements Loggable {
+  @JsonIgnore
   protected static final Integer FETCH_TIMEOUT_MAX = 1;
+  @JsonIgnore
   protected static final TimeUnit FETCH_TIMEOUT_UNIT = TimeUnit.MINUTES;
+  @JsonIgnore
   protected static final Integer N_DEPTH_MAX = 1;
   protected Integer n;
   protected Set<Property> properties;
-  protected ClientSession session;
-  protected FetchBroker wikidataApi;
   protected FetchQueue queue;
+  @JsonIgnore
+  protected ClientSession session;
+  @JsonIgnore
+  protected FetchBroker wikidataApi;
+  @JsonIgnore
   protected EntDocProc entProc;
+  @JsonIgnore
   protected ScheduledExecutorService timeoutExecutor;
 
   public WikidataManager(ClientSession parentSession) {

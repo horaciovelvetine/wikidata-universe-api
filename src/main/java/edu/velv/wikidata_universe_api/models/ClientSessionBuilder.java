@@ -35,10 +35,6 @@ public class ClientSessionBuilder {
     sesh.graphset().vertices().forEach(v -> {
       v.setCoords(sesh.layout().apply(v));
     });
-
-    //TODO: below...
-    // build a fetch data collection to log speed of fetching w/ timeout @ WikidataManager
-    // establish and build out responses, moving towards client resp...
     return Either.right(sesh);
   }
 }

@@ -2,17 +2,25 @@ package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.velv.wikidata_universe_api.models.jung_ish.Graphset;
 import edu.velv.wikidata_universe_api.models.jung_ish.FR3DLayout;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
 import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ClientSession {
   protected String query;
   protected Dimension subjectDimensions;
   protected Graphset graphset;
   protected WikidataManager wikidata;
+  @JsonIgnore
   protected FR3DLayout layout;
+
+  protected ClientSession() {
+  }
 
   public ClientSession(String query, String dimensions) {
     this.query = QueryParamSanitizer.sanitize(query);

@@ -3,6 +3,9 @@ package edu.velv.wikidata_universe_api.models.jung_ish;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Vertex {
   protected String id;
   protected String label;
