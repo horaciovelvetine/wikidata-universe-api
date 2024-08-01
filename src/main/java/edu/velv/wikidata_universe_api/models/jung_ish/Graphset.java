@@ -12,6 +12,7 @@ import io.vavr.Tuple2;
 public class Graphset {
   protected Set<Vertex> vertices;
   protected Set<Edge> edges;
+  protected Vertex origin;
 
   public Graphset() {
     this.vertices = ConcurrentHashMap.newKeySet();
@@ -38,8 +39,16 @@ public class Graphset {
     edges.add(e);
   }
 
-  public int getVertexCount() {
+  public Vertex getOriginRef() {
+    return origin;
+  }
+
+  public int vertexCount() {
     return vertices().size();
+  }
+
+  public void setOriginRef(Vertex v) {
+    this.origin = v;
   }
 
   public Optional<Tuple2<Vertex, Vertex>> getEndpoints(Edge e) {
