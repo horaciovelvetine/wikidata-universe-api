@@ -7,15 +7,15 @@ import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
+import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
-import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.ClientSession;
-import edu.velv.wikidata_universe_api.models.Edge;
-import edu.velv.wikidata_universe_api.models.Vertex;
+import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class EntDocProc implements Loggable {
-  private final ClientSession session;
+  protected ClientSession session;
 
   private static final Set<String> EXCLUDED_DATA = Set.of("external-id", "monolingualtext",
       "commonsMedia", "url", "globe-coordinate", "geo-shape", "wikibase-lexeme");
@@ -34,6 +34,9 @@ public class EntDocProc implements Loggable {
     this.session = parentSession;
   }
 
+  /**
+   * Narrows the EntityDocument fetched from the Wikidata API into the correct type to be processed and added to the graphset
+   */
   public void processWikiEntDocument(EntityDocument doc) {
     if (doc instanceof ItemDocumentImpl) {
       processItemDocument((ItemDocumentImpl) doc);
@@ -42,19 +45,34 @@ public class EntDocProc implements Loggable {
     }
   }
 
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+  /**
+   * Search Results contain no statement details, for now add the usable details, and put it's ID back in the queue to get
+   * the remaining Statement details.
+   */
+  public void processSearchEntResult(WbSearchEntitiesResult searchResult) {
+    Vertex v = new Vertex(searchResult);
+    session.graphset().addVertex(v);
+    session.wikidataManager().addSearchResultIDBackToQueue(v);
+  }
+
+  // PRIVATE...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
   private void processItemDocument(ItemDocumentImpl doc) {
     Vertex v = new Vertex(doc);
+    if (vertexMatchesOriginalQuery(v)) {
+      session.graphset().setOriginRef(v);
+    }
+
     session.graphset().addVertex(v);
     processItemsStatements(doc);
   }
 
   private void processPropertyDocument(PropertyDocumentImpl doc) {
     Property p = new Property(doc);
-    session.graphset().addProperty(p);
+    session.wikidataManager().addProperty(p);
   }
 
   private void processItemsStatements(ItemDocumentImpl doc) {
@@ -90,5 +108,9 @@ public class EntDocProc implements Loggable {
 
   private boolean hasExcludedEntityId(SnakData ms) {
     return EXCLUDED_ENT_IDS.contains(ms.property.value) || EXCLUDED_ENT_IDS.contains(ms.snakValue.value);
+  }
+
+  private boolean vertexMatchesOriginalQuery(Vertex v) {
+    return session.query().toLowerCase().equals(v.label().toLowerCase());
   }
 }

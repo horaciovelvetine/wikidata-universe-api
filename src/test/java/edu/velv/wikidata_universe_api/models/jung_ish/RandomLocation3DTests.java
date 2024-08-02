@@ -1,7 +1,8 @@
-package edu.velv.wikidata_universe_api.models.jung;
+package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.awt.Dimension;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models.jung;
+package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import java.awt.Dimension;
 import java.util.Date;

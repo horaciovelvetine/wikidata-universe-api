@@ -29,3 +29,5 @@ vs_code/*
 .keep
 
 target/*
+
+logs

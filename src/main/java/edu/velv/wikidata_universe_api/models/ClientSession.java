@@ -2,19 +2,31 @@ package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import edu.velv.wikidata_universe_api.models.jung_ish.Graphset;
+import edu.velv.wikidata_universe_api.models.jung_ish.FR3DLayout;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
 import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ClientSession {
-  private final String query;
-  private final Dimension subjectDimensions;
-  private final Graphset graphset;
-  private final WikidataManager wikidata;
+  protected String query;
+  protected Dimension subjectDimensions;
+  protected Graphset graphset;
+  protected WikidataManager wikidata;
+  @JsonIgnore
+  protected FR3DLayout layout;
+
+  protected ClientSession() {
+  }
 
   public ClientSession(String query, String dimensions) {
     this.query = QueryParamSanitizer.sanitize(query);
     this.subjectDimensions = getDimensionsFromClient(dimensions);
     this.graphset = new Graphset();
+    this.layout = new FR3DLayout(graphset, getDimensionsFromClient(dimensions));
     this.wikidata = new WikidataManager(this);
   }
 
@@ -34,9 +46,13 @@ public class ClientSession {
     return this.wikidata;
   }
 
+  public FR3DLayout layout() {
+    return this.layout;
+  }
+
   public String details() {
     String br = "\n";
-    return this.toString() + br + graphset.toString() + br + wikidata.toString();
+    return br + this.toString() + br + graphset.toString() + br + wikidata.toString();
   }
 
   @Override

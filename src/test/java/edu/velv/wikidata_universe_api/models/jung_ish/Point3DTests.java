@@ -1,6 +1,7 @@
-package edu.velv.wikidata_universe_api.models.jung;
+package edu.velv.wikidata_universe_api.models.jung_ish;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Point3DTests {

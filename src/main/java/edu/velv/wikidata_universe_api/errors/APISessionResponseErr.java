@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.err;
+package edu.velv.wikidata_universe_api.errors;
 
 public record APISessionResponseErr(int status, String message) {
   // private static final int SERVICE_UNAVAILABLE = 503;

@@ -29,7 +29,7 @@
 	</scm>
 	<properties>
 		<java.version>22</java.version>
-		<wikidataToolkitVersion>0.14.7</wikidataToolkitVersion>
+		<wikidata.toolkit.version>0.14.7</wikidata.toolkit.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -66,12 +66,12 @@
 		<dependency>
 			<groupId>org.wikidata.wdtk</groupId>
 			<artifactId>wdtk-datamodel</artifactId>
-			<version>${wikidataToolkitVersion}</version>
+			<version>${wikidata.toolkit.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wikidata.wdtk</groupId>
 			<artifactId>wdtk-wikibaseapi</artifactId>
-			<version>${wikidataToolkitVersion}</version>
+			<version>${wikidata.toolkit.version}</version>
 		</dependency>
 	</dependencies>
 

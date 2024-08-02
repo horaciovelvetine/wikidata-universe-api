@@ -7,12 +7,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
+
 import java.util.function.Predicate;
 
-import edu.velv.wikidata_universe_api.models.Edge;
-
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FetchQueue {
+  @JsonIgnore
   private static final String ENT_ID_PATTERN = "[PQ]\\d+";
+  @JsonIgnore
   private static final int MAX_QUERY_SIZE = 50;
   private final Set<Target.Entity> entities;
   private final Set<Target.Invalid> invalid;
@@ -32,6 +40,10 @@ public class FetchQueue {
     addEntityIfNotPresent(nP, e.propertyId());
     addEntityIfNotPresent(nP, e.label());
     addEntityIfNotPresent(nP, e.tgtEntId());
+  }
+
+  public void addUnfetchedVertexValue(Vertex v, Integer n) {
+    addEntityIfNotPresent(n + 1, v.id());
   }
 
   /**
@@ -86,12 +98,11 @@ public class FetchQueue {
         + invalid.size() + " }";
   }
 
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
-  //* PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE || PRIVATE *//
+  // Private...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
-  //TODO: remove debug details code
-  
   private List<String> countTargetsByN() {
     Map<Integer, Integer> countByN = new HashMap<>();
     for (Target.Entity entity : entities) {

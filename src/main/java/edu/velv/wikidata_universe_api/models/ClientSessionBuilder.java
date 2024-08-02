@@ -1,9 +1,8 @@
-package edu.velv.wikidata_universe_api.function;
+package edu.velv.wikidata_universe_api.models;
 
 import java.util.Optional;
 
-import edu.velv.wikidata_universe_api.err.Err;
-import edu.velv.wikidata_universe_api.models.ClientSession;
+import edu.velv.wikidata_universe_api.errors.Err;
 import io.vavr.control.Either;
 
 public class ClientSessionBuilder {
@@ -20,10 +19,22 @@ public class ClientSessionBuilder {
       return Either.left(fetchRelatedDataTask.get());
     }
 
-    //TODO: below...
-    // * initialize layout coords for set
-    // * create a response from a pruned client session
+    Optional<Err> createLayoutTask = sesh.layout().initialize();
+    if (createLayoutTask.isPresent()) {
+      return Either.left(createLayoutTask.get());
+    }
 
+    while (!sesh.layout().done()) {
+      try {
+        sesh.layout().step();
+      } catch (Exception e) {
+        System.out.println("Step exception catch");
+      }
+    }
+
+    sesh.graphset().vertices().forEach(v -> {
+      v.setCoords(sesh.layout().apply(v));
+    });
     return Either.right(sesh);
   }
 }

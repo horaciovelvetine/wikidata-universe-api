@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.velv.wikidata_universe_api.err.*;
-import edu.velv.wikidata_universe_api.err.Err.DebugDetailsResponse;
-import edu.velv.wikidata_universe_api.function.ClientSessionBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.velv.wikidata_universe_api.errors.*;
+import edu.velv.wikidata_universe_api.errors.Err.DebugDetailsResponse;
 import edu.velv.wikidata_universe_api.models.ClientSession;
+import edu.velv.wikidata_universe_api.models.ClientSessionBuilder;
 
 @CrossOrigin
 @RestController
@@ -34,7 +36,14 @@ public class APISessionController {
   }
 
   private ResponseEntity<String> buildSuccessResponse(ClientSession session) {
-    return ResponseEntity.status(200).body(session.details());
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      String str = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(session);
+      return ResponseEntity.status(200).body(str);
+    } catch (Exception e) {
+      System.out.println("Jackson Exception");
+    }
+    return null;
   }
 
   private ResponseEntity<String> buildErrorResponse(DebugDetailsResponse err) {
