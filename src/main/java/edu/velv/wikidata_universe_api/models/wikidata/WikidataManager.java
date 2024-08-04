@@ -14,9 +14,6 @@ import java.util.Map.Entry;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
 import edu.velv.wikidata_universe_api.models.ClientSession;
@@ -26,24 +23,16 @@ import edu.velv.wikidata_universe_api.utils.Loggable;
 import edu.velv.wikidata_universe_api.utils.ProcessTimer;
 import io.vavr.control.Either;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class WikidataManager implements Loggable {
-  @JsonIgnore
   protected static final Integer FETCH_TIMEOUT_MAX = 1;
-  @JsonIgnore
   protected static final TimeUnit FETCH_TIMEOUT_UNIT = TimeUnit.MINUTES;
-  @JsonIgnore
   protected static final Integer N_DEPTH_MAX = 1;
   protected Integer n;
   protected Set<Property> properties;
   protected FetchQueue queue;
-  @JsonIgnore
   protected ClientSession session;
-  @JsonIgnore
   protected FetchBroker wikidataApi;
-  @JsonIgnore
   protected EntDocProc entProc;
-  @JsonIgnore
   protected ScheduledExecutorService timeoutExecutor;
 
   public WikidataManager(ClientSession parentSession) {
@@ -86,6 +75,14 @@ public class WikidataManager implements Loggable {
     }
   }
 
+  public Set<Property> properties() {
+    return this.properties;
+  }
+
+  public FetchQueue fetchQueue() {
+    return this.queue;
+  }
+
   public String toString() {
     return "Wikidata={ n=" + n + ", " + queue.toString() + " }";
   }
@@ -99,7 +96,7 @@ public class WikidataManager implements Loggable {
     queue.addUnfetchedEdgeValues(e, n);
   }
 
-  public void addSearchResultIDBackToQueue(Vertex v) {
+  protected void addSearchResultIDBackToQueue(Vertex v) {
     queue.addUnfetchedVertexValue(v, n);
   }
 
@@ -109,30 +106,8 @@ public class WikidataManager implements Loggable {
     properties.add(p);
   }
 
-  private String buildInvalidLogString(String tgtQuery) {
+  protected String buildInvalidLogString(String tgtQuery) {
     return "Invalid/Error: (" + tgtQuery + ") query.";
-  }
-
-  private void handleFetchResults(Map<String, Either<Err, EntityDocument>> results) {
-    for (Entry<String, Either<Err, EntityDocument>> result : results.entrySet()) {
-      if (result.getValue().isLeft()) {
-        log(buildInvalidLogString(result.getKey()));
-        queue.fetchInvalid(result.getKey());
-      }
-      entProc.processWikiEntDocument(result.getValue().get());
-      queue.fetchSuccess(result.getKey());
-    }
-  }
-
-  private void handleDateResults(Map<String, Either<Err, WbSearchEntitiesResult>> results) {
-    for (Entry<String, Either<Err, WbSearchEntitiesResult>> result : results.entrySet()) {
-      if (result.getValue().isLeft()) {
-        log(buildInvalidLogString(result.getKey()));
-        queue.fetchInvalid(result.getKey());
-      }
-      entProc.processSearchEntResult(result.getValue().get());
-      queue.fetchSuccess(result.getKey());
-    }
   }
 
   // Fetch Related Task...
@@ -146,8 +121,8 @@ public class WikidataManager implements Loggable {
       try {
         ProcessTimer fetchTimer = new ProcessTimer();
 
-        List<String> dateBatch = queue.getDateTargetsBatchAtN(n);
-        List<String> qBatch = queue.getEntTargetsBatchAtN(n);
+        List<String> dateBatch = queue.getDateTargetBatch(n);
+        List<String> qBatch = queue.getEntTargetBatch(n);
 
         Either<Err, Map<String, Either<Err, EntityDocument>>> qResults = wikidataApi.fetchEntitiesByIdList(qBatch);
         Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> dateResults = wikidataApi
@@ -158,12 +133,13 @@ public class WikidataManager implements Loggable {
         }
         // Collect fetch details for eval
         // === === === === === === === === === === === ===
-        fetchTimer.stop(); // dont time processing 
+        fetchTimer.stop(); // stop time for processing 
         int totalFetched = 0;
         totalFetched += qResults.get().entrySet().size();
         totalFetched += dateResults.get().entrySet().size();
         logFetch(fetchTimer.getElapsedTimeFormatted() + " :: " + totalFetched);
         // === === === === === === === === === === === ===
+
         handleDateResults(dateResults.get());
         handleFetchResults(qResults.get());
 
@@ -173,12 +149,36 @@ public class WikidataManager implements Loggable {
       } catch (Exception e) {
         return Optional.of(new FetchRelatedWithTimeoutError("@fetchRelatedTask()", e));
       }
+      print(session.details());
     }
     // === === === === === === === === === === === ===
     taskTimer.stop();
     logFetch(session.details());
     logFetch(taskTimer.getElapsedTimeFormatted() + "\n");
     // === === === === === === === === === === === ===
+
     return Optional.empty();
+  }
+
+  private void handleFetchResults(Map<String, Either<Err, EntityDocument>> results) {
+    for (Entry<String, Either<Err, EntityDocument>> result : results.entrySet()) {
+      if (result.getValue().isLeft()) {
+        log(buildInvalidLogString(result.getKey()));
+        queue.fetchInvalidCleanup(result.getKey());
+      }
+      entProc.processWikiEntDocument(result.getValue().get());
+      queue.fetchSuccessCleanup(result.getKey());
+    }
+  }
+
+  private void handleDateResults(Map<String, Either<Err, WbSearchEntitiesResult>> results) {
+    for (Entry<String, Either<Err, WbSearchEntitiesResult>> result : results.entrySet()) {
+      if (result.getValue().isLeft()) {
+        log(buildInvalidLogString(result.getKey()));
+        queue.fetchInvalidCleanup(result.getKey());
+      }
+      entProc.processSearchEntResult(result.getValue().get());
+      queue.fetchSuccessCleanup(result.getKey());
+    }
   }
 }
