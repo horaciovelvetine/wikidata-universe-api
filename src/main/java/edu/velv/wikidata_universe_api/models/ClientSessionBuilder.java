@@ -8,13 +8,17 @@ import io.vavr.control.Either;
 public class ClientSessionBuilder {
   public static Either<Err, ClientSession> initialize(String query, String dimensions) {
     ClientSession sesh = new ClientSession(query, dimensions);
+
     Optional<Err> fetchInitQueryTask = sesh.wikidataManager().fetchInitQueryData();
     if (fetchInitQueryTask.isPresent()) {
       return Either.left(fetchInitQueryTask.get());
     }
+    //END 1
+    //=====================================================================================================================>
+    //=====================================================================================================================>
+    //=====================================================================================================================>
 
     Optional<Err> fetchRelatedDataTask = sesh.wikidataManager().fetchRelatedWithTimeout();
-
     if (fetchRelatedDataTask.isPresent()) {
       return Either.left(fetchRelatedDataTask.get());
     }
@@ -23,7 +27,6 @@ public class ClientSessionBuilder {
     if (createLayoutTask.isPresent()) {
       return Either.left(createLayoutTask.get());
     }
-
     while (!sesh.layout().done()) {
       try {
         sesh.layout().step();
@@ -31,10 +34,15 @@ public class ClientSessionBuilder {
         System.out.println("Step exception catch");
       }
     }
-
     sesh.graphset().vertices().forEach(v -> {
       v.setCoords(sesh.layout().apply(v));
     });
+
+    //END 2
+    //=====================================================================================================================>
+    //=====================================================================================================================>
+    //=====================================================================================================================>
+
     return Either.right(sesh);
   }
 }
