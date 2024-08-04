@@ -1,17 +1,25 @@
 package edu.velv.wikidata_universe_api.controllers;
 
+import java.util.Collection;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.velv.wikidata_universe_api.errors.*;
+import edu.velv.wikidata_universe_api.errors.Err.DataSerializationError;
 import edu.velv.wikidata_universe_api.errors.Err.DebugDetailsResponse;
 import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.ClientSessionBuilder;
+import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
+import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
+import edu.velv.wikidata_universe_api.models.wikidata.FetchQueue;
+import edu.velv.wikidata_universe_api.models.wikidata.Property;
 
 @CrossOrigin
 @RestController
@@ -37,16 +45,30 @@ public class APISessionController {
 
   private ResponseEntity<String> buildSuccessResponse(ClientSession session) {
     ObjectMapper mapper = new ObjectMapper();
+
+    ClientSessionDataBody body = new ClientSessionDataBody(
+        session.graphset().vertices(),
+        session.graphset().edges(),
+        session.wikidataManager().properties(),
+        session.wikidataManager().fetchQueue());
+
     try {
-      String str = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(session);
-      return ResponseEntity.status(200).body(str);
+      return ResponseEntity.status(200).body(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(body));
     } catch (Exception e) {
-      System.out.println("Jackson Exception");
+      return buildErrorResponse(
+          Err.mapDebug(new DataSerializationError("Encountered error @ buildSuccessResponse(): ", e)));
     }
-    return null;
   }
 
   private ResponseEntity<String> buildErrorResponse(DebugDetailsResponse err) {
     return ResponseEntity.status(err.status()).body(err.message());
+  }
+
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  private record ClientSessionDataBody(
+      Collection<Vertex> vertices,
+      Collection<Edge> edges,
+      Collection<Property> properties,
+      FetchQueue queue) {
   }
 }
