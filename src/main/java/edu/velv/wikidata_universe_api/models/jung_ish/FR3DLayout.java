@@ -15,7 +15,7 @@ import com.google.common.cache.CacheLoader;
 
 import io.vavr.Tuple2;
 import edu.velv.wikidata_universe_api.errors.*;
-import edu.velv.wikidata_universe_api.errors.Err.LayoutDebug;
+import edu.velv.wikidata_universe_api.errors.Err.LayoutProcessError;
 
 public class FR3DLayout {
   protected Graphset graph;
@@ -97,7 +97,7 @@ public class FR3DLayout {
       doInit();
       return Optional.empty();
     } catch (Exception e) {
-      return Optional.of(new LayoutDebug(e));
+      return Optional.of(new LayoutProcessError("Unable to initialize layout: ", e));
     }
   }
 
