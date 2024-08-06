@@ -15,13 +15,15 @@ import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FetchQueue {
+  @JsonIgnore
   private static final int MAX_QUERY_SIZE = 50;
+  @JsonIgnore
   private static final String ENT_ID_PATTERN = "[PQ]\\d+";
+  @JsonIgnore
+  private final Set<String> fetched; // for convienence
 
   private final Map<Integer, Set<String>> queued;
   private final Set<String> invalid;
-  @JsonIgnore
-  private final Set<String> fetched; // for convienence
 
   public FetchQueue() {
     queued = new ConcurrentHashMap<>();
@@ -32,7 +34,7 @@ public class FetchQueue {
   public void addUnfetchedEdgeValues(Edge e, Integer n) {
     Integer nP = n + 1;
     addEntityIfNotPresent(e.label(), nP);
-    addEntityIfNotPresent(e.tgtEntId(), nP);
+    addEntityIfNotPresent(e.tgtId(), nP);
     addEntityIfNotPresent(e.propertyId(), nP);
   }
 
