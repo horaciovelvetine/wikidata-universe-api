@@ -6,7 +6,7 @@ import edu.velv.wikidata_universe_api.models.wikidata.SnakData;
 import edu.velv.wikidata_universe_api.models.wikidata.ValueData.ValueType;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record Edge(String srcEntId, String tgtEntId, String propertyId, String label, ValueType type) {
+public record Edge(String srcId, String tgtId, String propertyId, String label, ValueType type) {
 
   public Edge(String srcVertexId, SnakData mainSnak) {
     this(srcVertexId, getTgtEntIdIfNotDateType(mainSnak), mainSnak.property.value, getLabelIfDateTypePresent(mainSnak),
@@ -18,7 +18,7 @@ public record Edge(String srcEntId, String tgtEntId, String propertyId, String l
    * fetched yet as a part of the import process in a new array.
    */
   public String[] unfetchedEdgeDetailStrings() {
-    return new String[] { tgtEntId, propertyId, label };
+    return new String[] { tgtId, propertyId, label };
   }
 
   private static String getLabelIfDateTypePresent(SnakData mainSnak) {
