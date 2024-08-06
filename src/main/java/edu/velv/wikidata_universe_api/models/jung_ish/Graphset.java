@@ -57,8 +57,8 @@ public class Graphset {
   }
 
   public Optional<Tuple2<Vertex, Vertex>> getEndpoints(Edge e) {
-    Optional<Vertex> one = getVertex(e.srcEntId());
-    Optional<Vertex> two = getVertex(e.tgtEntId());
+    Optional<Vertex> one = getVertex(e.srcId());
+    Optional<Vertex> two = getVertex(e.tgtId());
     if (one.isEmpty() || two.isEmpty()) {
       return Optional.empty();
     }
