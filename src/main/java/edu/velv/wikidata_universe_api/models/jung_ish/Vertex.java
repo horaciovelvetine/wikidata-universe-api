@@ -20,6 +20,7 @@ public class Vertex {
     this.id = itemDoc.getEntityId().getId();
     this.label = itemDoc.findLabel("en");
     this.description = itemDoc.findDescription("en");
+    this.coords = new Point3D();
   }
 
   public Vertex(WbSearchEntitiesResult result) {
