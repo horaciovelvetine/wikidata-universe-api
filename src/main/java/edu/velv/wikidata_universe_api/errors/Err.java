@@ -5,11 +5,8 @@ import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWi
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.NoSuchEntityFoundError;
 
 public sealed interface Err
-    permits WikidataServiceError, Err.DataSerializationError, Err.LayoutProcessError, Err.DebugDetailsResponse {
+    permits WikidataServiceError, Err.LayoutProcessError, Err.DebugDetailsResponse {
   static final int ERR_CODE = 404;
-
-  record DataSerializationError(String message, Exception e) implements Err {
-  }
 
   record LayoutProcessError(String message, Exception e) implements Err {
   }
@@ -27,7 +24,6 @@ public sealed interface Err
       case NoSuchEntityFoundError e -> new DebugDetailsResponse(ERR_CODE, "No Such Entity Found", err);
       case ApiUnavailableError e -> new DebugDetailsResponse(ERR_CODE, "Wikidata Unavailable Error", err);
       case FetchRelatedWithTimeoutError e -> new DebugDetailsResponse(ERR_CODE, "Related Fetch Timed Out", err);
-      case DataSerializationError e -> new DebugDetailsResponse(ERR_CODE, "Unable to Serialize Data", err);
       default -> new DebugDetailsResponse(ERR_CODE, "Unexpected value: ", err);
     };
   }
