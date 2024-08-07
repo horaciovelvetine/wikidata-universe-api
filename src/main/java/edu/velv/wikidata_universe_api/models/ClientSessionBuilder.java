@@ -6,17 +6,37 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import io.vavr.control.Either;
 
 public class ClientSessionBuilder {
-  public static Either<Err, ClientSession> initialize(String query, String dimensions) {
+
+  public static Either<Err, ClientSession> getInitialQueryData(String query) {
+    ClientSession sesh = new ClientSession(query, "0x0");
+    Optional<Err> initialDataTask = sesh.wikidataManager().fetchInitQueryData();
+    if (initialDataTask.isPresent()) {
+      return Either.left(initialDataTask.get());
+    }
+    return Either.right(sesh);
+  }
+
+  public static Either<Err, ClientSession> getRelatedEntityData(String query) {
+    return null;
+  }
+
+  //dimesions start as '1x1' string format
+  public static Either<Err, ClientSession> layoutGraphData(String dimensions) {
+    return null;
+  }
+
+  //Private...
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
+  private static Either<Err, ClientSession> initialize(String query, String dimensions) {
     ClientSession sesh = new ClientSession(query, dimensions);
 
     Optional<Err> fetchInitQueryTask = sesh.wikidataManager().fetchInitQueryData();
     if (fetchInitQueryTask.isPresent()) {
       return Either.left(fetchInitQueryTask.get());
     }
-    //END 1
-    //=====================================================================================================================>
-    //=====================================================================================================================>
-    //=====================================================================================================================>
 
     Optional<Err> fetchRelatedDataTask = sesh.wikidataManager().fetchRelatedWithTimeout();
     if (fetchRelatedDataTask.isPresent()) {
