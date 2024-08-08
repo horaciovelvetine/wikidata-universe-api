@@ -12,23 +12,29 @@ import edu.velv.wikidata_universe_api.models.ClientSession;
 import edu.velv.wikidata_universe_api.models.ClientSessionBuilder;
 import edu.velv.wikidata_universe_api.models.ResponseBody;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 @CrossOrigin
 @RestController
 public class APISessionController {
-  // @GetMapping("/api/init-session")
-  // public ResponseEntity<ResponseBody> initSession(
-  //     @RequestParam(required = true) String query,
-  //     @RequestParam(required = true) String dimensions) {
-  //   return ClientSessionBuilder.initialize(query, dimensions)
-  //       .mapLeft(Err::mapDebug)
-  //       .fold(this::buildErrorResponse, this::buildSuccessResponse);
-  // }
-
   @GetMapping("/api/init-query-data")
   public ResponseEntity<ResponseBody> getInitQueryData(@RequestParam(required = true) String query) {
     return ClientSessionBuilder.getInitialQueryData(query)
         .mapLeft(Err::mapDebug)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
+  }
+
+  @PostMapping("api/init-related-data")
+  public ResponseEntity<ResponseBody> getInitRelatedData(@RequestBody ResponseBody payload) {
+    //TODO: handle init related data fetching, diff from event get related data tbd...
+    return null;
+  }
+
+  @PostMapping("api/create-layout")
+  public ResponseEntity<ResponseBody> createLayout(@RequestBody ResponseBody payload) {
+    //TODO: take in details and provide complete coordinates
+    return null;
   }
 
   private ResponseEntity<ResponseBody> buildSuccessResponse(ClientSession session) {
