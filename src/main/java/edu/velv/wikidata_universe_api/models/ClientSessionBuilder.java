@@ -3,6 +3,7 @@ package edu.velv.wikidata_universe_api.models;
 import java.util.Optional;
 
 import edu.velv.wikidata_universe_api.errors.Err;
+import edu.velv.wikidata_universe_api.utils.SerializeData;
 import io.vavr.control.Either;
 
 public class ClientSessionBuilder {
@@ -13,6 +14,8 @@ public class ClientSessionBuilder {
     if (initialDataTask.isPresent()) {
       return Either.left(initialDataTask.get());
     }
+    // Creates and puts .json version of response in dir for use
+    SerializeData.ResponseBody(new ResponseBody(sesh));
     return Either.right(sesh);
   }
 
