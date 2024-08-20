@@ -25,6 +25,18 @@ public class ClientSession {
     this.wikidata = new WikidataManager(this);
   }
 
+  public ClientSession(ResponseBody payload) {
+    this.query = payload.query();
+    this.subjectDimensions = payload.dimensions();
+    this.graphset = new Graphset(payload.vertices(), payload.edges());
+    this.layout = new FR3DLayout(graphset, payload.dimensions());
+    // properties and queue
+    this.wikidata = new WikidataManager(this);
+    this.wikidataManager().addAllProperties(payload.properties());
+    this.wikidataManager().populateQueueWithPayload(payload);
+
+  }
+
   public Graphset graphset() {
     return this.graphset;
   }

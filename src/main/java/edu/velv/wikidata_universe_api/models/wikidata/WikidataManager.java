@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Collection;
 
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
@@ -17,6 +18,7 @@ import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
 import edu.velv.wikidata_universe_api.models.ClientSession;
+import edu.velv.wikidata_universe_api.models.ResponseBody;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
@@ -85,6 +87,14 @@ public class WikidataManager implements Loggable {
 
   public String toString() {
     return "Wikidata={ n=" + n + ", " + queue.toString() + " }";
+  }
+
+  public void addAllProperties(Collection<Property> props) {
+    properties.addAll(props);
+  }
+
+  public void populateQueueWithPayload(ResponseBody payload) {
+    this.queue = new FetchQueue(payload.queue());
   }
 
   // Private...

@@ -5,10 +5,13 @@ import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWi
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.NoSuchEntityFoundError;
 
 public sealed interface Err
-    permits WikidataServiceError, Err.LayoutProcessError, Err.DebugDetailsResponse {
+    permits WikidataServiceError, Err.LayoutProcessError, Err.DebugDetailsResponse, Err.DefaultResponseBodyError {
   static final int ERR_CODE = 404;
 
   record LayoutProcessError(String message, Exception e) implements Err {
+  }
+
+  record DefaultResponseBodyError(String message) implements Err {
   }
 
   // Error Mapping for Responses to Client...
@@ -24,6 +27,8 @@ public sealed interface Err
       case NoSuchEntityFoundError e -> new DebugDetailsResponse(ERR_CODE, "No Such Entity Found", err);
       case ApiUnavailableError e -> new DebugDetailsResponse(ERR_CODE, "Wikidata Unavailable Error", err);
       case FetchRelatedWithTimeoutError e -> new DebugDetailsResponse(ERR_CODE, "Related Fetch Timed Out", err);
+      case LayoutProcessError e -> new DebugDetailsResponse(ERR_CODE, "Layout Process Error", err);
+      case DefaultResponseBodyError e -> new DebugDetailsResponse(ERR_CODE, "Default Response Error", err);
       default -> new DebugDetailsResponse(ERR_CODE, "Unexpected value: ", err);
     };
   }

@@ -8,9 +8,11 @@ import io.vavr.control.Either;
 
 public class ClientSessionBuilder {
 
-  public static Either<Err, ClientSession> getInitialQueryData(String query) {
-    ClientSession sesh = new ClientSession(query, "0x0");
+  public static Either<Err, ClientSession> getInitialQueryData(String query, String dimensions) {
+    ClientSession sesh = new ClientSession(query, dimensions);
+
     Optional<Err> initialDataTask = sesh.wikidataManager().fetchInitQueryData();
+
     if (initialDataTask.isPresent()) {
       return Either.left(initialDataTask.get());
     }
@@ -19,28 +21,8 @@ public class ClientSessionBuilder {
     return Either.right(sesh);
   }
 
-  public static Either<Err, ClientSession> getRelatedEntityData(String query) {
-    return null;
-  }
-
-  //dimesions start as '1x1' string format
-  public static Either<Err, ClientSession> layoutGraphData(String dimensions) {
-    return null;
-  }
-
-  //Private...
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-
-  private static Either<Err, ClientSession> initialize(String query, String dimensions) {
-    ClientSession sesh = new ClientSession(query, dimensions);
-
-    Optional<Err> fetchInitQueryTask = sesh.wikidataManager().fetchInitQueryData();
-    if (fetchInitQueryTask.isPresent()) {
-      return Either.left(fetchInitQueryTask.get());
-    }
-
+  public static Either<Err, ClientSession> getRelatedEntityData(ResponseBody payload) {
+    ClientSession sesh = new ClientSession(payload);
     Optional<Err> fetchRelatedDataTask = sesh.wikidataManager().fetchRelatedWithTimeout();
     if (fetchRelatedDataTask.isPresent()) {
       return Either.left(fetchRelatedDataTask.get());
@@ -54,18 +36,14 @@ public class ClientSessionBuilder {
       try {
         sesh.layout().step();
       } catch (Exception e) {
-        System.out.println("Step exception catch");
+        System.out.println("Step exception...");
       }
     }
     sesh.graphset().vertices().forEach(v -> {
       v.setCoords(sesh.layout().apply(v));
     });
 
-    //END 2
-    //=====================================================================================================================>
-    //=====================================================================================================================>
-    //=====================================================================================================================>
-
+    SerializeData.ResponseBody(new ResponseBody(sesh));
     return Either.right(sesh);
   }
 }

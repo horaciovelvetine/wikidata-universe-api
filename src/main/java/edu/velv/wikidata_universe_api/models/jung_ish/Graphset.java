@@ -24,6 +24,13 @@ public class Graphset {
     this.edges = ConcurrentHashMap.newKeySet();
   }
 
+  public Graphset(Collection<Vertex> inpVerts, Collection<Edge> inpEdges) {
+    this.vertices = ConcurrentHashMap.newKeySet();
+    this.edges = ConcurrentHashMap.newKeySet();
+    vertices.addAll(inpVerts);
+    edges.addAll(inpEdges);
+  }
+
   public Collection<Vertex> vertices() {
     return vertices;
   }
