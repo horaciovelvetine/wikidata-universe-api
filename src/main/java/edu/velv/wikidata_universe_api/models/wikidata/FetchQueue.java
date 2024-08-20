@@ -31,6 +31,13 @@ public class FetchQueue {
     fetched = ConcurrentHashMap.newKeySet();
   }
 
+  public FetchQueue(FetchQueue fq) {
+    queued = new ConcurrentHashMap<>(fq.queued);
+    invalid = ConcurrentHashMap.newKeySet();
+    fetched = ConcurrentHashMap.newKeySet();
+    invalid.addAll(fq.invalid);
+  }
+
   public void addUnfetchedEdgeValues(Edge e, Integer n) {
     Integer nP = n + 1;
     addEntityIfNotPresent(e.label(), nP);
@@ -71,7 +78,6 @@ public class FetchQueue {
     int totalQueued = 0;
     for (Entry<Integer, Set<String>> que : queued.entrySet()) {
       totalQueued += que.getValue().size();
-
     }
     return "Queue={ total= " + totalQueued + ", fetched= " + fetched.size() + ", invalid= " + invalid.size() + " }";
   }
@@ -79,6 +85,7 @@ public class FetchQueue {
   //=====================================================================================================================>
   //=====================================================================================================================>
   //=====================================================================================================================>
+
   protected void removeQueryTarget(String query) {
     queued.forEach((k, v) -> v.removeIf(str -> query.equals(str)));
     queued.entrySet().removeIf(entry -> entry.getValue().isEmpty());

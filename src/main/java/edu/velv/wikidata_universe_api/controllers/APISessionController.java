@@ -18,17 +18,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 @CrossOrigin
 @RestController
 public class APISessionController {
-  @GetMapping("/api/init-query-data")
-  public ResponseEntity<ResponseBody> getInitQueryData(@RequestParam(required = true) String query) {
-    return ClientSessionBuilder.getInitialQueryData(query)
+  @GetMapping("/api/query-data")
+  public ResponseEntity<ResponseBody> getInitQueryData(@RequestParam(required = true) String query, String dimensions) {
+    return ClientSessionBuilder.getInitialQueryData(query, dimensions)
         .mapLeft(Err::mapDebug)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
-  @PostMapping("api/init-related-data")
+  @PostMapping("api/related-data-queue")
   public ResponseEntity<ResponseBody> getInitRelatedData(@RequestBody ResponseBody payload) {
-    //TODO: handle init related data fetching, diff from event get related data tbd...
-    return null;
+    return ClientSessionBuilder.getRelatedEntityData(payload)
+        .mapLeft(Err::mapDebug)
+        .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
   @PostMapping("api/create-layout")

@@ -16,8 +16,9 @@ import com.google.common.cache.CacheLoader;
 import io.vavr.Tuple2;
 import edu.velv.wikidata_universe_api.errors.*;
 import edu.velv.wikidata_universe_api.errors.Err.LayoutProcessError;
+import edu.velv.wikidata_universe_api.utils.Loggable;
 
-public class FR3DLayout {
+public class FR3DLayout implements Loggable {
   protected Graphset graph;
   protected Dimension size;
   // CONST
@@ -97,6 +98,7 @@ public class FR3DLayout {
       doInit();
       return Optional.empty();
     } catch (Exception e) {
+      print(e.getMessage());
       return Optional.of(new LayoutProcessError("Unable to initialize layout: ", e));
     }
   }
