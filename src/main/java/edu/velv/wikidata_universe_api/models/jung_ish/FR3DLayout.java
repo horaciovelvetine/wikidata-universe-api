@@ -73,13 +73,6 @@ public class FR3DLayout implements Loggable {
 
       setAndInitPositions(new RandomLocation3D<Vertex>(size));
 
-      Vertex origin = graph.getOriginRef();
-      if (origin == null) {
-
-      }
-      getLocationData(origin).setLocation(new Point3D(EPSILON, EPSILON, EPSILON));
-      lockedVertices.add(origin);
-
       currentIteration = 0;
       temperature = width / 10;
       forceConst = Math.sqrt(height * width / graph.vertexCount());
