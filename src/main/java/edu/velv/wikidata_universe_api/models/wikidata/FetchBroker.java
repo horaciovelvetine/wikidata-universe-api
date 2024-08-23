@@ -20,7 +20,6 @@ import edu.velv.wikidata_universe_api.utils.Loggable;
 public class FetchBroker implements Loggable {
   private static final String EN_WIKI_IRI = "enwiki";
   private static final String EN_LANG_WIKI = "en";
-  private static final String DEFAULT_FALLBACK_ID = "Q3454165";
   private final WikibaseDataFetcher fetcher;
 
   public FetchBroker() {
@@ -82,6 +81,41 @@ public class FetchBroker implements Loggable {
     return Either.right(results);
   }
 
+  // HANDLER(S)
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
+  private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument doc) {
+    return doc == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFoundID()"))
+        : Either.right(doc);
+  }
+
+  private Either<Err, WbSearchEntitiesResult> handleNoSuchEntityResults(WbSearchEntitiesResult res) {
+    return res == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFoundID()"))
+        : Either.right(res);
+  }
+
+  private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(
+      List<WbSearchEntitiesResult> results) {
+    return results.isEmpty()
+        ? Either.left(new NoSuchEntityFoundError("@handleSearchedEntities()"))
+        : Either.right(results.get(0));
+  }
+
+  private <T> Either<Err, T> fetchWithApiUnavailableHandler(CheckedFunction0<T> supplier) {
+    return Try.of(supplier)
+        .toEither()
+        .mapLeft(e -> new ApiUnavailableError(e.getMessage(), e));
+  }
+
+  private Either<Err, EntityDocument> handleNoTitleResults(Err err, String query) {
+    if (err instanceof NoSuchEntityFoundError) {
+      return fetchQueryByAnyMatch(query); // Widens search to all entities
+    }
+    return Either.left(err);
+  }
+
   // WDTK Fetches 
   //=====================================================================================================================>
   //=====================================================================================================================>
@@ -113,51 +147,13 @@ public class FetchBroker implements Loggable {
     return fetchWithApiUnavailableHandler(() -> fetcher.searchEntities(query, EN_LANG_WIKI))
         .flatMap(this::handleSearchedEntitiesResults);
   }
-  // BY ANY || DEFAULT...
+  // BY ANY
 
-  private Either<Err, EntityDocument> fetchQueryByAnyOrDefault(String query) {
+  private Either<Err, EntityDocument> fetchQueryByAnyMatch(String query) {
     return fetchSearchResultsByAny(query).fold((Err err) -> {
-      if (err instanceof NoSuchEntityFoundError) {
-        return fetchEntityDocumentById(DEFAULT_FALLBACK_ID);
-      }
       return Either.left(err);
     }, (WbSearchEntitiesResult result) -> {
       return fetchEntityDocumentById(result.getEntityId());
     });
-  }
-
-  // HANDLER(S)
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-
-  private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument doc) {
-    return doc == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFoundID()"))
-        : Either.right(doc);
-  }
-
-  private Either<Err, WbSearchEntitiesResult> handleNoSuchEntityResults(WbSearchEntitiesResult res) {
-    return res == null ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntityFoundID()"))
-        : Either.right(res);
-  }
-
-  private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(
-      List<WbSearchEntitiesResult> results) {
-    return results.isEmpty()
-        ? Either.left(new NoSuchEntityFoundError("@handleSearchedEntities()"))
-        : Either.right(results.get(0));
-  }
-
-  private <T> Either<Err, T> fetchWithApiUnavailableHandler(CheckedFunction0<T> supplier) {
-    return Try.of(supplier)
-        .toEither()
-        .mapLeft(e -> new ApiUnavailableError(e.getMessage(), e));
-  }
-
-  private Either<Err, EntityDocument> handleNoTitleResults(Err err, String query) {
-    if (err instanceof NoSuchEntityFoundError) {
-      return fetchQueryByAnyOrDefault(query); // Widens search to all entities
-    }
-    return Either.left(err);
   }
 }
