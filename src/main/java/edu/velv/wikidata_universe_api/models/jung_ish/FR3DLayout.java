@@ -28,7 +28,7 @@ public class FR3DLayout implements Loggable {
   protected final int BRDR_FACT = 50;
   protected final double EPSILON = 0.000001;
   protected final double ATTR_MULT = 0.75;
-  protected final double REP_MULT = 0.75;
+  protected final double REP_MULT = 0.55;
   // CALC'D
   protected double forceConst;
   protected double temperature;
@@ -55,7 +55,8 @@ public class FR3DLayout implements Loggable {
         }
       });
 
-  protected FR3DLayout() {
+  public FR3DLayout() {
+    // default empty constructor
   }
 
   public FR3DLayout(Graphset graph, Dimension size) {
@@ -287,12 +288,9 @@ public class FR3DLayout implements Loggable {
 
     newX = adjustPositionToBorderBox(newX, width);
     newY = adjustPositionToBorderBox(newY, height);
-    newZ = adjustPositionToBorderBox(newZ, Math.min(width, height)); // z min of x, y
-    if (isLocked(v)) {
-      print("truthy locked value");
-    } else if (!isLocked(v)) {
-      p.setLocation(newX, newY, newZ);
-    }
+    newZ = adjustPositionToBorderBox(newZ, Math.max(width, height));
+
+    p.setLocation(newX, newY, newZ);
   }
 
   // Utils...
@@ -301,12 +299,19 @@ public class FR3DLayout implements Loggable {
   //=====================================================================================================================>
 
   protected void setAndInitPositions(Function<Vertex, Point3D> initializer) {
-
     Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
       public Point3D apply(Point3D input) {
         return (Point3D) input.clone();
       }
-    }, initializer);
+    }, new Function<Vertex, Point3D>() {
+      public Point3D apply(Vertex v) {
+        if (lockedVertices.contains(v) && v.coords != null) {
+          return v.coords();
+        } else {
+          return initializer.apply(v);
+        }
+      }
+    });
 
     this.locationData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
     this.offsetData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));

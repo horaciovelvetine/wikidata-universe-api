@@ -9,13 +9,13 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
-import edu.velv.wikidata_universe_api.models.ClientSession;
+import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class EntDocProc implements Loggable {
-  protected ClientSession session;
+  protected ClientRequest session;
 
   private static final Set<String> EXCLUDED_DATA = Set.of("external-id", "monolingualtext",
       "commonsMedia", "url", "globe-coordinate", "geo-shape", "wikibase-lexeme");
@@ -30,7 +30,7 @@ public class EntDocProc implements Loggable {
       "P7452", "Q19478619", "P4666", "P345", "P2604", "P5007", "Q59522350", "Q32351192", "P1011",
       "P8402", "P2959", "P78", "P5323", "P6104");
 
-  public EntDocProc(ClientSession parentSession) {
+  public EntDocProc(ClientRequest parentSession) {
     this.session = parentSession;
   }
 
