@@ -91,7 +91,6 @@ public class FR3DLayout implements Loggable {
       doInit();
       return Optional.empty();
     } catch (Exception e) {
-      print(e.getMessage());
       return Optional.of(new LayoutProcessError("Unable to initialize layout: ", e));
     }
   }
@@ -155,7 +154,7 @@ public class FR3DLayout implements Loggable {
         for (Vertex v : graph.vertices()) {
           if (isLocked(v))
             continue;
-          calcPositions(v);
+          calcPosition(v);
         }
         break;
       } catch (ConcurrentModificationException cme) {
@@ -230,7 +229,7 @@ public class FR3DLayout implements Loggable {
 
     Vertex v1 = endpoints.get()._1();
     Vertex v2 = endpoints.get()._2();
-    if ((isLocked(v1) && isLocked(v2)) || v1 == v2) {
+    if ((isLocked(v1) && isLocked(v2)) || v1.id() == v2.id()) {
       return;
     }
 
@@ -253,7 +252,7 @@ public class FR3DLayout implements Loggable {
     double zDisp = dz * force / dl;
 
     if (!isLocked(v1)) {
-      updateOffset(v1, -xDisp, -yDisp, -zDisp, isLocked(v2)); // opposite direction(s)
+      updateOffset(v1, -xDisp, -yDisp, -zDisp, isLocked(v2));
     }
 
     if (!isLocked(v2)) {
@@ -261,7 +260,7 @@ public class FR3DLayout implements Loggable {
     }
   }
 
-  protected void calcPositions(Vertex v) {
+  protected void calcPosition(Vertex v) {
     if (isLocked(v))
       return;
 
@@ -289,8 +288,11 @@ public class FR3DLayout implements Loggable {
     newX = adjustPositionToBorderBox(newX, width);
     newY = adjustPositionToBorderBox(newY, height);
     newZ = adjustPositionToBorderBox(newZ, Math.min(width, height)); // z min of x, y
-
-    p.setLocation(newX, newY, newZ);
+    if (isLocked(v)) {
+      print("truthy locked value");
+    } else if (!isLocked(v)) {
+      p.setLocation(newX, newY, newZ);
+    }
   }
 
   // Utils...
@@ -312,7 +314,12 @@ public class FR3DLayout implements Loggable {
   }
 
   protected boolean isLocked(Vertex v) {
-    return lockedVertices.contains(v);
+    for (Vertex lockedVertex : lockedVertices) {
+      if (lockedVertex.id().equals(v.id())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   protected Point3D getOffsetData(Vertex v) {

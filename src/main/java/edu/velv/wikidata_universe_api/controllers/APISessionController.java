@@ -27,15 +27,16 @@ public class APISessionController {
 
   @PostMapping("api/related-data-queue")
   public ResponseEntity<ResponseBody> getInitRelatedData(@RequestBody ResponseBody payload) {
-    return ClientSessionBuilder.getRelatedEntityData(payload)
+    return ClientSessionBuilder.getRelatedQueuedData(payload)
         .mapLeft(Err::mapDebug)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
-  @PostMapping("api/create-layout")
-  public ResponseEntity<ResponseBody> createLayout(@RequestBody ResponseBody payload) {
-    //TODO: take in details and provide complete coordinates
-    return null;
+  @PostMapping("api/related-data-click")
+  public ResponseEntity<ResponseBody> getClickTargetRelatedData(@RequestBody ResponseBody payload) {
+    return ClientSessionBuilder.getRealatedClickData(payload)
+        .mapLeft(Err::mapDebug)
+        .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
   private ResponseEntity<ResponseBody> buildSuccessResponse(ClientSession session) {

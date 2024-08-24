@@ -147,7 +147,8 @@ public class FetchBroker implements Loggable {
     return fetchWithApiUnavailableHandler(() -> fetcher.searchEntities(query, EN_LANG_WIKI))
         .flatMap(this::handleSearchedEntitiesResults);
   }
-  // BY ANY
+
+  // FOLD ANY TO ENTITY DOC...
 
   private Either<Err, EntityDocument> fetchQueryByAnyMatch(String query) {
     return fetchSearchResultsByAny(query).fold((Err err) -> {
