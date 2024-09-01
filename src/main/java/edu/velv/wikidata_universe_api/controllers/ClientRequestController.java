@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.velv.wikidata_universe_api.errors.*;
 import edu.velv.wikidata_universe_api.errors.Err.DebugDetailsResponse;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
-import edu.velv.wikidata_universe_api.models.RequestResponseBody;
+import edu.velv.wikidata_universe_api.models.RequestPayload;
+import edu.velv.wikidata_universe_api.models.ResponseBody;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 public class ClientRequestController {
   @GetMapping("/api/query-data")
-  public ResponseEntity<RequestResponseBody> getInitQueryData(@RequestParam(required = true) String query) {
+  public ResponseEntity<ResponseBody> getInitQueryData(@RequestParam(required = true) String query) {
     return new ClientRequest(query)
         .getInitialQueryData()
         .mapLeft(Err::mapDebug)
@@ -26,7 +27,7 @@ public class ClientRequestController {
   }
 
   @PostMapping("api/related-data-queue")
-  public ResponseEntity<RequestResponseBody> getInitRelatedData(@RequestBody RequestResponseBody payload) {
+  public ResponseEntity<ResponseBody> getInitRelatedData(@RequestBody RequestPayload payload) {
     return new ClientRequest(payload, false) // fetches values in the body of the request (from the queue).
         .getInitialRelatedData()
         .mapLeft(Err::mapDebug)
@@ -34,18 +35,18 @@ public class ClientRequestController {
   }
 
   @PostMapping("api/related-data-click")
-  public ResponseEntity<RequestResponseBody> getClickTargetRelatedData(@RequestBody RequestResponseBody payload) {
+  public ResponseEntity<ResponseBody> getClickTargetRelatedData(@RequestBody RequestPayload payload) {
     return new ClientRequest(payload, true) // ignores fetch values in the body and instead fills queue itself.
         .getClickRelatedData()
         .mapLeft(Err::mapDebug)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
-  private ResponseEntity<RequestResponseBody> buildSuccessResponse(ClientRequest session) {
-    return ResponseEntity.status(200).body(new RequestResponseBody(session));
+  private ResponseEntity<ResponseBody> buildSuccessResponse(ClientRequest session) {
+    return ResponseEntity.status(200).body(new ResponseBody(session));
   }
 
-  private ResponseEntity<RequestResponseBody> buildErrorResponse(DebugDetailsResponse err) {
-    return ResponseEntity.status(err.status()).body(new RequestResponseBody(err));
+  private ResponseEntity<ResponseBody> buildErrorResponse(DebugDetailsResponse err) {
+    return ResponseEntity.status(err.status()).body(new ResponseBody(err));
   }
 }
