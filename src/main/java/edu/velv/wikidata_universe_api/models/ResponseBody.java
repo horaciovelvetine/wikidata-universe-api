@@ -15,7 +15,7 @@ import edu.velv.wikidata_universe_api.errors.Err.DefaultResponseBodyError;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class RequestResponseBody {
+public class ResponseBody {
   Err err;
   String query;
   Collection<Vertex> vertices;
@@ -25,7 +25,7 @@ public class RequestResponseBody {
   Dimension dimensions;
 
   // for defaulting...
-  public RequestResponseBody() {
+  public ResponseBody() {
     this.err = new DefaultResponseBodyError("No Body in Default response");
     this.vertices = new ArrayList<>();
     this.edges = new ArrayList<>();
@@ -33,7 +33,7 @@ public class RequestResponseBody {
     this.queue = new FetchQueue();
   }
 
-  public RequestResponseBody(Err e) {
+  public ResponseBody(Err e) {
     this.err = e;
     this.vertices = new ArrayList<>();
     this.edges = new ArrayList<>();
@@ -41,7 +41,7 @@ public class RequestResponseBody {
     this.queue = new FetchQueue();
   }
 
-  public RequestResponseBody(ClientRequest session) {
+  public ResponseBody(ClientRequest session) {
     this.err = null;
     this.vertices = session.graphset().vertices();
     this.edges = session.graphset().edges();

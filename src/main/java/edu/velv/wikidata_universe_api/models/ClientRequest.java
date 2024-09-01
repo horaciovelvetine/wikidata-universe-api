@@ -28,17 +28,17 @@ public class ClientRequest {
     this.wikidata = new WikidataManager(this);
   }
 
-  public ClientRequest(RequestResponseBody payload, boolean resetQueue) {
+  public ClientRequest(RequestPayload payload, boolean resetQueued) {
     this.query = payload.query();
     this.subjectDimensions = payload.dimensions();
     this.graphset = new Graphset(payload.vertices(), payload.edges());
-    this.layout = new FR3DLayout(graphset, payload.dimensions());
-    // properties and queue
+    this.layout = new FR3DLayout(graphset, subjectDimensions);
+    // contextually populates from prev reqeust response
     this.wikidata = new WikidataManager(this);
-    this.wikidataManager().addAllProperties(payload.properties());
-    if (!resetQueue) {
+    if (!resetQueued) {
       this.wikidataManager().populateQueueWithPayload(payload);
     }
+    this.wikidataManager().addAllProperties(payload.properties());
   }
 
   public Graphset graphset() {
@@ -94,6 +94,7 @@ public class ClientRequest {
    * @return Either an Err(or) or a ClientSession object containing the related entity data.
    */
   public Either<Err, ClientRequest> getInitialRelatedData() {
+    layout().lock(true); // lock initial (origin) @ (0,0,0)
     Optional<Err> fetchRelatedDataTask = wikidataManager().fetchRelatedWithTimeout();
     if (fetchRelatedDataTask.isPresent()) {
       return Either.left(fetchRelatedDataTask.get());
@@ -124,13 +125,6 @@ public class ClientRequest {
     }
 
     return getInitialRelatedData();
-  }
-
-  private Dimension getDimensionsFromClient(String dimensions) {
-    String[] split = dimensions.split("x");
-    int width = (int) Math.floor(Double.parseDouble(split[0]));
-    int height = (int) Math.floor(Double.parseDouble(split[1]));
-    return new Dimension(width, height);
   }
 
   private void finalizeLayoutPositions() {

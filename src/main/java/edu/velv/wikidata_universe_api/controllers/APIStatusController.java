@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.velv.wikidata_universe_api.models.RequestResponseBody;
+import edu.velv.wikidata_universe_api.models.ResponseBody;
 
 @CrossOrigin
 @RestController
@@ -21,8 +21,8 @@ public class APIStatusController {
   }
 
   @GetMapping("/api/faking-it")
-  public ResponseEntity<RequestResponseBody> getMethodName() {
-    return ResponseEntity.ok(new RequestResponseBody());
+  public ResponseEntity<ResponseBody> getMethodName() {
+    return ResponseEntity.ok(new ResponseBody());
   }
 
   @GetMapping("/api/await-success")

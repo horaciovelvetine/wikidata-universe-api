@@ -18,7 +18,7 @@ import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
-import edu.velv.wikidata_universe_api.models.RequestResponseBody;
+import edu.velv.wikidata_universe_api.models.RequestPayload;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
@@ -93,7 +93,7 @@ public class WikidataManager implements Loggable {
     properties.addAll(props);
   }
 
-  public void populateQueueWithPayload(RequestResponseBody payload) {
+  public void populateQueueWithPayload(RequestPayload payload) {
     this.queue = new FetchQueue(payload.queue());
   }
 
