@@ -14,8 +14,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 
 import io.vavr.Tuple2;
-import edu.velv.wikidata_universe_api.errors.*;
-import edu.velv.wikidata_universe_api.errors.Err.LayoutProcessError;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class FR3DLayout implements Loggable {
@@ -26,6 +24,7 @@ public class FR3DLayout implements Loggable {
   protected final int ITER_MVMNT_MAX = 5;
   protected final int DITH_MAGN = 2;
   protected final int BRDR_FACT = 50;
+  protected final double TARGET_DENSITY = 0.0000000001; //reverese: smaller (more dense)
   protected final double EPSILON = 0.000001;
   protected final double ATTR_MULT = 0.75;
   protected final double REP_MULT = 0.55;
@@ -68,32 +67,37 @@ public class FR3DLayout implements Loggable {
   }
 
   protected void doInit() {
-    if (graph != null && size != null) {
-      Double width = size.getWidth();
-      Double height = size.getHeight();
+    int totalVertices = graph.vertexCount();
+    double width = size.getWidth();
+    double height = size.getHeight();
+    double maxDim = Math.max(width, height);
+    double minDim = Math.min(width, height);
+    double volume = width * height * maxDim;
+    double currentDensity = (totalVertices / volume);
+    double scaleFactor = Math.cbrt(TARGET_DENSITY / currentDensity);
+    width *= scaleFactor;
+    height *= scaleFactor;
+    maxDim *= scaleFactor;
+    minDim *= scaleFactor;
+    size.setSize(width, height);
 
-      setAndInitPositions(new RandomLocation3D<Vertex>(size));
+    setAndInitPositions(new RandomLocation3D<Vertex>(size));
 
-      currentIteration = 0;
-      temperature = width / 10;
-      forceConst = Math.sqrt(height * width / graph.vertexCount());
-      attrConst = forceConst * ATTR_MULT;
-      repConst = forceConst * REP_MULT;
-      maxDimension = Math.max(width, height);
-      borderWidth = Math.min(width, height) / BRDR_FACT;
-    }
+    currentIteration = 0;
+    temperature = width / 10;
+    forceConst = Math.sqrt(height * width / graph.vertexCount());
+    attrConst = forceConst * ATTR_MULT;
+    repConst = forceConst * REP_MULT;
+    maxDimension = maxDim;
+    borderWidth = minDim / BRDR_FACT;
+
   }
 
   /**
    * Attempts to initialize a layout with the sessions current graph
    */
-  public Optional<Err> initialize() {
-    try {
-      doInit();
-      return Optional.empty();
-    } catch (Exception e) {
-      return Optional.of(new LayoutProcessError("Unable to initialize layout: ", e));
-    }
+  public void initialize() {
+    doInit();
   }
 
   /**
