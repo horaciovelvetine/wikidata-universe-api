@@ -8,6 +8,7 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.models.jung_ish.FR3DLayout;
 import edu.velv.wikidata_universe_api.models.wikidata.WikidataManager;
 import edu.velv.wikidata_universe_api.utils.QueryParamSanitizer;
+import edu.velv.wikidata_universe_api.utils.SerializeData;
 import io.vavr.control.Either;
 
 public class ClientRequest {
@@ -95,18 +96,14 @@ public class ClientRequest {
    */
   public Either<Err, ClientRequest> getInitialRelatedData() {
     layout().lock(true); // lock initial (origin) @ (0,0,0)
-    Optional<Err> fetchRelatedDataTask = wikidataManager().fetchRelatedWithTimeout();
-    if (fetchRelatedDataTask.isPresent()) {
-      return Either.left(fetchRelatedDataTask.get());
-    }
+    // TODO This is predominently a timeout response, however on a timeout it should still lay itself out
+    wikidataManager().fetchRelatedWithTimeout();
 
-    Optional<Err> createLayoutTask = layout().initialize();
-    if (createLayoutTask.isPresent()) {
-      return Either.left(createLayoutTask.get());
-    }
-
+    layout().initialize();
     finalizeLayoutPositions();
     setVertexPositions();
+
+    SerializeData.ResponseBody(new ResponseBody(this));
 
     return Either.right(this);
   }
@@ -123,6 +120,8 @@ public class ClientRequest {
     if (initialFetchTask.isPresent()) {
       Either.left(initialFetchTask.get());
     }
+
+    SerializeData.ResponseBody(new ResponseBody(this));
 
     return getInitialRelatedData();
   }
