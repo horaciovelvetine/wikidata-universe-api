@@ -97,7 +97,7 @@ public class WikidataManager implements Loggable {
     this.queue = new FetchQueue(payload.queue());
   }
 
-  // Private...
+  // Protected
   //=====================================================================================================================>
   //=====================================================================================================================>
   //=====================================================================================================================>
@@ -114,10 +114,6 @@ public class WikidataManager implements Loggable {
     if (properties.contains(p))
       return;
     properties.add(p);
-  }
-
-  protected String buildInvalidLogString(String tgtQuery) {
-    return "Invalid/Error: (" + tgtQuery + ") query.";
   }
 
   // Fetch Related Task...
@@ -190,5 +186,9 @@ public class WikidataManager implements Loggable {
       entProc.processSearchEntResult(result.getValue().get());
       queue.fetchSuccessCleanup(result.getKey());
     }
+  }
+
+  protected String buildInvalidLogString(String tgtQuery) {
+    return "Invalid/Error: (" + tgtQuery + ") query.";
   }
 }
