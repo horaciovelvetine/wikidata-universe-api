@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import edu.velv.wikidata_universe_api.models.Constables;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 
@@ -19,10 +20,6 @@ import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FetchQueue {
-  @JsonIgnore
-  private static final int MAX_QUERY_SIZE = 50;
-  @JsonIgnore
-  private static final String ENT_ID_PATTERN = "[PQ]\\d+";
   @JsonIgnore
   private final Set<String> fetched; // for convienence
 
@@ -76,26 +73,27 @@ public class FetchQueue {
   }
 
   /**
-   * Retrieves (a limited) 50 values from the Queue which are id's matching that of an Entity
-   * @see org.wikidata.wdtk (Wikidata Java Toolkit)
-   *
-   * @param n depth value to retrieve values from
-   * @return A list of id values which can be searched for
-   */
-  public List<String> getEntTargetBatch(Integer n) {
-    return getTargetBatchAtN(n, q -> q.matches(ENT_ID_PATTERN));
-  }
-
-  /**
-   * Retrieves (a limited) 50 values from the Queue which are dates
-   * @see org.wikidata.wdtk (Wikidata Java Toolkit)
+   * Gets a batch of targets from the queue prioritizing Properties and Items
+   * @see org.wikidata.wdtk for details on the Item & PropertyDocument(s)
    * 
-   * @param n depth value to retreive values from
-   * @return A list of dates which can be searched for
+   * @param n the depth value to fetch from
+   * @return a list of string targets either wholly Entities || Dates (strings)
    */
-  public List<String> getDateTargetBatch(Integer n) {
-    return getTargetBatchAtN(n, q -> !q.matches(ENT_ID_PATTERN));
-  }
+  public List<String> getTargetBatchByPriority(Integer n) {
+    List<String> batchTheBuilder = getTargetBatchAtN(n, q -> q.matches(Regex.PROP_ID));
+
+    if (batchTheBuilder.size() < 50) {
+      int spaceRemaining = Constables.WD_MAX_QUERY_SIZE - batchTheBuilder.size();
+      List<String> entIds = getItemTargetBatch(n);
+      batchTheBuilder.addAll(entIds.subList(0, Math.min(spaceRemaining, entIds.size())));
+    }
+
+    if (batchTheBuilder.isEmpty()) {
+      batchTheBuilder = getDateTargetBatch(n);
+    }
+
+    return batchTheBuilder;
+  };
 
   /**
    * Remove a successfully retrieved target value from the queue and add it to the fetched list
@@ -135,7 +133,7 @@ public class FetchQueue {
   /** 
    * Removes any value which matches from the queue, regardless of depth.
   */
-  protected void removeQueryTarget(String query) {
+  private void removeQueryTarget(String query) {
     queued.forEach((k, v) -> v.removeIf(str -> query.equals(str)));
     queued.entrySet().removeIf(entry -> entry.getValue().isEmpty());
   }
@@ -147,12 +145,12 @@ public class FetchQueue {
    * @param n the depth from which to get values
    * @param matchCondition predicate condition to check entries against
    */
-  protected List<String> getTargetBatchAtN(Integer n, Predicate<String> matchCondition) {
+  private List<String> getTargetBatchAtN(Integer n, Predicate<String> matchCondition) {
     Set<String> targetBatch = queued.get(n);
     if (targetBatch == null) {
       return List.of();
     }
-    return targetBatch.stream().filter(matchCondition).map(x -> x).limit(MAX_QUERY_SIZE).toList();
+    return targetBatch.stream().filter(matchCondition).map(x -> x).limit(Constables.WD_MAX_QUERY_SIZE).toList();
   }
 
   /**
@@ -162,7 +160,7 @@ public class FetchQueue {
    * @param query value to be added to the queue
    * @param nPlus the depth at which the value should be recorded
    */
-  protected void addEntityIfNotPresent(String query, Integer nPlus) {
+  private void addEntityIfNotPresent(String query, Integer nPlus) {
     if (isInvalid(query) || isInQueue(query, nPlus) || isFetched(query)) {
       return;
     }
@@ -189,4 +187,21 @@ public class FetchQueue {
   protected boolean isFetched(String query) {
     return fetched.contains(query);
   }
+
+  /**
+  * Retrieves (a limited) 50 values from the Queue which are dates
+  * @see org.wikidata.wdtk (Wikidata Java Toolkit)
+  * 
+  * @param n depth value to retreive values from
+  * @return A list of dates which can be searched for
+  */
+
+  private List<String> getDateTargetBatch(Integer n) {
+    return getTargetBatchAtN(n, q -> !q.matches(Regex.ENT_ID));
+  }
+
+  private List<String> getItemTargetBatch(Integer n) {
+    return getTargetBatchAtN(n, q -> q.matches(Regex.ITEM_ID));
+  }
+
 }
