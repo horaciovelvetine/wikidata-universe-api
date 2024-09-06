@@ -14,20 +14,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 
 import io.vavr.Tuple2;
+import edu.velv.wikidata_universe_api.models.Constables;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class FR3DLayout implements Loggable {
   protected Graphset graph;
   protected Dimension size;
-  // CONST
-  protected final int MAX_ITER = 700;
-  protected final int ITER_MVMNT_MAX = 5;
-  protected final int DITH_MAGN = 2;
-  protected final int BRDR_FACT = 50;
-  protected final double TARGET_DENSITY = 0.0000000001; //reverese: smaller (more dense)
-  protected final double EPSILON = 0.000001;
-  protected final double ATTR_MULT = 0.75;
-  protected final double REP_MULT = 0.55;
+  protected final double EPSILON = 0.0000001;
   // CALC'D
   protected double forceConst;
   protected double temperature;
@@ -74,7 +67,7 @@ public class FR3DLayout implements Loggable {
     double minDim = Math.min(width, height);
     double volume = width * height * maxDim;
     double currentDensity = (totalVertices / volume);
-    double scaleFactor = Math.cbrt(TARGET_DENSITY / currentDensity);
+    double scaleFactor = Math.cbrt(Constables.F3D_TGT_DENS / currentDensity);
     width *= scaleFactor;
     height *= scaleFactor;
     maxDim *= scaleFactor;
@@ -86,10 +79,10 @@ public class FR3DLayout implements Loggable {
     currentIteration = 0;
     temperature = width / 10;
     forceConst = Math.sqrt(height * width / graph.vertexCount());
-    attrConst = forceConst * ATTR_MULT;
-    repConst = forceConst * REP_MULT;
+    attrConst = forceConst * Constables.F3D_ATTR_MULT;
+    repConst = forceConst * Constables.F3D_REP_MULT;
     maxDimension = maxDim;
-    borderWidth = minDim / BRDR_FACT;
+    borderWidth = minDim / Constables.F3D_BRDR_FACT;
 
   }
 
@@ -174,7 +167,7 @@ public class FR3DLayout implements Loggable {
    * the Graphset. 
    */
   public boolean done() {
-    if (currentIteration > MAX_ITER || temperature < 1.0 / maxDimension) {
+    if (currentIteration > Constables.F3D_MAX_ITER || temperature < 1.0 / maxDimension) {
       return true;
     }
     return false;
@@ -283,9 +276,12 @@ public class FR3DLayout implements Loggable {
     if (Double.isNaN(xDisp) || Double.isNaN(yDisp) || Double.isNaN(zDisp))
       throw new IllegalArgumentException("NaN in position calculation");
 
-    double newX = p.getX() + Math.max(-ITER_MVMNT_MAX, Math.min(ITER_MVMNT_MAX, xDisp));
-    double newY = p.getY() + Math.max(-ITER_MVMNT_MAX, Math.min(ITER_MVMNT_MAX, yDisp));
-    double newZ = p.getZ() + Math.max(-ITER_MVMNT_MAX, Math.min(ITER_MVMNT_MAX, zDisp));
+    double newX = p.getX()
+        + Math.max(-Constables.F3D_MAX_MVMNT_PER_ITER, Math.min(Constables.F3D_MAX_MVMNT_PER_ITER, xDisp));
+    double newY = p.getY()
+        + Math.max(-Constables.F3D_MAX_MVMNT_PER_ITER, Math.min(Constables.F3D_MAX_MVMNT_PER_ITER, yDisp));
+    double newZ = p.getZ()
+        + Math.max(-Constables.F3D_MAX_MVMNT_PER_ITER, Math.min(Constables.F3D_MAX_MVMNT_PER_ITER, zDisp));
 
     double width = size.getWidth();
     double height = size.getHeight();
@@ -349,7 +345,7 @@ public class FR3DLayout implements Loggable {
   }
 
   public void cool() {
-    temperature *= (1.0 - currentIteration / (double) MAX_ITER);
+    temperature *= (1.0 - currentIteration / (double) Constables.F3D_MAX_ITER);
     if (currentIteration % 100 == 0) {
       adjustForceConstants();
     }
