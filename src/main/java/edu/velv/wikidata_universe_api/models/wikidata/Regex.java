@@ -8,5 +8,5 @@ package edu.velv.wikidata_universe_api.models.wikidata;
 interface Regex {
   String ENT_ID = "[PQ]\\d+";
   String PROP_ID = "[P]\\d+";
-  String VERT_ID = "[Q]\\d+";
+  String ITEM_ID = "[Q]\\d+";
 }

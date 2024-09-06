@@ -1,6 +1,6 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
-import java.util.Set;
+import java.lang.constant.Constable; //? @davewtillman just want to ask him about this accidental discovery
 import java.util.Iterator;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
@@ -10,25 +10,13 @@ import org.wikidata.wdtk.datamodel.interfaces.Statement;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import edu.velv.wikidata_universe_api.models.ClientRequest;
+import edu.velv.wikidata_universe_api.models.Constables;
 import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
 public class EntDocProc implements Loggable {
   protected ClientRequest session;
-
-  private static final Set<String> EXCLUDED_DATA = Set.of("external-id", "monolingualtext",
-      "commonsMedia", "url", "globe-coordinate", "geo-shape", "wikibase-lexeme");
-
-  private static final Set<String> EXCLUDED_ENT_IDS = Set.of("P1343", "P143", "P935", "P8687",
-      "P3744", "P18", "P373", "P856", "P1748", "P21", "P11889", "P1424", "P11527", "P1545", "P5008",
-      "P1889", "P813", "P214", "P213", "P227", "P244", "P268", "P1006", "P1711", "P648", "P1315",
-      "P2163", "P3430", "P1015", "P1207", "P1225", "P4823", "P269", "P322", "P1871", "P691",
-      "P4342", "P5361", "P2600", "P535", "P8094", "P7293", "P8189", "P950", "P8318", "P1263",
-      "P2949", "P7029", "P7699", "P10227", "P409", "P8081", "P7902", "P4619", "P7369", "P3348",
-      "P1368", "P11686", "P10832", "P5034", "P1415", "P6058", "P646", "P5869", "P461", "Q109429537",
-      "P7452", "Q19478619", "P4666", "P345", "P2604", "P5007", "Q59522350", "Q32351192", "P1011",
-      "P8402", "P2959", "P78", "P5323", "P6104");
 
   public EntDocProc(ClientRequest parentSession) {
     this.session = parentSession;
@@ -103,11 +91,12 @@ public class EntDocProc implements Loggable {
   }
 
   private boolean hasExcludedDataType(SnakData ms) {
-    return EXCLUDED_DATA.contains(ms.datatype);
+    return Constables.WD_EXCLUDED_DATA_TYPES.contains(ms.datatype);
   }
 
   private boolean hasExcludedEntityId(SnakData ms) {
-    return EXCLUDED_ENT_IDS.contains(ms.property.value) || EXCLUDED_ENT_IDS.contains(ms.snakValue.value);
+    return Constables.WD_EXCLUDED_ENT_IDS.contains(ms.property.value)
+        || Constables.WD_EXCLUDED_ENT_IDS.contains(ms.snakValue.value);
   }
 
   private boolean vertexMatchesOriginalQuery(Vertex v) {
