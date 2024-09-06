@@ -103,6 +103,7 @@ public class ClientRequest {
     finalizeLayoutPositions();
     setVertexPositions();
 
+    // TODO: Remove finally
     SerializeData.ResponseBody(new ResponseBody(this));
 
     return Either.right(this);
@@ -121,6 +122,7 @@ public class ClientRequest {
       Either.left(initialFetchTask.get());
     }
 
+    // TODO: Remove finally
     SerializeData.ResponseBody(new ResponseBody(this));
 
     return getInitialRelatedData();
