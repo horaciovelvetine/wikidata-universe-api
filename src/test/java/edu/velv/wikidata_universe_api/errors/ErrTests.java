@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 
-public class ErrTest {
+public class ErrTests {
 
   @Test
   public void testDebugDetailsResponseErrorMsg() {
