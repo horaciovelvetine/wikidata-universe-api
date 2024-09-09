@@ -66,12 +66,15 @@ public class FR3DLayout implements Loggable {
     double maxDim = Math.max(width, height);
     double minDim = Math.min(width, height);
     double volume = width * height * maxDim;
-    double currentDensity = (totalVertices / volume);
-    double scaleFactor = Math.cbrt(Constables.F3D_TGT_DENS / currentDensity);
-    width *= scaleFactor;
-    height *= scaleFactor;
-    maxDim *= scaleFactor;
-    minDim *= scaleFactor;
+    double currentDensity = (totalVertices * Math.pow(20, 3) / volume);
+    print("===============================================================");
+    print("LAYOUT SCALE IS::" + currentDensity);
+    print("===============================================================");
+    // double scaleFactor = Math.cbrt(0.0000001 / currentDensity);
+    // width *= scaleFactor;
+    // height *= scaleFactor;
+    // maxDim *= scaleFactor;
+    // minDim *= scaleFactor;
     size.setSize(width, height);
 
     setAndInitPositions(new RandomLocation3D<Vertex>(size));

@@ -1,6 +1,8 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
 import java.util.List;
+import java.util.ArrayList;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -81,13 +83,7 @@ public class FetchQueue {
    */
   public List<String> getTargetBatchByPriority(Integer n) {
     List<String> batchTheBuilder = getTargetBatchAtN(n, q -> q.matches(Regex.PROP_ID));
-
-    if (batchTheBuilder.size() < 50) {
-      int spaceRemaining = Constables.WD_MAX_QUERY_SIZE - batchTheBuilder.size();
-      List<String> entIds = getItemTargetBatch(n);
-      batchTheBuilder.addAll(entIds.subList(0, Math.min(spaceRemaining, entIds.size())));
-    }
-
+    batchTheBuilder = supplementEntityTargets(n, batchTheBuilder);
     if (batchTheBuilder.isEmpty()) {
       batchTheBuilder = getDateTargetBatch(n);
     }
@@ -173,8 +169,6 @@ public class FetchQueue {
     queued.get(nPlus).add(query);
   }
 
-  /* Boolean checks */
-
   protected boolean isInvalid(String query) {
     return query == null || invalid.contains(query);
   }
@@ -189,12 +183,26 @@ public class FetchQueue {
   }
 
   /**
-  * Retrieves (a limited) 50 values from the Queue which are dates
-  * @see org.wikidata.wdtk (Wikidata Java Toolkit)
-  * 
-  * @param n depth value to retreive values from
-  * @return A list of dates which can be searched for
-  */
+   * Adds additional targets to a batch if there is any space and there are targets to add
+   * values are added to the batch, else returns the current batch.
+   * 
+   * @param n depth to retrieve from
+   * @param curBatch the current batch list
+   * 
+   * @return the updated list of string targets
+   */
+  private List<String> supplementEntityTargets(Integer n, List<String> curBatch) {
+    List<String> entIds = getItemTargetBatch(n);
+    if (curBatch.size() == Constables.WD_MAX_QUERY_SIZE || entIds.size() == 0) {
+      return curBatch;
+    }
+
+    int spaceRemaining = Constables.WD_MAX_QUERY_SIZE - curBatch.size();
+
+    List<String> fillFilter = new ArrayList<>(entIds.subList(0, Math.min(spaceRemaining, entIds.size())));
+    fillFilter.addAll(curBatch);
+    return fillFilter;
+  }
 
   private List<String> getDateTargetBatch(Integer n) {
     return getTargetBatchAtN(n, q -> !q.matches(Regex.ENT_ID));

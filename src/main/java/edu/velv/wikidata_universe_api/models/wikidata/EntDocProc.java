@@ -1,6 +1,5 @@
 package edu.velv.wikidata_universe_api.models.wikidata;
 
-import java.lang.constant.Constable; //? @davewtillman just want to ask him about this accidental discovery
 import java.util.Iterator;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
@@ -100,6 +99,8 @@ public class EntDocProc implements Loggable {
   }
 
   private boolean vertexMatchesOriginalQuery(Vertex v) {
+    if (v.label() == null)
+      return false;
     return session.query().toLowerCase().equals(v.label().toLowerCase());
   }
 }

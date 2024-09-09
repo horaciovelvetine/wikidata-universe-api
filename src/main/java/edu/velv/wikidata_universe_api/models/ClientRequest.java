@@ -104,7 +104,7 @@ public class ClientRequest {
     setVertexPositions();
 
     // TODO: Remove finally
-    SerializeData.ResponseBody(new ResponseBody(this));
+    // SerializeData.ResponseBody(new ResponseBody(this));
 
     return Either.right(this);
   }
@@ -123,7 +123,7 @@ public class ClientRequest {
     }
 
     // TODO: Remove finally
-    SerializeData.ResponseBody(new ResponseBody(this));
+    // SerializeData.ResponseBody(new ResponseBody(this));
 
     return getInitialRelatedData();
   }

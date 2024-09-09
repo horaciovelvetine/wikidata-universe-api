@@ -10,4 +10,5 @@ public class WikidataUniverseApiApplication {
 		SpringApplication.run(WikidataUniverseApiApplication.class, args);
 	}
 
+	
 }

@@ -31,7 +31,7 @@ public final class Constables {
   public static final int F3D_MRGN_DITH = 2;
   public static final int F3D_BRDR_FACT = 50;
   // TODO: put this number into some sort of reasonable range E-8 math is weird math (maybe Vertex radius size???)
-  public static final double F3D_TGT_DENS = 0.0000000001;
+  public static final double F3D_TGT_DENS = 0.000000001;
   public static final double F3D_ATTR_MULT = 0.75;
   public static final double F3D_REP_MULT = 0.50;
 }

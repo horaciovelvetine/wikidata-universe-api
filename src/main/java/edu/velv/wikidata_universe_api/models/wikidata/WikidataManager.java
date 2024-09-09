@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Collection;
 
+import io.vavr.control.Either;
+
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
@@ -23,7 +25,6 @@ import edu.velv.wikidata_universe_api.models.jung_ish.Edge;
 import edu.velv.wikidata_universe_api.models.jung_ish.Vertex;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 import edu.velv.wikidata_universe_api.utils.ProcessTimer;
-import io.vavr.control.Either;
 
 public class WikidataManager implements Loggable {
   protected Integer n;
@@ -86,10 +87,16 @@ public class WikidataManager implements Loggable {
     return "Wikidata={ n=" + n + ", " + queue.toString() + " }";
   }
 
+  /**
+   * Used to reconstruct an already existing queue for a ClientRequest
+   */
   public void addAllProperties(Collection<Property> props) {
     properties.addAll(props);
   }
 
+  /**
+   * Used to reconstruct an already existing queue for a ClientRequest
+   */
   public void populateQueueWithPayload(RequestPayload payload) {
     this.queue = new FetchQueue(payload.queue());
   }
@@ -118,29 +125,35 @@ public class WikidataManager implements Loggable {
   //=====================================================================================================================>
   //=====================================================================================================================>
 
-  // should remove the duality of fetching dates using another mechanism
   private Optional<Err> fetchRelatedTaskSingleRunner() {
-    while (n <= Constables.WD_MAX_N_FETCH_DEPTH) {
-      List<String> tgtBatch = queue.getTargetBatchByPriority(n);
-      boolean isEntBatch = tgtBatch.getFirst().matches(Regex.ENT_ID);
-      Optional<Err> batchProcTask;
 
-      if (isEntBatch) {
-        batchProcTask = fetchAndHandleEntities(tgtBatch);
-      } else {
-        batchProcTask = fetchAndHandleDates(tgtBatch);
-      }
-
-      if (batchProcTask.isPresent()) {
-        // exits with only API error, NoResultsErrs are relegated to invalid
-        return batchProcTask;
-      }
-
+    while (n <= 2) {
       if (queue.isEmptyAtNDepth(n)) {
         n += 1;
       }
+
+      try {
+        List<String> tgtBatch = queue.getTargetBatchByPriority(n);
+        boolean isEntBatch = tgtBatch.getFirst().matches(Regex.ENT_ID);
+        Optional<Err> batchProcTask;
+
+        if (isEntBatch) {
+          batchProcTask = fetchAndHandleEntities(tgtBatch);
+        } else {
+          batchProcTask = fetchAndHandleDates(tgtBatch);
+        }
+
+        if (batchProcTask.isPresent()) {
+          // exits with only API error, NoResultsErrs are relegated to invalid
+          return batchProcTask;
+        }
+      } catch (Exception e) {
+        print(e.getMessage());
+      }
       // ends loop...
+      print(session.details());
     }
+
     return Optional.empty();
   }
 
