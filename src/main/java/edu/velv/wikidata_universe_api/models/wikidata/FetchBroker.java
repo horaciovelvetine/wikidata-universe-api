@@ -9,6 +9,7 @@ import io.vavr.CheckedFunction0;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 
+import org.springframework.stereotype.Service;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
@@ -17,6 +18,8 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.WikidataServiceError.*;
 import edu.velv.wikidata_universe_api.utils.Loggable;
 
+
+@Service
 public class FetchBroker implements Loggable {
   private static final String EN_WIKI_IRI = "enwiki";
   private static final String EN_LANG_WIKI = "en";
