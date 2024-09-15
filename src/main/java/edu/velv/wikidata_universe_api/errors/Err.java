@@ -1,11 +1,15 @@
 package edu.velv.wikidata_universe_api.errors;
 
-public sealed interface Err permits Err.WikidataServiceError, Err.WikiverseServiceError {
+import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.DebugDetailsError;
+import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
+import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
+
+public sealed interface Err permits Err.WikidataServiceError, Err.WikiverseServiceError, Err.RequestErrResponse {
   public String msg();
 
   sealed interface WikiverseServiceError extends Err {
-    record DebugDetailsResponseError(String msg) implements WikiverseServiceError {
-      //? General Error for use in Debug Responses to the Client
+    record DebugDetailsError(String msg) implements WikiverseServiceError {
+      //? Default error
     }
   }
 
@@ -16,15 +20,35 @@ public sealed interface Err permits Err.WikidataServiceError, Err.WikiverseServi
       }
     }
 
-    record NoSuchRecordFoundError(String msg, String query) implements WikidataServiceError {
-      public NoSuchRecordFoundError(String query) {
+    record NoSuchEntityFoundError(String msg, String query) implements WikidataServiceError {
+      //? Searching by any returns no results for this query
+      public NoSuchEntityFoundError(String query) {
         this("No such entity found for: " + query, query);
       }
 
-      public NoSuchRecordFoundError() {
+      public NoSuchEntityFoundError() {
         this("default query");
       }
-      //? Searching by any returns no results for this query
     }
+  }
+
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
+  record RequestErrResponse(int status, String msg, Err e) implements Err {
+    //? Returned in ResponseBody if Err present summarizes thrown for debug
+  }
+
+  public static RequestErrResponse mapErrResponse(Err error) {
+    return switch (error) {
+      case DebugDetailsError e -> new RequestErrResponse(404, "A Debug, oh no squish it!", error);
+      case ApiUnavailableError e ->
+        new RequestErrResponse(404, "Wikidata's API is currently unavailable, try again later.", error);
+      case NoSuchEntityFoundError e -> new RequestErrResponse(404,
+          "Seems like there is no such matching record, check your search and try again.", error);
+      default ->
+        new RequestErrResponse(400, "Fallback, found a default error, retrace your steps and try again!", error);
+    };
   }
 }
