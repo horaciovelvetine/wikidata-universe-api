@@ -66,15 +66,16 @@ public class ValueData implements ValueVisitor<ValueData> {
     return null;
   }
 
-  private String convertToWikidataSearchableDate(TimeValue time) {
+  protected String convertToWikidataSearchableDate(TimeValue time) {
+    if (time.toString() == null)
+      return null;
     String punc = time.toString().replaceAll(WDATA_PUNC_FORMATTING, "");
-    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-    SimpleDateFormat outputFormat = new SimpleDateFormat("MMMM d, yyyy");
+
     try {
+      SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+      SimpleDateFormat outputFormat = new SimpleDateFormat("MMMM d, yyyy");
       return outputFormat.format(inputFormat.parse(punc));
     } catch (Exception e) {
-      //todo - prod fix
-      System.out.println("Exception while attempting convertToWikidataSearchableDate()");
       return punc;
     }
   }
