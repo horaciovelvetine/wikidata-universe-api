@@ -3,7 +3,9 @@ package edu.velv.wikidata_universe_api.models;
 import java.util.Map;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
+import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
+import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -74,6 +76,28 @@ public class Vertex {
 
   public void coords(Point3D point) {
     this.coords = point;
+  }
+
+  public boolean isFetchedOrDate() {
+    return fetched && id == null;
+  }
+
+  public boolean isFetchedOrId() {
+    return fetched && id != null;
+  }
+
+  public void updateUnfetchedValues(ItemDocumentImpl doc) {
+    this.label = doc.findLabel(Constables.EN_LANG_WIKI_KEY);
+    this.description = doc.findDescription(Constables.EN_LANG_WIKI_KEY);
+    this.siteLinks = doc.getSiteLinks();
+    this.fetched = true;
+  }
+
+  public void updateUnfetchedValues(WbSearchEntitiesResult result) {
+    this.label = result.getLabel();
+    this.description = result.getDescription();
+    this.siteLinks = null;
+    this.fetched = true;
   }
 
 }

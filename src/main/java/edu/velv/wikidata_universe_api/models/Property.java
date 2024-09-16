@@ -53,4 +53,10 @@ public class Property {
   public void fetched(boolean isFetched) {
     this.fetched = isFetched;
   }
+
+  public void updateUnfetchedValues(PropertyDocument doc) {
+    this.description = doc.findDescription(Constables.EN_LANG_WIKI_KEY);
+    this.label = doc.findLabel(Constables.EN_LANG_WIKI_KEY);
+    this.fetched = true;
+  }
 }
