@@ -16,6 +16,7 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import edu.velv.wikidata_universe_api.Constables;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
+import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError;
 
 @Service
@@ -59,6 +60,28 @@ public class FetchBroker {
       });
       return Either.right(results);
     });
+  }
+
+  /**
+   * Individually searches for Dates using the formatted labels one at a time to build a set of date results. 
+   * @apiNote This method sends individual requests for every date target slightly changing the pattern above
+   * todo - test if there were a way to have this make use of the title fetch list 
+   * 
+   * @param List<String> dateTgts
+   * @return a list of SearchResults mapped to their query value, or an Err(or) if one was encountered
+   */
+  protected Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> fetchEntitiesByDateList(
+      List<String> dateBatch) {
+    Map<String, Either<Err, WbSearchEntitiesResult>> results = new HashMap<>();
+    for (String dateTgt : dateBatch) {
+      Either<Err, WbSearchEntitiesResult> fetchRes = fetchSearchResultsByAnyMatch(dateTgt);
+      if (fetchRes.isLeft() && fetchRes.getLeft().getClass().equals(ApiUnavailableError.class)) {
+        // prevent spamming requests if Wikidata offline
+        return Either.left(fetchRes.getLeft());
+      }
+      results.put(dateTgt, fetchRes);
+    }
+    return Either.right(results);
   }
 
   //? PRIVATE...
@@ -191,4 +214,5 @@ public class FetchBroker {
         ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntitiesResult() was unable to find a matching Entity"))
         : Either.right(res);
   }
+
 }
