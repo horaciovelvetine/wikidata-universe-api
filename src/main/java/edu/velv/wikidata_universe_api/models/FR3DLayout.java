@@ -310,7 +310,7 @@ public class FR3DLayout {
   /**
    * Checks if the provided Vertex's position is locked and should not be moved
    */
-  private boolean isLocked(Vertex v) {
+  protected boolean isLocked(Vertex v) {
     for (Vertex lockedVertex : lockedVertices) {
       if (lockedVertex.id().equals(v.id())) {
         return true;
@@ -322,7 +322,7 @@ public class FR3DLayout {
   /**
    * Gets the largest of the two Dimensions (used for a depth (Z) value throghout app)
    */
-  private double maxDim() {
+  protected double maxDim() {
     return Math.max(size.getWidth(), size.getHeight());
   }
 
