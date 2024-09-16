@@ -11,19 +11,23 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.models.Graphset;
 import edu.velv.wikidata_universe_api.models.FR3DLayout;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
+import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 public class ClientRequest {
-  @Autowired
-  protected WikidataServiceManager wikidata;
   protected String query;
   protected Dimension dimensions;
   protected Graphset graph;
   protected FR3DLayout layout;
 
+  @Autowired
+  private WikidataServiceManager wikidata;
+
   public ClientRequest(String query) {
     this.query = this.sanitizeQueryString(query);
+    this.dimensions = new Dimension();
     this.graph = new Graphset();
+    this.layout = new FR3DLayout(dimensions, graph);
   }
 
   public ClientRequest(RequestPayloadData payload) {
@@ -67,8 +71,8 @@ public class ClientRequest {
    */
   public Either<Err, ClientRequest> getUnfetchedData() {
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteDataTask(this);
-
-    return Either.right(this);
+    runLayoutAlgoProcess();
+    return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
   }
 
   /**
@@ -79,5 +83,19 @@ public class ClientRequest {
       return null;
     }
     return query.replaceAll("[^\\w\\s]", "").trim();
+  }
+
+  /**
+   * Initializes, and steps the Layout process to provide vertices with updates layout positions - then updates
+   * Graphset so that each Vertex is aware of its update Point3D coords.
+   */
+  private void runLayoutAlgoProcess() {
+    layout.initialize();
+    while (!layout.done()) {
+      layout.step();
+    }
+    for (Vertex vert : graph.vertices()) {
+      vert.coords(layout.apply(vert));
+    }
   }
 }
