@@ -1,13 +1,15 @@
 package edu.velv.wikidata_universe_api.models;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import io.vavr.Tuple2;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.Collection;
 
 /**
  * Represents a graph set that contains vertices, edges, and properties.
@@ -132,6 +134,112 @@ public class Graphset {
     return Optional.of(new Tuple2<Vertex, Vertex>(src.get(), tgt.get()));
   }
 
-  
+  /**
+   * Checks if any of the data elements (Vertices & Properties) still have unfetched details
+   */
+  public boolean allDataFetched() {
+    for (Vertex v : vertices) {
+      if (!v.fetched()) {
+        return false;
+      }
+    }
+
+    for (Property p : properties) {
+      if (!p.fetched()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Creates a set of strings which represent Wikidata Entities with unfetched details, checking both vertices and properties.
+   * Ignores vertices which represent a date target, returning only ID values (e.g. "Q123", "P123")
+   * 
+   * @return a set of Wikidata searchable string targets
+   */
+  public List<String> getUnfetchedEntityIDTargetBatch() {
+    List<String> batch = new ArrayList<>();
+    int batchSize = 0;
+
+    batch = addUnfetchedPropertyIdsToBatch(batch, batchSize);
+    if (batchSize == 50)
+      return batch;
+
+    return addUnfetchedVertexIdsToBatch(batch, batchSize);
+  }
+
+  /**
+   * Creates a set of string which represent Wikidata date Entities with details 
+   */
+  public List<String> getUnfetchedDateTargetBatch() {
+    List<String> batch = new ArrayList<>();
+    int count = 0;
+
+    for (Vertex v : vertices) {
+      if (v.isFetchedOrId())
+        continue;
+
+      batch.add(v.label());
+      count++;
+      if (count == 50)
+        return batch;
+    }
+    return batch;
+  }
+
+  /**
+   * Removes the given target value from mention in the data set by searching for any entitiy where it might be mentioned and
+   * removing it. The target values are provided from Wikidata so this should be a particularly rare call/result. There are no
+   * additional details to handle from this target.
+   */
+  public void removeInvalidSearchResultFromData(String targetValue) {
+    // Remove vertices with matching id or label
+    vertices.removeIf(v -> v.id().equals(targetValue) || v.label().equals(targetValue));
+
+    // Remove properties with matching id
+    properties.removeIf(p -> p.id().equals(targetValue));
+
+    // Remove edges with matching tgtId, srcId, propertyId, or label
+    edges.removeIf(e -> e.tgtId().equals(targetValue) || e.srcId().equals(targetValue) || e.propertyId().equals(targetValue) || e.label().equals(targetValue));
+  }
+
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
+  /**
+   * Filters vertices for unfetched entities where an id() values is present, then updates the batch with this target info
+   */
+  private List<String> addUnfetchedVertexIdsToBatch(List<String> batch, int count) {
+    for (Vertex v : vertices) {
+      if (v.isFetchedOrDate())
+        continue;
+      batch.add(v.id());
+      count++;
+      if (count == 50)
+        return batch;
+    }
+    return batch;
+  }
+
+  /**
+   * Filters properties for unfetched entities, then updates the batch with this target info
+   */
+  private List<String> addUnfetchedPropertyIdsToBatch(List<String> batch, int count) {
+    for (Property p : properties) {
+      if (p.fetched())
+        continue;
+      batch.add(p.id());
+      count++;
+      if (count == 50)
+        return batch;
+    }
+    return batch;
+  }
 
 }
