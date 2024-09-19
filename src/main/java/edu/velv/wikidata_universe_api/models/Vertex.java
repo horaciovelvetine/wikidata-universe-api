@@ -3,7 +3,6 @@ package edu.velv.wikidata_universe_api.models;
 import java.util.Map;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
@@ -79,11 +78,11 @@ public class Vertex {
   }
 
   public boolean isFetchedOrDate() {
-    return fetched && id == null;
+    return fetched || id == null;
   }
 
   public boolean isFetchedOrId() {
-    return fetched && id != null;
+    return fetched && !id.isBlank();
   }
 
   public void updateUnfetchedValues(ItemDocumentImpl doc) {
