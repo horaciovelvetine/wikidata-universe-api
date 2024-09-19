@@ -23,6 +23,14 @@ public class ValueData implements ValueVisitor<ValueData> {
     String, DateTime, EntityId, Quantity
   }
 
+  public String value() {
+    return value;
+  }
+
+  public ValueType type() {
+    return type;
+  }
+
   @Override
   public ValueData visit(EntityIdValue value) {
     if (value != null) {
