@@ -114,6 +114,9 @@ public class WikidataServiceManager {
    * from the Graphset to prevent bad data.
    */
   private Optional<Err> ingestUnfetchedTargetIdBatchData(List<String> idBatch, ClientRequest req) {
+    if (idBatch.isEmpty())
+      return Optional.empty();
+
     Either<Err, Map<String, Either<Err, EntityDocument>>> idResults = api.fetchEntitiesByIdList(idBatch);
     if (idResults.isLeft()) {
       return Optional.of(idResults.getLeft());
@@ -136,13 +139,16 @@ public class WikidataServiceManager {
     }
     return Optional.empty();
   }
-  
+
   /**
    * Fetches details for a batch of Wikidata Date Entities (individual fetches imposed by WikidataAPI limit), then uses that list of results
    * to update existing Vertices with the details of a successful fetch, or if there was no matching Date (...shouldn't be possible) removes mention
    * of this value from the Graphset to prevent bad data.
    */
   private Optional<Err> ingestUnfetchedTargetDateBatchData(List<String> dateBatch, ClientRequest req) {
+    if (dateBatch.isEmpty())
+      return Optional.empty();
+
     Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> dateResults = api.fetchEntitiesByDateList(dateBatch);
     if (dateResults.isLeft()) {
       return Optional.of(dateResults.getLeft());
