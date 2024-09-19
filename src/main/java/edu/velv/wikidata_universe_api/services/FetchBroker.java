@@ -193,19 +193,6 @@ public class FetchBroker {
   /**
    * Checks the provided result from the Wikidata API for null
    * 
-   * @param WbSearchEntitiesResult response
-   * @return return a result match, else returns a NoSuchEntityFoundError
-   */
-  private Either<Err, WbSearchEntitiesResult> handleNoSuchEntityResults(WbSearchEntitiesResult res) {
-    return res == null
-        ? Either.left(
-            new NoSuchEntityFoundError("@handleNoSuchEntitiesResult() was unable to find a matching SearchResult"))
-        : Either.right(res);
-  }
-
-  /**
-   * Checks the provided result from the Wikidata API for null
-   * 
    * @param EntityDocument response
    * @return return a result match, else returns a NoSuchEntityFoundError
    */
