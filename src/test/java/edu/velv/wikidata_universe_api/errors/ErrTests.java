@@ -8,74 +8,52 @@ import org.junit.jupiter.api.Test;
 public class ErrTests {
 
   @Test
-  public void testDebugDetailsResponseErrorMsg() {
+  public void constructs_debug_details_error_with_msg() {
     String expectedMessage = "Debug Details Msg";
-    Err.WikiverseServiceError.DebugDetailsResponseError error = new Err.WikiverseServiceError.DebugDetailsResponseError(
+    Err.WikiverseServiceError.DebugDetailsError error = new Err.WikiverseServiceError.DebugDetailsError(
         expectedMessage);
 
     assertEquals(expectedMessage, error.msg());
   }
 
   @Test
-  public void testNoSuchRecordFoundErrorWithQuery() {
-    // Arrange
+  public void constructs_no_such_found_error_with_query() {
     String query = "testQuery";
     String expectedMessage = "No such entity found for: " + query;
-    Err.WikidataServiceError.NoSuchRecordFoundError error = new Err.WikidataServiceError.NoSuchRecordFoundError(query);
+    Err.WikidataServiceError.NoSuchEntityFoundError error = new Err.WikidataServiceError.NoSuchEntityFoundError(query);
 
-    // Act
-    String actualMessage = error.msg();
-
-    // Assert
-    assertEquals(expectedMessage, actualMessage);
+    assertEquals(expectedMessage, error.msg());
     assertEquals(query, error.query());
   }
 
   @Test
-  public void testNoSuchRecordFoundErrorDefaultConstructor() {
-    // Arrange
+  public void constructs_no_such_found_error_no_query() {
     String expectedMessage = "No such entity found for: default query";
-    Err.WikidataServiceError.NoSuchRecordFoundError error = new Err.WikidataServiceError.NoSuchRecordFoundError();
+    Err.WikidataServiceError.NoSuchEntityFoundError error = new Err.WikidataServiceError.NoSuchEntityFoundError();
 
-    // Act
-    String actualMessage = error.msg();
-
-    // Assert
-    assertEquals(expectedMessage, actualMessage);
+    assertEquals(expectedMessage, error.msg());
     assertEquals("default query", error.query());
   }
 
   @Test
-  public void testApiUnavailableErrorWithMessageAndCause() {
-    // Arrange
+  public void constucts_api_unavailable_error_with_msg() {
     String expectedMessage = "Custom error message";
     Throwable expectedCause = new RuntimeException("Root cause");
     Err.WikidataServiceError.ApiUnavailableError error = new Err.WikidataServiceError.ApiUnavailableError(
         expectedMessage, expectedCause);
 
-    // Act
-    String actualMessage = error.msg();
-    Throwable actualCause = error.cause();
-
-    // Assert
-    assertEquals(expectedMessage, actualMessage);
-    assertSame(expectedCause, actualCause);
+    assertEquals(expectedMessage, error.msg());
+    assertSame(expectedCause, error.cause());
   }
 
   @Test
-  public void testApiUnavailableErrorWithCause() {
-    // Arrange
+  public void constructs_api_unavailable_error_default_msg() {
     String expectedMessage = "The Wikidata API is currently offline, try again later.";
     Throwable expectedCause = new RuntimeException("Root cause");
     Err.WikidataServiceError.ApiUnavailableError error = new Err.WikidataServiceError.ApiUnavailableError(
         expectedCause);
 
-    // Act
-    String actualMessage = error.msg();
-    Throwable actualCause = error.cause();
-
-    // Assert
-    assertEquals(expectedMessage, actualMessage);
-    assertSame(expectedCause, actualCause);
+    assertEquals(expectedMessage, error.msg());
+    assertSame(expectedCause, error.cause());
   }
 }
