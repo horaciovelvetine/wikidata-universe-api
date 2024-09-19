@@ -17,11 +17,12 @@ public class Constables {
   public static final Set<String> EXCLUDED_DATA_TYPES = Set.of("external-id", "monolingualtext",
       "commonsMedia", "url", "globe-coordinate", "geo-shape", "wikibase-lexeme");
   // FR3D LAYOUT SPECIFIC STUFF
-  public static final double TARGET_DATA_DENSITY = 0.5;
+  public static final double TARGET_DATA_DENSITY = 0.005;
   public static final double REP_MULT = 0.5;
   public static final double ATTR_MULT = 0.75;
   public static final double TEMP_MULT = 10;
   public static final int MAX_ITERS = 700;
+  public static final double MAX_ITER_MVMNT = 50;
 
   private Constables() {
     // Prevent instantiating for constant variables usage
