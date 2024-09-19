@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 
-import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -25,10 +24,17 @@ public class Graphset {
     //default constructor
   }
 
-  public Graphset(Collection<Vertex> vertices, Collection<Edge> edges, Collection<Property> properties) {
-    this.vertices.addAll(vertices);
-    this.edges.addAll(edges);
-    this.properties.addAll(properties);
+  public Graphset(List<Vertex> payloadVerts, List<Edge> payloadEdges, List<Property> payloadProps) {
+    //? iteration prevents unintentional duplicates from being added
+    for (Vertex vert : payloadVerts) {
+      addVertex(vert);
+    }
+    for (Edge edge : payloadEdges) {
+      addEdge(edge);
+    }
+    for (Property prop : payloadProps) {
+      addProperty(prop);
+    }
   }
 
   public Set<Vertex> vertices() {
@@ -56,10 +62,16 @@ public class Graphset {
   }
 
   /**
-   * Validates a new Vertex has no existing duplicate before adding to the Graphset
+   * Validates a new Vertex has no existing duplicate before adding to the Graphset by checking if 
+   * either the vertex id or label already exists.
    */
   public void addVertex(Vertex v) {
-    Optional<Vertex> vertData = getVertexById(v.id());
+    Optional<Vertex> vertData;
+    if (v.id() == null) {
+      vertData = getVertexByLabel(v.label());
+    } else {
+      vertData = getVertexById(v.id());
+    }
     if (vertData.isEmpty()) {
       vertices.add(v);
     }
@@ -90,7 +102,22 @@ public class Graphset {
    * @return a Vertex, or empty if none exists with the given id
    */
   public Optional<Vertex> getVertexById(String id) {
-    return vertices.stream().filter(v -> v.id().equals(id)).findAny();
+    return vertices.stream().filter(v -> {
+      String vertId = v.id();
+      return vertId != null && vertId.equals(id);
+    }).findAny();
+  }
+
+  /**
+   * @apiNote for unfetched Date Vertices
+   * @param label to look for
+   * @return a Vertex, or empty if none exists witht the given label;
+   */
+  public Optional<Vertex> getVertexByLabel(String label) {
+    return vertices.stream().filter(v -> {
+      String vertLabel = v.label();
+      return vertLabel != null && vertLabel.equals(label);
+    }).findAny();
   }
 
   /**
@@ -99,16 +126,6 @@ public class Graphset {
    */
   public Optional<Property> getPropertyById(String id) {
     return properties.stream().filter(p -> p.id().equals(id)).findAny();
-  }
-
-  /**
-   * @apiNote Slight variation to prevent adding duplicate edges
-   * 
-   * @param edge the edge to look for
-   * @return an Edge, or empty if none exists matching the provided
-   */
-  private Optional<Edge> getEdgeByEdge(Edge ed) {
-    return edges.stream().filter(e -> e.srcId().equals(ed.srcId()) && e.tgtId().equals(ed.tgtId())).findAny();
   }
 
   /**
@@ -202,7 +219,14 @@ public class Graphset {
     properties.removeIf(p -> p.id().equals(targetValue));
 
     // Remove edges with matching tgtId, srcId, propertyId, or label
-    edges.removeIf(e -> e.tgtId().equals(targetValue) || e.srcId().equals(targetValue) || e.propertyId().equals(targetValue) || e.label().equals(targetValue));
+    edges.removeIf(e -> {
+      boolean srcMatch = e.srcId().equals(targetValue);
+      boolean tgtMatch = e.tgtId() != null && e.tgtId().equals(targetValue);
+      boolean propMatch = e.tgtId() != null && e.propertyId().equals(targetValue);
+      boolean lblMatch = e.label() != null && e.propertyId().equals(targetValue);
+
+      return srcMatch || tgtMatch || propMatch || lblMatch;
+    });
   }
 
   //=====================================================================================================================>
@@ -240,6 +264,19 @@ public class Graphset {
         return batch;
     }
     return batch;
+  }
+
+  /**
+  * @apiNote Slight variation to prevent adding duplicate edges
+  * 
+  * @param edge the edge to look for
+  * @return an Edge, or empty if none exists matching the provided
+  */
+  private Optional<Edge> getEdgeByEdge(Edge ed) {
+    return edges.stream().filter(e -> {
+      String tgtId = e.tgtId();
+      return tgtId != null && e.srcId().equals(ed.srcId()) && tgtId.equals(ed.tgtId());
+    }).findAny();
   }
 
 }
