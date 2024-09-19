@@ -20,6 +20,18 @@ public class SnakData implements SnakVisitor<SnakData> {
     this.snakValue = value;
   }
 
+  public String datatype() {
+    return datatype;
+  }
+
+  public ValueData property() {
+    return property;
+  }
+
+  public ValueData snakValue() {
+    return snakValue;
+  }
+
   @Override
   public SnakData visit(ValueSnak snak) {
     if (snak instanceof ValueSnakImpl) {
