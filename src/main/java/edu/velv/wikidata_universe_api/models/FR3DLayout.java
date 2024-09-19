@@ -39,7 +39,7 @@ public class FR3DLayout {
 
   private Dimension size;
   private int curIteration;
-  private final double EPSILON = 0.000000001; // prevents 0 div
+  private final double EPSILON = 0.000001D; // prevents 0 div
   private double temperature;
   private double forceConst;
   private double attrConst;
@@ -149,7 +149,7 @@ public class FR3DLayout {
   //=====================================================================================================================>
   //=====================================================================================================================>
 
-  private void calcRepulsion(Vertex v) {
+  protected void calcRepulsion(Vertex v) {
     Point3D curOffset = getOffsetData(v);
     curOffset.setLocation(0, 0, 0); //? offset data resets on step here @ start of iteration
 
@@ -160,23 +160,25 @@ public class FR3DLayout {
       Point3D p1 = getLocationData(v);
       Point3D p2 = getLocationData(v2);
 
-      double dl = Math.max(EPSILON, p1.distance(p2));
-      double force = (repConst * repConst) / dl;
+      double deltaLen = Math.max(EPSILON, p1.distance(p2));
+      double force = (repConst * repConst) / deltaLen;
 
       if (Double.isNaN(force))
         throw new IllegalArgumentException("NaN in repulsion force calc.");
 
-      int oppositeLockMult = isLocked(v2) ? 2 : 1;
-      double xDisp = xDiff(p1, p2) * force * oppositeLockMult;
-      double yDisp = yDiff(p1, p2) * force * oppositeLockMult;
-      double zDisp = zDiff(p1, p2) * force * oppositeLockMult;
-      Point3D dispVec = new Point3D(xDisp, yDisp, zDisp);
+      double scale = isLocked(v2) ? 2 : 1;
+      double xDisp = xDiff(p1, p2) * force;
+      double yDisp = yDiff(p1, p2) * force;
+      double zDisp = zDiff(p1, p2) * force;
 
-      updateOffset(v, dispVec);
+      updateOffset(v, xDisp, yDisp, zDisp, scale);
     }
   }
 
-  private void calcAttraction(Edge e) {
+  //=====================================================================================================================>
+  //=====================================================================================================================>
+
+  protected void calcAttraction(Edge e) {
     Optional<Tuple2<Vertex, Vertex>> endpoints = graph.getEndpoints(e);
     if (endpoints.isEmpty())
       return;
@@ -190,42 +192,50 @@ public class FR3DLayout {
     Point3D p2 = getLocationData(v2);
 
     double dl = Math.max(EPSILON, p1.distance(p2));
-    double force = dl * dl / attrConst;
+    double force = dl / attrConst;
 
     if (Double.isNaN(force))
       throw new IllegalArgumentException("NaN in repulsion force calc.");
 
-    double xDisp = xDiff(p1, p2) * force / dl;
-    double yDisp = yDiff(p1, p2) * force / dl;
-    double zDisp = zDiff(p1, p2) * force / dl;
+    double xDisp = xDiff(p1, p2) * force;
+    double yDisp = yDiff(p1, p2) * force;
+    double zDisp = zDiff(p1, p2) * force;
 
     if (!isLocked(v1)) {
       int scale = isLocked(v2) ? 2 : 1;
-      Point3D dispVec = new Point3D(-(scale * xDisp), -(scale * yDisp), -(scale * zDisp));
-      updateOffset(v1, dispVec);
+      updateOffset(v1, xDisp, yDisp, zDisp, scale);
     }
 
     if (!isLocked(v2)) {
       int scale = isLocked(v1) ? 2 : 1;
-      Point3D dispVec = new Point3D(-(scale * xDisp), -(scale * yDisp), -(scale * zDisp));
-      updateOffset(v2, dispVec);
+      updateOffset(v2, xDisp, yDisp, zDisp, scale);
     }
 
   }
 
-  private void calcPosition(Vertex v) {
-    Point3D offset = getOffsetData(v);
+  //=====================================================================================================================>
+  //=====================================================================================================================>
 
-    double dl = Math.max(EPSILON, offset.distanceSq(offset));
-    double xDisp = offset.getX() / dl * Math.min(dl, temperature);
-    double yDisp = offset.getY() / dl * Math.min(dl, temperature);
-    double zDisp = offset.getZ() / dl * Math.min(dl, temperature);
+  protected void calcPosition(Vertex v) {
+    Point3D loc = getLocationData(v);
+    Point3D off = getOffsetData(v);
+
+    double deltaLen = Math.max(EPSILON,
+        Math.sqrt((off.getX() * off.getX()) + (off.getY() * off.getY()) + (off.getZ() * off.getZ())));
+    double xDisp = off.getX() / deltaLen * Math.min(deltaLen, temperature);
+    double yDisp = off.getY() / deltaLen * Math.min(deltaLen, temperature);
+    double zDisp = off.getZ() / deltaLen * Math.min(deltaLen, temperature);
 
     if (Double.isNaN(xDisp) || Double.isNaN(yDisp) || Double.isNaN(zDisp))
       throw new IllegalArgumentException("NaN value found in update position displacement calcs");
 
-    Point3D location = getLocationData(v);
-    location.setLocation(location.getX() + xDisp, location.getY() + yDisp, location.getZ() + zDisp);
+    double nX = loc.getX() + clampToMaxIterMvmnt(xDisp);
+    double nY = loc.getX() + clampToMaxIterMvmnt(yDisp);
+    double nZ = loc.getX() + clampToMaxIterMvmnt(zDisp);
+
+    //Todo clamp to dimensions??
+
+    loc.setLocation(nX, nY, nZ);
   }
 
   //=====================================================================================================================>
@@ -242,7 +252,7 @@ public class FR3DLayout {
    *
    * @param initializer - any function which given a Vertex provides a Point3D in return
    */
-  private void setInitialRandomPositions(Function<Vertex, Point3D> initializer) {
+  protected void setInitialRandomPositions(Function<Vertex, Point3D> initializer) {
     Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
       public Point3D apply(Point3D input) {
         return (Point3D) input.clone();
@@ -268,7 +278,7 @@ public class FR3DLayout {
    *
    * @apinote Uses the maximum of Width || Height for Depth per app convention
    */
-  private void scaleDimensionsToGraphsetSize() {
+  protected void scaleDimensionsToGraphsetSize() {
     int totalVerts = graph.vertexCount();
     double initWidth = size.getWidth();
     double initHeight = size.getHeight();
@@ -285,7 +295,7 @@ public class FR3DLayout {
   /**
    * Sets the 'physical' constants used in each calculation for the layout, these define the overall shape
    */
-  private void initializeLayoutConstants() {
+  protected void initializeLayoutConstants() {
     curIteration = 0;
     temperature = size.getWidth() / Constables.TEMP_MULT;
     forceConst = Math.sqrt(size.getHeight() * size.getWidth() / graph.vertexCount());
@@ -296,14 +306,14 @@ public class FR3DLayout {
   /**
    * Gets the offset data from the cache for the provided Vertex
    */
-  private Point3D getOffsetData(Vertex v) {
+  protected Point3D getOffsetData(Vertex v) {
     return offsetData.getUnchecked(v);
   }
 
   /**
    * Gets the location data from the cache for the provided Vertex
    */
-  private Point3D getLocationData(Vertex v) {
+  protected Point3D getLocationData(Vertex v) {
     return locationData.getUnchecked(v);
   }
 
@@ -329,30 +339,35 @@ public class FR3DLayout {
   /**
    * Checks the both provided vertices are in the locked vertex
    */
-  private boolean bothVerticesLocked(Vertex v1, Vertex v2) {
+  protected boolean bothVerticesLocked(Vertex v1, Vertex v2) {
     return isLocked(v1) && isLocked(v2);
   }
 
   /**
-   * Update the current offset values for the given vertex using the {x,y,z} values of the provided Point3D
+   * Update the current offset values for the given vertex using the displacement values provided
+   * scaling in to oppose forces on an opposing locked vertex - still allowing the full intended adjustment.
+   * @param Vertex
+   * @param displacement of X 
+   * @param displacement of Y
+   * @param displacement of Z 
    */
-  private void updateOffset(Vertex v, Point3D dispVector) {
+  protected void updateOffset(Vertex v, double dx, double dy, double dz, double scale) {
     Point3D curOffset = getOffsetData(v);
-    double newX = curOffset.getX() + dispVector.getX();
-    double newY = curOffset.getY() + dispVector.getY();
-    double newZ = curOffset.getZ() + dispVector.getZ();
+    double newX = curOffset.getX() - (scale * dx);
+    double newY = curOffset.getY() - (scale * dy);
+    double newZ = curOffset.getZ() - (scale * dz);
     curOffset.setLocation(newX, newY, newZ);
   }
 
-  private double xDiff(Point3D p1, Point3D p2) {
+  protected double xDiff(Point3D p1, Point3D p2) {
     return p1.getX() - p2.getX();
   }
 
-  private double yDiff(Point3D p1, Point3D p2) {
+  protected double yDiff(Point3D p1, Point3D p2) {
     return p1.getY() - p2.getY();
   }
 
-  private double zDiff(Point3D p1, Point3D p2) {
+  protected double zDiff(Point3D p1, Point3D p2) {
     return p1.getZ() - p2.getZ();
   }
 
@@ -360,7 +375,7 @@ public class FR3DLayout {
    * Called once per-step() this simulates the physical 'annealing' process by decreasing overall temperature as
    * the algorithim steps, allowing for less overall movement and a measure of 'completeness'
    */
-  private void cool() {
+  protected void cool() {
     temperature *= (1.0 - curIteration / (double) Constables.MAX_ITERS);
     if (curIteration % 100 == 0) {
       adjustForceConstants();
@@ -371,7 +386,7 @@ public class FR3DLayout {
    * Called every 100 iterations to adjust forces based on how the overall layout is proceeding, overall leads to 
    * more consistent layout performance by tweaking each value to force constant to nudge the layout towards balance
    */
-  private void adjustForceConstants() {
+  protected void adjustForceConstants() {
     double averageRepulsionForce = calculateAverageRepulsionForce();
     double averageAttractionForce = calculateAverageAttractionForce();
 
@@ -388,7 +403,7 @@ public class FR3DLayout {
    * The average of all repulsive forces between each Vertex used to assess
    * current status of the layout for dynamic adjustment during the layout step process
    */
-  private double calculateAverageRepulsionForce() {
+  protected double calculateAverageRepulsionForce() {
     double totalRepulsionForce = 0;
     int count = 0;
     Set<Vertex> verts = graph.vertices();
@@ -412,7 +427,7 @@ public class FR3DLayout {
    * The average of all attractive forces between each existing Edge's endpoints used to assess 
    * current status of the layout for dynamic adjustment during the layout step process
    */
-  private double calculateAverageAttractionForce() {
+  protected double calculateAverageAttractionForce() {
     double totalAttractionForce = 0;
     int count = 0;
     Set<Edge> eds = graph.edges();
@@ -436,6 +451,10 @@ public class FR3DLayout {
     }
 
     return totalAttractionForce / count;
+  }
+
+  protected double clampToMaxIterMvmnt(double disp) {
+    return Math.max(-Constables.MAX_ITER_MVMNT, Math.min(Constables.MAX_ITER_MVMNT, disp));
   }
 
 }
