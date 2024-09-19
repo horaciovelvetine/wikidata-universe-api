@@ -28,7 +28,7 @@ public class Edge {
   public Edge(String srcEntId, SnakData mainSnak) {
     this.srcId = srcEntId;
     this.tgtId = tgtIdOrNullForDates(mainSnak);
-    this.propertyId = mainSnak.property.value;
+    this.propertyId = mainSnak.property().value();
     this.label = labelForDatesOrNull(mainSnak);
     this.fetched = tgtId == null ? false : true;
   }
@@ -74,10 +74,10 @@ public class Edge {
   }
 
   private String tgtIdOrNullForDates(SnakData mainSnak) {
-    return mainSnak.snakValue.type != ValueType.DateTime ? mainSnak.snakValue.value : null;
+    return mainSnak.snakValue().type() != ValueType.DateTime ? mainSnak.snakValue().value() : null;
   }
 
   private String labelForDatesOrNull(SnakData mainSnak) {
-    return mainSnak.snakValue.type == ValueType.DateTime ? mainSnak.snakValue.value : null;
+    return mainSnak.snakValue().type() == ValueType.DateTime ? mainSnak.snakValue().value() : null;
   }
 }
