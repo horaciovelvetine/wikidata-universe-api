@@ -29,8 +29,8 @@ public class WikidataServiceManager {
 
   /**
    * Uses the initial query value to find the target of the request and then gather the initial data
-   * used to construct a Graph (layout), then return the initial results for the client. Results in a
-   * single vertex on screen, with further fetch details stored for a subsequent request task. 
+   * used to construct a Graph (no layout for this request), then return the initial results for the client.
+   * Results in a single vertex on screen, with further fetch details stored for a subsequent request task. 
    * 
    * @param ClientRequest
    * @return an Err(or) if one was encountered during execution
@@ -48,8 +48,8 @@ public class WikidataServiceManager {
 
   /**
    * Fetch currently unknown values from the Wikidata API to complete the details of the Graphset, called
-   * as a subsequent request from the client to ensure valid connection with Client (application) before initiating 
-   * larger request load on Wikidata API.
+   * as a subsequent request from the client to ensure valid connection with Client (application) before 
+   * initiating larger request load on Wikidata API.
    * 
    * @param req
    * @return an Err<er> if one was encountered during execution
