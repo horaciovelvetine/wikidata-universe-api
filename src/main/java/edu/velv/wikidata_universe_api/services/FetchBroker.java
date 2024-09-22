@@ -28,6 +28,15 @@ public class FetchBroker {
   }
 
   /**
+   * Injectable dependency is used for mocking and testing the fetcher for testing this class.
+   * @apiNote do not use this constructor in any sort of actual serving of data/or services, providing a real
+   * instance of the fetcher should still maintain functionality. 
+   */
+  public FetchBroker(WikibaseDataFetcher fetcher) {
+    this.fetcher = fetcher;
+  }
+
+  /**
    * Retrieves a matching EntityDocument by first searching for an Entity with a matching label,
    * then expanding to search across all attributes with more leinent match criteria. Provides handling
    * and Err(or)s in the case(s) that the Wikidata API is offline or No Such (matching) Record can be found
@@ -173,7 +182,7 @@ public class FetchBroker {
    * @param query 
    * @return An EntityDocument match or an encountered Err(or)
    */
-  private Either<Err, EntityDocument> fetchEntityByTitleMatch(String query) {
+  private Either<Err, EntityDocument>  fetchEntityByTitleMatch(String query) {
     return fetchWithApiUnavailableErrorHandler(() -> fetcher.getEntityDocumentByTitle(Constables.EN_WIKI_IRI, query))
         .flatMap(this::handleNoSuchEntityResults);
   }
