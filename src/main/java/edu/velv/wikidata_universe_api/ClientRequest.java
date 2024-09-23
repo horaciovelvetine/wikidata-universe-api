@@ -6,6 +6,7 @@ import java.util.Optional;
 import io.vavr.control.Either;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.models.Graphset;
@@ -20,21 +21,22 @@ public class ClientRequest {
   protected Graphset graph;
   protected FR3DLayout layout;
 
-  @Autowired
-  private WikidataServiceManager wikidata;
+  private final WikidataServiceManager wikidata;
 
-  public ClientRequest(String query) {
+  public ClientRequest(WikidataServiceManager wd, String query) {
     this.query = this.sanitizeQueryString(query);
     this.dimensions = new Dimension();
     this.graph = new Graphset();
     this.layout = new FR3DLayout(dimensions, graph);
+    this.wikidata = wd;
   }
 
-  public ClientRequest(RequestPayloadData payload) {
+  public ClientRequest(WikidataServiceManager wd, RequestPayloadData payload) {
     this.query = payload.query();
     this.dimensions = payload.dimensions();
     this.graph = new Graphset(payload.vertices(), payload.edges(), payload.properties());
     this.layout = new FR3DLayout(this.dimensions(), this.graph());
+    this.wikidata = wd;
   }
 
   public String query() {
@@ -76,16 +78,6 @@ public class ClientRequest {
   }
 
   /**
-   * Removes portential garbage from the provided query value recieved as a query param from the client.
-   */
-  private String sanitizeQueryString(String query) {
-    if (query == null || query.isBlank()) {
-      return null;
-    }
-    return query.replaceAll("[^\\w\\s]", "").trim();
-  }
-
-  /**
    * Initializes, and steps the Layout process to provide vertices with updates layout positions - then updates
    * Graphset so that each Vertex is aware of its update Point3D coords.
    */
@@ -97,5 +89,15 @@ public class ClientRequest {
     for (Vertex vert : graph.vertices()) {
       vert.coords(layout.apply(vert));
     }
+  }
+
+  /**
+  * Removes portential garbage from the provided query value recieved as a query param from the client.
+  */
+  private String sanitizeQueryString(String query) {
+    if (query == null || query.isBlank()) {
+      return null;
+    }
+    return query.replaceAll("[^\\w\\s]", "").trim();
   }
 }

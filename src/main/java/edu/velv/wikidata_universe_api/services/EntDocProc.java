@@ -16,8 +16,11 @@ import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.SnakData;
 import edu.velv.wikidata_universe_api.models.Vertex;
 
-@Service
 public class EntDocProc {
+
+  public EntDocProc() {
+    //default constructor
+  }
 
   /**
    * Type checks the provided document to attempt to create a Vertex from the provided doc.

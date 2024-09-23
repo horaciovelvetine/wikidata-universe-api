@@ -19,7 +19,6 @@ import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEnti
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError;
 
-@Service
 public class FetchBroker {
   private final WikibaseDataFetcher fetcher;
 

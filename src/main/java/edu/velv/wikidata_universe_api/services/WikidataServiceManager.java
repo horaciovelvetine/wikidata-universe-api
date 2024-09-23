@@ -19,13 +19,15 @@ import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.errors.Err;
 
-@Service
 public class WikidataServiceManager {
-  @Autowired
-  private FetchBroker api;
+  
+  private FetchBroker api = new FetchBroker();
 
-  @Autowired
-  private EntDocProc docProc;
+  private EntDocProc docProc = new EntDocProc();
+
+  public WikidataServiceManager() {
+    // Default a constructor
+  }
 
   /**
    * Uses the initial query value to find the target of the request and then gather the initial data
@@ -57,10 +59,12 @@ public class WikidataServiceManager {
   public Optional<Err> fetchIncompleteDataTask(ClientRequest req) {
     while (!req.graph().allDataFetched()) {
       List<String> tgtBatch = req.graph().getUnfetchedEntityIDTargetBatch();
+
       if (tgtBatch.size() == 0) {
         tgtBatch = req.graph().getUnfetchedDateTargetBatch();
         ingestUnfetchedTargetDateBatchData(tgtBatch, req);
       }
+
       ingestUnfetchedTargetIdBatchData(tgtBatch, req);
     }
 
