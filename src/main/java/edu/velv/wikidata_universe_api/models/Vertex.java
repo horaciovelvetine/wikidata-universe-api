@@ -1,25 +1,27 @@
 package edu.velv.wikidata_universe_api.models;
 
-import java.util.Map;
-
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
-import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
+import org.wikidata.wdtk.datamodel.implementation.SitesImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.velv.wikidata_universe_api.Constables;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Vertex {
   @JsonIgnore
+  private SitesImpl sites = new SitesImpl();
+
   public static final Integer RADIUS = 20;
-  @JsonIgnore
-  private boolean fetched;
 
   private String id;
   private String label;
   private String description;
-  private Map<String, SiteLink> siteLinks; //todo check site links might be helpful for cx
+  private String pageUrl;
+  private String siteLinkUrl;
+  private boolean fetched;
   private Point3D coords;
 
   public Vertex() {
@@ -32,7 +34,10 @@ public class Vertex {
     this.id = itemDoc.getEntityId().getId();
     this.label = itemDoc.findLabel(Constables.EN_LANG_WIKI_KEY);
     this.description = itemDoc.findDescription(Constables.EN_LANG_WIKI_KEY);
-    this.siteLinks = itemDoc.getSiteLinks();
+    // this.pageUrl = getPageUrl(itemDoc);
+    // this.siteLinkUrl = getSiteLinkUrl(itemDoc);
+    this.pageUrl = null;
+    this.siteLinkUrl = null;
     this.fetched = true;
     this.coords = new Point3D();
   }
@@ -77,6 +82,22 @@ public class Vertex {
     this.coords = point;
   }
 
+  public String pageUrl() {
+    return this.pageUrl;
+  }
+
+  public void pageUrl(String pageUrl) {
+    this.pageUrl = pageUrl;
+  }
+
+  public String siteLinkUrl() {
+    return this.siteLinkUrl;
+  }
+
+  public void siteLinkUrl(String siteLinkUrl) {
+    this.siteLinkUrl = siteLinkUrl;
+  }
+
   public boolean isFetchedOrDate() {
     return fetched || id == null;
   }
@@ -88,14 +109,18 @@ public class Vertex {
   public void updateUnfetchedValues(ItemDocumentImpl doc) {
     this.label = doc.findLabel(Constables.EN_LANG_WIKI_KEY);
     this.description = doc.findDescription(Constables.EN_LANG_WIKI_KEY);
-    this.siteLinks = doc.getSiteLinks();
+    // this.pageUrl = getPageUrl(doc);
+    // this.siteLinkUrl = getSiteLinkUrl(doc);
+    this.pageUrl = null;
+    this.siteLinkUrl = null;
     this.fetched = true;
   }
 
   public void updateUnfetchedValues(WbSearchEntitiesResult result) {
     this.label = result.getLabel();
     this.description = result.getDescription();
-    this.siteLinks = null;
+    this.pageUrl = null;
+    this.siteLinkUrl = null;
     this.fetched = true;
   }
 
