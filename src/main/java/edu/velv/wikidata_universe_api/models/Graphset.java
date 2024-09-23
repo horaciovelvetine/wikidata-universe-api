@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import io.vavr.Tuple2;
 
 /**
@@ -15,6 +17,7 @@ import io.vavr.Tuple2;
  * With <3 & credit to JUNG & it's contributors
  * @https://github.com/jrtom/jung - thanks!
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Graphset {
   protected Set<Vertex> vertices = ConcurrentHashMap.newKeySet();
   protected Set<Edge> edges = ConcurrentHashMap.newKeySet();

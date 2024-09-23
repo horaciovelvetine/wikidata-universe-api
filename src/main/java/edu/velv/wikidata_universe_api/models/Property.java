@@ -2,8 +2,11 @@ package edu.velv.wikidata_universe_api.models;
 
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import edu.velv.wikidata_universe_api.Constables;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Property {
   private String id;
   private String label;

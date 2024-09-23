@@ -1,7 +1,10 @@
 package edu.velv.wikidata_universe_api.models;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Edge {
   private String srcId;
   private String tgtId;
