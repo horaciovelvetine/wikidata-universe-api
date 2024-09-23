@@ -22,7 +22,7 @@ public class Constables {
   public static final double ATTR_MULT = 0.75;
   public static final double TEMP_MULT = 10;
   public static final int MAX_ITERS = 700;
-  public static final double MAX_ITER_MVMNT = 50;
+  public static final double MAX_ITER_MVMNT = 5;
 
   private Constables() {
     // Prevent instantiating for constant variables usage
