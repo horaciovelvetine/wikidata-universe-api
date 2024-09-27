@@ -5,11 +5,10 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.stereotype.Service;
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
+import org.wikidata.wdtk.datamodel.interfaces.StatementDocument;
 
 import edu.velv.wikidata_universe_api.Constables;
 import edu.velv.wikidata_universe_api.models.Edge;
@@ -31,7 +30,7 @@ public class EntDocProc {
    * @return a Vertex or empty if not passed the correct doc subtype 
    * 
    */
-  public Optional<Vertex> attemptVertexCreateUnkownTypeEntDoc(EntityDocument doc) {
+  public Optional<Vertex> createVertexFromUnknownEntDoc(EntityDocument doc) {
     if (doc instanceof ItemDocumentImpl) {
       Vertex newVert = new Vertex((ItemDocumentImpl) doc);
       return Optional.of(newVert);
@@ -47,49 +46,48 @@ public class EntDocProc {
    * @return a set of unique Edge's
    * 
    */
-  public Set<Edge> createRelatedEdgesFromStatements(EntityDocument oDoc) {
-    ItemDocument doc = (ItemDocument) oDoc;
-    String srcId = doc.getEntityId().getId();
-    Iterator<Statement> stmts = doc.getAllStatements();
+  public Set<Edge> createRelatedEdgesFromStatements(EntityDocument doc) {
     Set<Edge> newEdges = new HashSet<>();
-
-    while (stmts.hasNext()) {
-      Statement stmt = stmts.next();
-      SnakData mainSnak = stmt.getMainSnak().accept(new SnakData());
-      if (snakDefinesRelevantData(mainSnak)) {
-        newEdges.add(new Edge(srcId, mainSnak));
+    if (doc instanceof StatementDocument) {
+      StatementDocument castDoc = (StatementDocument) doc;
+      String srcId = doc.getEntityId().getId();
+      Iterator<Statement> stmts = castDoc.getAllStatements();
+      while (stmts.hasNext()) {
+        Statement stmt = stmts.next();
+        SnakData mainSnak = stmt.getMainSnak().accept(new SnakData());
+        if (snakDefinesRelevantData(mainSnak)) {
+          newEdges.add(new Edge(srcId, mainSnak));
+        }
       }
     }
-
     return newEdges;
   }
 
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-
   /**
-   * Wraps the validation methods used to double check that a MainSnak is something worth including
-   * in the returned data set, in the process checking for:
-   * - Missing or null data
-   * - Excluded DataType(s) - mostly random external database Id values
-   * - Excluded Entity Data - Wikidata internal (and Id specific) pre-excluded entities 
+   * Checks the MainSnak from a Statement looking for missing or exclusionary data that the Statement may define. Most of this is looking for null data, then checking if the Statement defines some external database ID ref. Through development a list of excluded QID & PID values has been built. Often these are mismarked (should be .datatype() == 'external-id') but are only found at random.
    * @see https://github.com/horaciovelvetine/ForceDrawnGraphs/blob/main/docs/dev/PROPERTY_EXCLUSION_LIST.md
    */
   private boolean snakDefinesRelevantData(SnakData ms) {
-    return !(hasNullDataValues(ms) || definesExcludedDataType(ms) || definesExcludedEntityData(ms));
-  }
-
-  private boolean hasNullDataValues(SnakData ms) {
-    return ms == null || ms.snakValue == null || ms.property == null;
-  }
-
-  private boolean definesExcludedDataType(SnakData ms) {
-    return Constables.EXCLUDED_DATA_TYPES.contains(ms.datatype);
-  }
-
-  private boolean definesExcludedEntityData(SnakData ms) {
-    return Constables.EXCLUDED_ENT_IDS.contains(ms.property.value)
-        || Constables.EXCLUDED_ENT_IDS.contains(ms.snakValue.value);
+    if (ms == null)
+      return false;
+    if (ms.snakValue() == null)
+      return false;
+    if (ms.property() == null)
+      return false;
+    if (ms.datatype() == null)
+      return false;
+    if (Constables.EXCLUDED_DATA_TYPES.contains(ms.datatype))
+      return false;
+    if (ms.property().value() == null)
+      return false;
+    if (Constables.EXCLUDED_ENT_IDS.contains(ms.property().value()))
+      return false;
+    if (ms.snakValue().value() == null)
+      return false;
+    if (ms.snakValue().value().startsWith("P"))
+      return false;
+    if (Constables.EXCLUDED_ENT_IDS.contains(ms.snakValue().value()))
+      return false;
+    return true;
   }
 }

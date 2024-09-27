@@ -37,7 +37,7 @@ public class EntDocProcTests {
   void attemptVertexCreateUnkownTypeEntDoc_creates_vertex_when_expected() throws Exception {
     setupDouglasAdamsItemDocument();
 
-    Optional<Vertex> result = docProc.attemptVertexCreateUnkownTypeEntDoc(mItemDoc);
+    Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mItemDoc);
 
     assertNotNull(result);
     assertEquals("Q42", result.get().id());
@@ -48,7 +48,7 @@ public class EntDocProcTests {
   @Test
   void attemptVertexCreateUnkownTypeEntDoc_is_empty_when_expected() {
     PropertyDocument mockPropDoc = mock(PropertyDocument.class);
-    Optional<Vertex> result = docProc.attemptVertexCreateUnkownTypeEntDoc(mockPropDoc);
+    Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mockPropDoc);
     assertTrue(result.isEmpty(), "Should not create a Vertex with a Property Document");
   }
 
@@ -84,6 +84,32 @@ public class EntDocProcTests {
 
     assertTrue(results.isEmpty());
   }
+
+  @Test
+  void createRelatedEdgeFromStatements_ignores_property_tgt_edges() {
+    setupDouglasAdamsItemDocument();
+
+    // Mock a statement where the tgtId starts with "P"
+    Statement propertyTgtStatement = propertyTgtStatement();
+
+    List<Statement> statements = List.of(propertyTgtStatement);
+    when(mItemDoc.getAllStatements()).thenReturn(statements.iterator());
+
+    Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
+
+    // Assert that no edges are created
+    assertTrue(results.isEmpty(), "Edges with tgtId starting with 'P' should not be created");
+  }
+
+  private Statement propertyTgtStatement() {
+    ValueData prop = entValueData(PID);
+    ValueData val = entValueData("P456"); // tgtId starting with "P"
+    SnakData snakData = new SnakData(entStr, prop, val);
+
+    return dataToStatementPipeline(snakData);
+  }
+
+
 
   private void setupDouglasAdamsItemDocument() {
     when(mItemId.getId()).thenReturn("Q42");
