@@ -72,7 +72,6 @@ public class FetchBroker {
   /**
    * Individually searches for Dates using the formatted labels one at a time to build a set of date results. 
    * @apiNote This method sends individual requests for every date target slightly changing the pattern above
-   * todo - test if there were a way to have this make use of the title fetch list 
    * 
    * @param List<String> dateTgts
    * @return a list of SearchResults mapped to their query value, or an Err(or) if one was encountered
