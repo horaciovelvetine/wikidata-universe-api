@@ -22,11 +22,13 @@ public class Vertex {
   private String pageUrl;
   private String siteLinkUrl;
   private boolean fetched;
+  private boolean origin;
   private Point3D coords;
 
   public Vertex() {
     //default constructs...
     this.fetched = false;
+    this.origin = false;
     this.coords = new Point3D();
   }
 
@@ -39,6 +41,7 @@ public class Vertex {
     this.pageUrl = null;
     this.siteLinkUrl = null;
     this.fetched = true;
+    this.origin = false;
     this.coords = new Point3D();
   }
 
@@ -104,6 +107,14 @@ public class Vertex {
 
   public boolean isFetchedOrId() {
     return fetched && !id.isBlank();
+  }
+
+  public void setAsOrigin() {
+    this.origin = true;
+  }
+
+  public boolean origin() {
+    return this.origin;
   }
 
   public void updateUnfetchedValues(ItemDocumentImpl doc) {
