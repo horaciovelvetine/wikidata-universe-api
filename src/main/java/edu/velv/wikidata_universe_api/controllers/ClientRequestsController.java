@@ -9,6 +9,7 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.RequestErrResponse;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
+import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @CrossOrigin
 @RestController
-public class ClientRequestsController {
+public class ClientRequestsController implements Printable {
   private final WikidataServiceManager srvcMngr = new WikidataServiceManager();
 
   @GetMapping("api/status")
@@ -37,16 +38,13 @@ public class ClientRequestsController {
 
   @PostMapping("api/fetch-related")
   public ResponseEntity<RequestResponseBody> fetchRelatedDataDetails(@RequestBody RequestPayloadData payload) {
+
+    print("FetchRelated: " + payload.query());
+
     return new ClientRequest(srvcMngr, payload)
         .getUnfetchedData()
         .mapLeft(Err::mapErrResponse)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
-  }
-
-  @PostMapping("api/action/click-target")
-  public ResponseEntity<RequestResponseBody> fetchClickTargetRelatedDataDetails(
-      @RequestBody RequestPayloadData payload) {
-    return null;
   }
 
   private ResponseEntity<RequestResponseBody> buildSuccessResponse(ClientRequest request) {
