@@ -1,35 +1,54 @@
 package edu.velv.wikidata_universe_api.errors;
 
-import edu.velv.wikidata_universe_api.errors.WikidataServiceError.ApiUnavailableError;
-import edu.velv.wikidata_universe_api.errors.WikidataServiceError.FetchRelatedWithTimeoutError;
-import edu.velv.wikidata_universe_api.errors.WikidataServiceError.NoSuchEntityFoundError;
+import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.DebugDetailsError;
+import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
+import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
 
-public sealed interface Err
-    permits WikidataServiceError, Err.LayoutProcessError, Err.DebugDetailsResponse, Err.DefaultResponseBodyError {
-  static final int ERR_CODE = 404;
+public sealed interface Err permits Err.WikidataServiceError, Err.WikiverseServiceError, Err.RequestErrResponse {
+  public String msg();
 
-  record LayoutProcessError(String message, Exception e) implements Err {
+  sealed interface WikiverseServiceError extends Err {
+    record DebugDetailsError(String msg) implements WikiverseServiceError {
+      //? Default error
+    }
   }
 
-  record DefaultResponseBodyError(String message) implements Err {
+  sealed interface WikidataServiceError extends Err {
+    record ApiUnavailableError(String msg, Throwable cause) implements WikidataServiceError {
+      public ApiUnavailableError(Throwable cause) {
+        this("The Wikidata API is currently offline, try again later.", cause);
+      }
+    }
+
+    record NoSuchEntityFoundError(String msg, String query) implements WikidataServiceError {
+      //? Searching by any returns no results for this query
+      public NoSuchEntityFoundError(String query) {
+        this("No such entity found for: " + query, query);
+      }
+
+      public NoSuchEntityFoundError() {
+        this("default query");
+      }
+    }
   }
 
-  // Error Mapping for Responses to Client...
   //=====================================================================================================================>
   //=====================================================================================================================>
   //=====================================================================================================================>
 
-  record DebugDetailsResponse(int status, String message, Err e) implements Err {
+  record RequestErrResponse(int status, String msg, Err e) implements Err {
+    //? Returned in ResponseBody if Err present summarizes thrown for debug
   }
 
-  public static DebugDetailsResponse mapDebug(Err err) {
-    return switch (err) {
-      case NoSuchEntityFoundError e -> new DebugDetailsResponse(ERR_CODE, "No Such Entity Found", err);
-      case ApiUnavailableError e -> new DebugDetailsResponse(ERR_CODE, "Wikidata Unavailable Error", err);
-      case FetchRelatedWithTimeoutError e -> new DebugDetailsResponse(ERR_CODE, "Related Fetch Timed Out", err);
-      case LayoutProcessError e -> new DebugDetailsResponse(ERR_CODE, "Layout Process Error", err);
-      case DefaultResponseBodyError e -> new DebugDetailsResponse(ERR_CODE, "Default Response Error", err);
-      default -> new DebugDetailsResponse(ERR_CODE, "Unexpected value: ", err);
+  public static RequestErrResponse mapErrResponse(Err error) {
+    return switch (error) {
+      case DebugDetailsError e -> new RequestErrResponse(404, "A Debug, oh no squish it!", error);
+      case ApiUnavailableError e ->
+        new RequestErrResponse(404, "Wikidata's API is currently unavailable, try again later.", error);
+      case NoSuchEntityFoundError e -> new RequestErrResponse(404,
+          "Seems like there is no such matching record, check your search and try again.", error);
+      default ->
+        new RequestErrResponse(400, "Fallback, found a default error, retrace your steps and try again!", error);
     };
   }
 }
