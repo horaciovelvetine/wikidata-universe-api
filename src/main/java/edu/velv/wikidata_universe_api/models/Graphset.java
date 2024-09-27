@@ -3,7 +3,6 @@ package edu.velv.wikidata_universe_api.models;
 import java.util.Optional;
 import java.util.Set;
 import java.util.List;
-import java.util.ArrayList;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -54,6 +53,10 @@ public class Graphset {
 
   public Integer vertexCount() {
     return vertices.size();
+  }
+
+  public boolean hasNoExistingVertices() {
+    return vertexCount() == 0;
   }
 
   public Integer edgeCount() {
@@ -155,58 +158,24 @@ public class Graphset {
   }
 
   /**
-   * Checks if any of the data elements (Vertices & Properties) still have unfetched details
+   * Gets any Vertex object from the set where fetched is falsey
    */
-  public boolean allDataFetched() {
-    for (Vertex v : vertices) {
-      if (!v.fetched()) {
-        return false;
-      }
-    }
-
-    for (Property p : properties) {
-      if (!p.fetched()) {
-        return false;
-      }
-    }
-
-    return true;
+  public List<Vertex> getUnfetchedVertices() {
+    return vertices().stream().filter(v -> !v.fetched()).toList();
   }
 
   /**
-   * Creates a set of strings which represent Wikidata Entities with unfetched details, checking both vertices and properties.
-   * Ignores vertices which represent a date target, returning only ID values (e.g. "Q123", "P123")
-   * 
-   * @return a set of Wikidata searchable string targets
+   * Gets any Property object from the set where fetched is falsey
    */
-  public List<String> getUnfetchedEntityIDTargetBatch() {
-    List<String> batch = new ArrayList<>();
-    int batchSize = 0;
-
-    batch = addUnfetchedPropertyIdsToBatch(batch, batchSize);
-    if (batchSize == 50)
-      return batch;
-
-    return addUnfetchedVertexIdsToBatch(batch, batchSize);
+  public List<Property> getUnfetchedProperties() {
+    return properties().stream().filter(p -> !p.fetched()).toList();
   }
 
-  /**
-   * Creates a set of string which represent Wikidata date Entities with details 
-   */
-  public List<String> getUnfetchedDateTargetBatch() {
-    List<String> batch = new ArrayList<>();
-    int count = 0;
-
-    for (Vertex v : vertices) {
-      if (v.isFetchedOrId())
-        continue;
-
-      batch.add(v.label());
-      count++;
-      if (count == 50)
-        return batch;
-    }
-    return batch;
+  public Vertex getOriginVertex() {
+    return vertices.stream()
+        .filter(Vertex::fetched)
+        .findFirst()
+        .orElse(null);
   }
 
   /**
@@ -230,43 +199,6 @@ public class Graphset {
 
       return srcMatch || tgtMatch || propMatch || lblMatch;
     });
-  }
-
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-  //=====================================================================================================================>
-
-  /**
-   * Filters vertices for unfetched entities where an id() values is present, then updates the batch with this target info
-   */
-  private List<String> addUnfetchedVertexIdsToBatch(List<String> batch, int count) {
-    for (Vertex v : vertices) {
-      if (v.isFetchedOrDate())
-        continue;
-      batch.add(v.id());
-      count++;
-      if (count == 50)
-        return batch;
-    }
-    return batch;
-  }
-
-  /**
-   * Filters properties for unfetched entities, then updates the batch with this target info
-   */
-  private List<String> addUnfetchedPropertyIdsToBatch(List<String> batch, int count) {
-    for (Property p : properties) {
-      if (p.fetched())
-        continue;
-      batch.add(p.id());
-      count++;
-      if (count == 50)
-        return batch;
-    }
-    return batch;
   }
 
   /**
