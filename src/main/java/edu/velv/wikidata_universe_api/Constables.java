@@ -18,7 +18,7 @@ public class Constables {
       "commonsMedia", "url", "globe-coordinate", "geo-shape", "wikibase-lexeme");
   // FR3D LAYOUT SPECIFIC STUFF
   public static final double TARGET_DATA_DENSITY = 0.005;
-  public static final double REP_MULT = 0.5;
+  public static final double REP_MULT = 0.75;
   public static final double ATTR_MULT = 0.75;
   public static final double TEMP_MULT = 10;
   public static final int MAX_ITERS = 700;

@@ -8,7 +8,6 @@ import io.vavr.CheckedFunction0;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 
-import org.springframework.stereotype.Service;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;

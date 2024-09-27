@@ -20,11 +20,12 @@ class EdgeTests {
 
   @Test
   void constructs_default_edge() {
-    assertNull(edge.srcId());
-    assertNull(edge.tgtId());
-    assertNull(edge.propertyId());
-    assertNull(edge.label());
-    assertFalse(edge.fetched());
+    String msg = "Default Values should be either null or false!";
+    assertNull(edge.srcId(), msg);
+    assertNull(edge.tgtId(), msg);
+    assertNull(edge.propertyId(), msg);
+    assertNull(edge.label(), msg);
+    assertFalse(edge.fetched(), msg);
   }
 
   @Test

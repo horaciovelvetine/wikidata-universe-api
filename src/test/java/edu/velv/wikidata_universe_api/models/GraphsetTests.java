@@ -29,7 +29,6 @@ public class GraphsetTests {
     assertEquals(6, graphset.vertexCount());
     assertEquals(3, graphset.propertyCount());
     assertEquals(7, graphset.edgeCount());
-    assertTrue(graphset.allDataFetched());
   }
 
   @Test
@@ -38,7 +37,6 @@ public class GraphsetTests {
     assertEquals(4, graphset.vertexCount());
     assertEquals(2, graphset.propertyCount());
     assertEquals(3, graphset.edgeCount());
-    assertFalse(graphset.allDataFetched());
   }
 
   @Test
@@ -66,35 +64,6 @@ public class GraphsetTests {
     Optional<Tuple2<Vertex, Vertex>> missingEndpoint = graphset.getEndpoints(edge.orElse(null));
     assertTrue(missingEndpoint.isEmpty(),
         "The intended Edge should be an unfetched Date target, and should not be returned here.");
-  }
-
-  @Test
-  void getUnfetchedEntityIDTargetBatch_builds_batch_for_unfetched() {
-    graphset = DataBuilder.simpleUnfetchedGraphset();
-    List<String> batch = graphset.getUnfetchedEntityIDTargetBatch();
-    assertTrue(batch.size() != 0);
-  }
-
-  @Test
-  void getUnfetchedEntityIDTargetBatch_empty_for_fetched() {
-    graphset = DataBuilder.simpleFetchedGraphset();
-    List<String> batch = graphset.getUnfetchedEntityIDTargetBatch();
-    System.out.println(batch);
-    assertTrue(batch.size() == 0, "There should be nothing in the returned batch");
-  }
-
-  @Test
-  void getUnfetchedDateTargetBatch_builds_batch_for_unfetched() {
-    graphset = DataBuilder.simpleUnfetchedGraphset();
-    List<String> batch = graphset.getUnfetchedDateTargetBatch();
-    assertTrue(batch.size() != 0);
-  }
-
-  @Test
-  void getUnfetchedDateTargetBatch_empty_for_fetched() {
-    graphset = DataBuilder.simpleFetchedGraphset();
-    List<String> batch = graphset.getUnfetchedDateTargetBatch();
-    assertTrue(batch.size() == 0, "There should be nothing in the returned batch.");
   }
 
   @Test

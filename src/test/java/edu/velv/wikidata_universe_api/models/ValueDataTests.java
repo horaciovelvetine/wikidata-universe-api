@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.text.SimpleDateFormat;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
@@ -13,14 +11,10 @@ import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
 public class ValueDataTests {
 
   private ValueData valueData;
-  private SimpleDateFormat inputFormat;
-  private SimpleDateFormat outputFormat;
 
   @BeforeEach
   public void setUp() {
     valueData = new ValueData();
-    inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-    outputFormat = new SimpleDateFormat("MMMM d, yyyy");
   }
 
   @Test

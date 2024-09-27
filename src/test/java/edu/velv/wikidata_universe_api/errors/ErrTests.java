@@ -13,7 +13,7 @@ public class ErrTests {
     Err.WikiverseServiceError.DebugDetailsError error = new Err.WikiverseServiceError.DebugDetailsError(
         expectedMessage);
 
-    assertEquals(expectedMessage, error.msg());
+    assertEquals(expectedMessage, error.msg(), "Err's should at least have a message, bare minimum.");
   }
 
   @Test

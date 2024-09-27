@@ -5,9 +5,6 @@ import java.util.Optional;
 
 import io.vavr.control.Either;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.models.Graphset;
 import edu.velv.wikidata_universe_api.models.FR3DLayout;
@@ -72,6 +69,8 @@ public class ClientRequest {
    * @return an error if one was enountered while carrying out the fetches requests 
    */
   public Either<Err, ClientRequest> getUnfetchedData() {
+    layout.lock(this.graph().getOriginVertex(), true);
+
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteDataTask(this);
     runLayoutAlgoProcess();
     return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);

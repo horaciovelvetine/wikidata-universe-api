@@ -2,7 +2,6 @@ package edu.velv.wikidata_universe_api.models;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
