@@ -17,7 +17,7 @@ public class FR3DLayoutTest {
 
   @Test
   void initializes_simple_fetched_graphset() {
-    construct_testable_fetched_data();
+    // construct_testable_fetched_data();
 
     for (Vertex vert : graph.vertices()) {
       assertEquals(layout.apply(vert), new Point3D(), "Uninitialized Vertices should start with (0,0,0) coordinates");
@@ -34,7 +34,7 @@ public class FR3DLayoutTest {
 
   @Test
   void steps_simple_fetched_graphset() {
-    construct_testable_fetched_data();
+    // construct_testable_fetched_data();
     layout.initialize();
 
     Map<Vertex, Point3D> originalPositions = new HashMap<>();
@@ -55,7 +55,7 @@ public class FR3DLayoutTest {
 
   @Test
   void step_ignores_locked_vertices() {
-    construct_testable_fetched_data();
+    // construct_testable_fetched_data();
     Vertex mockOrigin = graph.vertices().stream().findFirst().get();
     layout.lock(mockOrigin, true);
 
@@ -73,8 +73,8 @@ public class FR3DLayoutTest {
     assertFalse(layout.isLocked(mockOrigin), "Should unlock Vertex with unlock all call");
   }
 
-  private void construct_testable_fetched_data() {
-    graph = DataBuilder.simpleFetchedGraphset();
-    layout = new FR3DLayout(new Dimension(500, 500), graph);
-  }
+  // private void construct_testable_fetched_data() {
+  //   graph = DataBuilder.simpleFetchedGraphset();
+  //   layout = new FR3DLayout(new Dimension(500, 500), graph);
+  // }
 }

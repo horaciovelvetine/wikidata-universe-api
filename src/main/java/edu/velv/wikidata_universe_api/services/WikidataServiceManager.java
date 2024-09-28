@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import io.vavr.control.Either;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
@@ -19,9 +22,11 @@ import edu.velv.wikidata_universe_api.errors.Err;
 
 public class WikidataServiceManager implements Printable {
 
-  private FetchBroker api = new FetchBroker();
+  @Autowired
+  private FetchBroker api;
 
-  private EntDocProc docProc = new EntDocProc();
+  @Autowired
+  private EntDocProc docProc;
 
   public WikidataServiceManager() {
     // Default a constructor
@@ -86,7 +91,7 @@ public class WikidataServiceManager implements Printable {
    * them back to the original ClientRequest.
    */
   private void ingestEntityDocAsVertexWithEdges(EntityDocument entDoc, ClientRequest req) {
-    Optional<Vertex> isVert = docProc.createVertexFromUnknownEntDoc(entDoc);
+    Optional<Vertex> isVert = docProc.createVertexFromUnknownEntDoc(entDoc, api.enLangKey());
 
     if (isVert.isPresent()) {
       Vertex vert = isVert.get();
@@ -139,18 +144,20 @@ public class WikidataServiceManager implements Printable {
 
     for (Entry<String, Either<Err, EntityDocument>> result : idResults.get().entrySet()) {
       queue.removeFromQueue(result.getKey());
+
       if (result.getValue().isLeft() || result.getValue().get() == null) { // NoSuchResultsErr removes tgt mention from graphset
         req.graph().removeInvalidSearchResultFromData(result.getKey());
       }
+
       EntityDocument resDoc = result.getValue().get();
-      Optional<Vertex> isVert = docProc.createVertexFromUnknownEntDoc(resDoc);
+      Optional<Vertex> isVert = docProc.createVertexFromUnknownEntDoc(resDoc, api.enLangKey());
 
       if (isVert.isPresent()) {
         req.graph().getVertexById(result.getKey()).get()
-            .updateUnfetchedValues((ItemDocumentImpl) resDoc);
+            .updateUnfetchedValues((ItemDocumentImpl) resDoc, this.api.enLangKey());
       } else if (resDoc instanceof PropertyDocument) { // is a Property is only other possibility
         req.graph().getPropertyById(result.getKey()).get()
-            .updateUnfetchedValues((PropertyDocument) resDoc);
+            .updateUnfetchedValues((PropertyDocument) resDoc, this.api.enLangKey());
       } else {
         print("Encountered an unknown doc type while ingesting related entIDBatch");
       }
@@ -176,11 +183,13 @@ public class WikidataServiceManager implements Printable {
 
     for (Entry<String, Either<Err, WbSearchEntitiesResult>> result : dateResults.get().entrySet()) {
       queue.removeFromQueue(result.getKey());
+
       if (result.getValue().isLeft()) {
         req.graph().removeInvalidSearchResultFromData(result.getKey());
       }
 
       Optional<Vertex> srcVertex = req.graph().getVertexById(result.getKey());
+
       if (srcVertex.isPresent()) {
         srcVertex.get().updateUnfetchedValues(result.getValue().get());
       }
@@ -188,6 +197,9 @@ public class WikidataServiceManager implements Printable {
     return Optional.empty();
   }
 
+  /**
+   * Composed during tasks to track what data needs to be fetched
+   */
   private class IncompleteDataQueue {
     List<String> entsToFetch = new ArrayList<>();
     List<String> datesToFetch = new ArrayList<>();

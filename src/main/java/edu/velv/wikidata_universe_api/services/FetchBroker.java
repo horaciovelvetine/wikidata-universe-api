@@ -8,11 +8,11 @@ import io.vavr.CheckedFunction0;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 
-import edu.velv.wikidata_universe_api.Constables;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
@@ -20,6 +20,12 @@ import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError;
 
 public class FetchBroker {
   private final WikibaseDataFetcher fetcher;
+
+  @Value("${edu.velv.WikiData.en_wiki_iri}")
+  private String wikiIri;
+
+  @Value("${edu.velv.WikiData.en_lang_wiki_key}")
+  private String wikiLangKey;
 
   public FetchBroker() {
     this.fetcher = WikibaseDataFetcher.getWikidataDataFetcher();
@@ -32,6 +38,14 @@ public class FetchBroker {
    */
   public FetchBroker(WikibaseDataFetcher fetcher) {
     this.fetcher = fetcher;
+  }
+
+  public String iri() {
+    return this.wikiIri;
+  }
+
+  public String enLangKey() {
+    return this.wikiLangKey;
   }
 
   /**
@@ -155,7 +169,7 @@ public class FetchBroker {
    * @return a matching SearchResult or encountered Err(or) 
    */
   private Either<Err, WbSearchEntitiesResult> fetchSearchResultsByAnyMatch(String query) {
-    return fetchWithApiUnavailableErrorHandler(() -> fetcher.searchEntities(query, Constables.EN_LANG_WIKI_KEY))
+    return fetchWithApiUnavailableErrorHandler(() -> fetcher.searchEntities(query, wikiLangKey))
         .flatMap(this::handleSearchedEntitiesResults);
   }
 
@@ -179,8 +193,8 @@ public class FetchBroker {
    * @param query 
    * @return An EntityDocument match or an encountered Err(or)
    */
-  private Either<Err, EntityDocument>  fetchEntityByTitleMatch(String query) {
-    return fetchWithApiUnavailableErrorHandler(() -> fetcher.getEntityDocumentByTitle(Constables.EN_WIKI_IRI, query))
+  private Either<Err, EntityDocument> fetchEntityByTitleMatch(String query) {
+    return fetchWithApiUnavailableErrorHandler(() -> fetcher.getEntityDocumentByTitle(wikiIri, query))
         .flatMap(this::handleNoSuchEntityResults);
   }
 

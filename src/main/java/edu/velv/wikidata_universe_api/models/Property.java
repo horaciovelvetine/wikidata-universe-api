@@ -4,8 +4,6 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-import edu.velv.wikidata_universe_api.Constables;
-
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Property {
   private String id;
@@ -16,13 +14,6 @@ public class Property {
   public Property() {
     //Default constructor does construct
     this.fetched = false;
-  }
-
-  public Property(PropertyDocument propDoc) {
-    this.id = propDoc.getEntityId().getId();
-    this.label = propDoc.findLabel(Constables.EN_LANG_WIKI_KEY);
-    this.description = propDoc.findDescription(Constables.EN_LANG_WIKI_KEY);
-    this.fetched = true;
   }
 
   public String id() {
@@ -57,9 +48,9 @@ public class Property {
     this.fetched = isFetched;
   }
 
-  public void updateUnfetchedValues(PropertyDocument doc) {
-    this.description = doc.findDescription(Constables.EN_LANG_WIKI_KEY);
-    this.label = doc.findLabel(Constables.EN_LANG_WIKI_KEY);
+  public void updateUnfetchedValues(PropertyDocument doc, String enLangKey) {
+    this.description = doc.findDescription(enLangKey);
+    this.label = doc.findLabel(enLangKey);
     this.fetched = true;
   }
 }

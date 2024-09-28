@@ -10,6 +10,7 @@ import edu.velv.wikidata_universe_api.models.Graphset;
 import edu.velv.wikidata_universe_api.models.FR3DLayout;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 import edu.velv.wikidata_universe_api.models.Vertex;
+import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 public class ClientRequest {
@@ -20,19 +21,19 @@ public class ClientRequest {
 
   private final WikidataServiceManager wikidata;
 
-  public ClientRequest(WikidataServiceManager wd, String query) {
+  public ClientRequest(WikidataServiceManager wd, FR3DConfig config, String query) {
     this.query = this.sanitizeQueryString(query);
     this.dimensions = new Dimension();
     this.graph = new Graphset();
-    this.layout = new FR3DLayout(dimensions, graph);
+    this.layout = new FR3DLayout(dimensions, graph, config);
     this.wikidata = wd;
   }
 
-  public ClientRequest(WikidataServiceManager wd, RequestPayloadData payload) {
+  public ClientRequest(WikidataServiceManager wd, FR3DConfig config, RequestPayloadData payload) {
     this.query = payload.query();
     this.dimensions = payload.dimensions();
     this.graph = new Graphset(payload.vertices(), payload.edges(), payload.properties());
-    this.layout = new FR3DLayout(this.dimensions(), this.graph());
+    this.layout = new FR3DLayout(dimensions, graph, config);
     this.wikidata = wd;
   }
 
@@ -72,6 +73,7 @@ public class ClientRequest {
     layout.lock(this.graph().getOriginVertex(), true);
 
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteDataTask(this);
+
     runLayoutAlgoProcess();
     return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
   }
@@ -82,9 +84,12 @@ public class ClientRequest {
    */
   private void runLayoutAlgoProcess() {
     layout.initialize();
-    while (!layout.done()) {
-      layout.step();
-    }
+
+    //todo -> back to test strange single coordinate layout results
+
+    // while (!layout.done()) {
+    //   layout.step();
+    // }
     for (Vertex vert : graph.vertices()) {
       vert.coords(layout.apply(vert));
     }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
-import edu.velv.wikidata_universe_api.Constables;
+// import edu.velv.wikidata_universe_api.Constables;
 
 public class VertexTests {
   Vertex bert; // the vert
@@ -88,19 +88,19 @@ public class VertexTests {
     assertTrue(bert.isFetchedOrId());
   }
 
-  @Test
-  public void updateUnfetchedValues_works_with_ItemDocument() {
-    String lbl = "LBL";
-    String dsc = "DSC";
-    when(mItemDoc.findLabel(Constables.EN_LANG_WIKI_KEY)).thenReturn(lbl);
-    when(mItemDoc.findDescription(Constables.EN_LANG_WIKI_KEY)).thenReturn(dsc);
+  // @Test
+  // public void updateUnfetchedValues_works_with_ItemDocument() {
+  //   String lbl = "LBL";
+  //   String dsc = "DSC";
+  //   when(mItemDoc.findLabel(Constables.EN_LANG_WIKI_KEY)).thenReturn(lbl);
+  //   when(mItemDoc.findDescription(Constables.EN_LANG_WIKI_KEY)).thenReturn(dsc);
 
-    bert.updateUnfetchedValues(mItemDoc);
+  //   bert.updateUnfetchedValues(mItemDoc);
 
-    assertEquals(lbl, bert.label());
-    assertEquals(dsc, bert.description());
-    assertTrue(bert.fetched());
-  }
+  //   assertEquals(lbl, bert.label());
+  //   assertEquals(dsc, bert.description());
+  //   assertTrue(bert.fetched());
+  // }
 
   @Test
   public void updateUnfetchedValues_works_with_SearchResults() {

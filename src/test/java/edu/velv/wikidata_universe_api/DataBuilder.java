@@ -66,11 +66,8 @@ public class DataBuilder {
 
   private static Vertex vertex(String idSfx) {
     String id = "Q" + idSfx;
-    when(mItemId.getId()).thenReturn(id);
-    when(mItemDoc.getEntityId()).thenReturn(mItemId);
-    when(mItemDoc.findLabel(en)).thenReturn(id + lbl);
-    when(mItemDoc.findDescription(en)).thenReturn(id + des);
-    Vertex vert = new Vertex(mItemDoc);
+    Vertex vert = new Vertex();
+    vert.id(id);
     vert.fetched(true);
     return vert;
   }
@@ -89,11 +86,8 @@ public class DataBuilder {
 
   private static Property property(String idSfx) {
     String id = "P" + idSfx;
-    when(mPropId.getId()).thenReturn(id);
-    when(mPropDoc.getEntityId()).thenReturn(mPropId);
-    when(mPropDoc.findLabel(en)).thenReturn(id + lbl);
-    when(mPropDoc.findDescription(en)).thenReturn(id + des);
-    Property prop = new Property(mPropDoc);
+    Property prop = new Property();
+    prop.id(id);
     prop.fetched(true);
     return prop;
   }

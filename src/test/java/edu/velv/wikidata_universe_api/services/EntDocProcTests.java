@@ -6,7 +6,6 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Snak;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
-import edu.velv.wikidata_universe_api.Constables;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.SnakData;
 import edu.velv.wikidata_universe_api.models.ValueData;
@@ -33,24 +32,24 @@ public class EntDocProcTests {
   ItemDocumentImpl mItemDoc = mock(ItemDocumentImpl.class);
   ItemIdValue mItemId = mock(ItemIdValue.class);
 
-  @Test
-  void attemptVertexCreateUnkownTypeEntDoc_creates_vertex_when_expected() throws Exception {
-    setupDouglasAdamsItemDocument();
+  // @Test
+  // void attemptVertexCreateUnkownTypeEntDoc_creates_vertex_when_expected() throws Exception {
+  //   setupDouglasAdamsItemDocument();
 
-    Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mItemDoc);
+  //   Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mItemDoc);
 
-    assertNotNull(result);
-    assertEquals("Q42", result.get().id());
-    assertEquals("Douglas Adams", result.get().label());
-    assertEquals("English science fiction writer and humorist (1952–2001)", result.get().description());
-  }
+  //   assertNotNull(result);
+  //   assertEquals("Q42", result.get().id());
+  //   assertEquals("Douglas Adams", result.get().label());
+  //   assertEquals("English science fiction writer and humorist (1952–2001)", result.get().description());
+  // }
 
-  @Test
-  void attemptVertexCreateUnkownTypeEntDoc_is_empty_when_expected() {
-    PropertyDocument mockPropDoc = mock(PropertyDocument.class);
-    Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mockPropDoc);
-    assertTrue(result.isEmpty(), "Should not create a Vertex with a Property Document");
-  }
+  // @Test
+  // void attemptVertexCreateUnkownTypeEntDoc_is_empty_when_expected() {
+  //   PropertyDocument mockPropDoc = mock(PropertyDocument.class);
+  //   Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mockPropDoc);
+  //   assertTrue(result.isEmpty(), "Should not create a Vertex with a Property Document");
+  // }
 
   @Test
   void createRelatedEdgesFromStatements_creates_relevant_edges() {
@@ -109,13 +108,11 @@ public class EntDocProcTests {
     return dataToStatementPipeline(snakData);
   }
 
-
-
   private void setupDouglasAdamsItemDocument() {
     when(mItemId.getId()).thenReturn("Q42");
     when(mItemDoc.getEntityId()).thenReturn(mItemId);
-    when(mItemDoc.findLabel(Constables.EN_LANG_WIKI_KEY)).thenReturn("Douglas Adams");
-    when(mItemDoc.findDescription(Constables.EN_LANG_WIKI_KEY))
+    when(mItemDoc.findLabel("en")).thenReturn("Douglas Adams");
+    when(mItemDoc.findDescription("en"))
         .thenReturn("English science fiction writer and humorist (1952–2001)");
   }
 

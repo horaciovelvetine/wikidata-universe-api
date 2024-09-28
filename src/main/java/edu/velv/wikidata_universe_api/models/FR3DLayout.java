@@ -12,7 +12,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import edu.velv.wikidata_universe_api.Constables;
+import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import io.vavr.Tuple2;
 
 /**
@@ -39,15 +39,18 @@ public class FR3DLayout {
 
   private Dimension size;
   private int curIteration;
+
   private final double EPSILON = 0.000001D; // prevents 0 div
+  private final FR3DConfig constants;
   private double temperature;
   private double forceConst;
   private double attrConst;
   private double repConst;
 
-  public FR3DLayout(Dimension dimensions, Graphset graph) {
+  public FR3DLayout(Dimension dimensions, Graphset graph, FR3DConfig config) {
     this.size = dimensions;
     this.graph = graph;
+    this.constants = config;
   }
 
   /**
@@ -138,7 +141,7 @@ public class FR3DLayout {
    * Checks wether or not the current layout has reached either the maximum iterations or an acceptable temperature.
   */
   public boolean done() {
-    return curIteration > Constables.MAX_ITERS || temperature < 1.0 / maxDim();
+    return curIteration > constants.maxIters() || temperature < 1.0 / maxDim();
   }
 
   //=====================================================================================================================>
@@ -230,12 +233,12 @@ public class FR3DLayout {
       throw new IllegalArgumentException("NaN value found in update position displacement calcs");
 
     double nX = loc.getX() + clampToMaxIterMvmnt(xDisp);
-    double nY = loc.getX() + clampToMaxIterMvmnt(yDisp);
-    double nZ = loc.getX() + clampToMaxIterMvmnt(zDisp);
+    double nY = loc.getY() + clampToMaxIterMvmnt(yDisp);
+    double nZ = loc.getZ() + clampToMaxIterMvmnt(zDisp);
 
-    //Todo clamp to dimensions??
+    Point3D clamped = clampNewPositionsToDimensions(nX, nY, nZ);
+    loc.setLocation(clamped);
 
-    loc.setLocation(nX, nY, nZ);
   }
 
   //=====================================================================================================================>
@@ -285,7 +288,7 @@ public class FR3DLayout {
     double initDepth = Math.max(initHeight, initWidth);
     double initVol = initWidth * initHeight * initDepth;
     double curDens = (totalVerts * Math.pow(Vertex.RADIUS, 3) / initVol);
-    double scale = Math.cbrt(Constables.TARGET_DATA_DENSITY / curDens);
+    double scale = Math.cbrt(constants.targetDensity() / curDens);
     int scWidth = (int) Math.ceil(initWidth * scale);
     int scHeigt = (int) Math.ceil(initHeight * scale);
     Dimension scDimension = new Dimension(scWidth, scHeigt);
@@ -297,10 +300,10 @@ public class FR3DLayout {
    */
   protected void initializeLayoutConstants() {
     curIteration = 0;
-    temperature = size.getWidth() / Constables.TEMP_MULT;
+    temperature = size.getWidth() / constants.tempMult();
     forceConst = Math.sqrt(size.getHeight() * size.getWidth() / graph.vertexCount());
-    attrConst = forceConst * Constables.ATTR_MULT;
-    repConst = forceConst * Constables.REP_MULT;
+    attrConst = forceConst * constants.attrMult();
+    repConst = forceConst * constants.repMult();
   }
 
   /**
@@ -376,7 +379,7 @@ public class FR3DLayout {
    * the algorithim steps, allowing for less overall movement and a measure of 'completeness'
    */
   protected void cool() {
-    temperature *= (1.0 - curIteration / (double) Constables.MAX_ITERS);
+    temperature *= (1.0 - curIteration / (double) constants.maxIters());
     if (curIteration % 100 == 0) {
       adjustForceConstants();
     }
@@ -453,8 +456,26 @@ public class FR3DLayout {
     return totalAttractionForce / count;
   }
 
+  /**
+   * Clamps the magnitude of the movement allowed on any iteration to the set constant  
+   */
   protected double clampToMaxIterMvmnt(double disp) {
-    return Math.max(-Constables.MAX_ITER_MVMNT, Math.min(Constables.MAX_ITER_MVMNT, disp));
+    return Math.max(-constants.maxIterMvmnt(), Math.min(constants.maxIterMvmnt(), disp));
+  }
+
+  /**
+  * Clamps the given value to the dimensions and return a new Point inside the dimensions boundaries
+  */
+  protected Point3D clampNewPositionsToDimensions(double newX, double newY, double newZ) {
+    double maxX = size.getWidth() / 2;
+    double maxY = size.getHeight() / 2;
+    double maxZ = Math.max(maxX, maxY) / 2;
+
+    newX = Math.max(-maxX, Math.min(maxX, newX));
+    newY = Math.max(-maxY, Math.min(maxY, newY));
+    newZ = Math.max(-maxZ, Math.min(maxZ, newZ));
+
+    return new Point3D(newX, newY, newZ);
   }
 
 }

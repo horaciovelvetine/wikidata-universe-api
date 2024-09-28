@@ -5,17 +5,22 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 import org.wikidata.wdtk.datamodel.interfaces.StatementDocument;
 
-import edu.velv.wikidata_universe_api.Constables;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.SnakData;
 import edu.velv.wikidata_universe_api.models.Vertex;
 
 public class EntDocProc {
+  @Value("${edu.velv.WikiData.excluded_datatypes}")
+  private Set<String> excludedDataTypes;
+
+  @Value("${edu.velv.WikiData.excluded_ids}")
+  private Set<String> excludedIds;
 
   public EntDocProc() {
     //default constructor
@@ -25,14 +30,15 @@ public class EntDocProc {
    * Type checks the provided document to attempt to create a Vertex from the provided doc.
    * If the result is empty it can be assumed the provided EntityDocument is of the subtype
    * PropertyDocument, and can instead be used (cast) to directly create a Property
+   * @param string 
    * 
    * @param EntityDocument generically typed wrapper result
    * @return a Vertex or empty if not passed the correct doc subtype 
    * 
    */
-  public Optional<Vertex> createVertexFromUnknownEntDoc(EntityDocument doc) {
+  public Optional<Vertex> createVertexFromUnknownEntDoc(EntityDocument doc, String enLangKey) {
     if (doc instanceof ItemDocumentImpl) {
-      Vertex newVert = new Vertex((ItemDocumentImpl) doc);
+      Vertex newVert = new Vertex((ItemDocumentImpl) doc, enLangKey);
       return Optional.of(newVert);
     }
     return Optional.empty();
@@ -48,10 +54,12 @@ public class EntDocProc {
    */
   public Set<Edge> createRelatedEdgesFromStatements(EntityDocument doc) {
     Set<Edge> newEdges = new HashSet<>();
+
     if (doc instanceof StatementDocument) {
       StatementDocument castDoc = (StatementDocument) doc;
       String srcId = doc.getEntityId().getId();
       Iterator<Statement> stmts = castDoc.getAllStatements();
+
       while (stmts.hasNext()) {
         Statement stmt = stmts.next();
         SnakData mainSnak = stmt.getMainSnak().accept(new SnakData());
@@ -76,18 +84,26 @@ public class EntDocProc {
       return false;
     if (ms.datatype() == null)
       return false;
-    if (Constables.EXCLUDED_DATA_TYPES.contains(ms.datatype))
+    if (excludedDataTypes.contains(ms.datatype))
       return false;
     if (ms.property().value() == null)
       return false;
-    if (Constables.EXCLUDED_ENT_IDS.contains(ms.property().value()))
+    if (excludedIds.contains(ms.property().value()))
       return false;
     if (ms.snakValue().value() == null)
       return false;
     if (ms.snakValue().value().startsWith("P"))
       return false;
-    if (Constables.EXCLUDED_ENT_IDS.contains(ms.snakValue().value()))
+    if (excludedIds.contains(ms.snakValue().value()))
       return false;
     return true;
+  }
+
+  public Set<String> excludedIds() {
+    return this.excludedIds;
+  }
+
+  public Set<String> excludedDataTypes() {
+    return this.excludedDataTypes;
   }
 }
