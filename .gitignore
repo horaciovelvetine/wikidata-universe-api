@@ -24,3 +24,14 @@ hs_err_pid*
 replay_pid*
 
 vs_code
+src/main/java/edu/velv/.DS_Store
+src/main/java/edu/.DS_Store
+src/main/java/.DS_Store
+src/main/.DS_Store
+src/.DS_Store
+target/classes/edu/velv/.DS_Store
+target/classes/edu/.DS_Store
+target/classes/.DS_Store
+target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+logs/1725416998245-session-body.json
+logs/1725669704051-session-body.json
