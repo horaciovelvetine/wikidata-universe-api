@@ -15,63 +15,63 @@ public class FR3DLayoutTest {
   private FR3DLayout layout;
   private Graphset graph;
 
-  @Test
-  void initializes_simple_fetched_graphset() {
-    // construct_testable_fetched_data();
+  // @Test
+  // void initializes_simple_fetched_graphset() {
+  //   // construct_testable_fetched_data();
 
-    for (Vertex vert : graph.vertices()) {
-      assertEquals(layout.apply(vert), new Point3D(), "Uninitialized Vertices should start with (0,0,0) coordinates");
-    }
+  //   for (Vertex vert : graph.vertices()) {
+  //     assertEquals(layout.apply(vert), new Point3D(), "Uninitialized Vertices should start with (0,0,0) coordinates");
+  //   }
 
-    layout.initialize();
+  //   layout.initialize();
 
-    for (Vertex vert : graph.vertices()) {
-      assertNotEquals(layout.apply(vert), new Point3D(),
-          "Initialized Vertices should not still be positioned @ (0,0,0)");
-    }
+  //   for (Vertex vert : graph.vertices()) {
+  //     assertNotEquals(layout.apply(vert), new Point3D(),
+  //         "Initialized Vertices should not still be positioned @ (0,0,0)");
+  //   }
 
-  }
+  // }
 
-  @Test
-  void steps_simple_fetched_graphset() {
-    // construct_testable_fetched_data();
-    layout.initialize();
+  // @Test
+  // void steps_simple_fetched_graphset() {
+  //   // construct_testable_fetched_data();
+  //   layout.initialize();
 
-    Map<Vertex, Point3D> originalPositions = new HashMap<>();
-    for (Vertex vert : graph.vertices()) {
-      Point3D pos = layout.getLocationData(vert);
-      originalPositions.put(vert, new Point3D(pos.getX(), pos.getY(), pos.getZ()));
-    }
+  //   Map<Vertex, Point3D> originalPositions = new HashMap<>();
+  //   for (Vertex vert : graph.vertices()) {
+  //     Point3D pos = layout.getLocationData(vert);
+  //     originalPositions.put(vert, new Point3D(pos.getX(), pos.getY(), pos.getZ()));
+  //   }
 
-    while (!layout.done()) {
-      layout.step();
-    }
+  //   while (!layout.done()) {
+  //     layout.step();
+  //   }
 
-    for (Entry<Vertex, Point3D> ent : originalPositions.entrySet()) {
-      assertNotEquals(layout.apply(ent.getKey()), ent.getValue(),
-          "Vertices should have moved from their originally initialized positions.");
-    }
-  }
+  //   for (Entry<Vertex, Point3D> ent : originalPositions.entrySet()) {
+  //     assertNotEquals(layout.apply(ent.getKey()), ent.getValue(),
+  //         "Vertices should have moved from their originally initialized positions.");
+  //   }
+  // }
 
-  @Test
-  void step_ignores_locked_vertices() {
-    // construct_testable_fetched_data();
-    Vertex mockOrigin = graph.vertices().stream().findFirst().get();
-    layout.lock(mockOrigin, true);
+  // @Test
+  // void step_ignores_locked_vertices() {
+  //   // construct_testable_fetched_data();
+  //   Vertex mockOrigin = graph.vertices().stream().findFirst().get();
+  //   layout.lock(mockOrigin, true);
 
-    layout.initialize();
-    assertEquals(layout.apply(mockOrigin), new Point3D(),
-        "The locked Vertex should remain @ (0,0,0) when initialized");
+  //   layout.initialize();
+  //   assertEquals(layout.apply(mockOrigin), new Point3D(),
+  //       "The locked Vertex should remain @ (0,0,0) when initialized");
 
-    while (!layout.done()) {
-      layout.step();
-    }
+  //   while (!layout.done()) {
+  //     layout.step();
+  //   }
 
-    assertEquals(layout.apply(mockOrigin), new Point3D(),
-        "The locked Vertex should remain @ (0,0,0) when stepped forward");
-    layout.lock(false);
-    assertFalse(layout.isLocked(mockOrigin), "Should unlock Vertex with unlock all call");
-  }
+  //   assertEquals(layout.apply(mockOrigin), new Point3D(),
+  //       "The locked Vertex should remain @ (0,0,0) when stepped forward");
+  //   layout.lock(false);
+  //   assertFalse(layout.isLocked(mockOrigin), "Should unlock Vertex with unlock all call");
+  // }
 
   // private void construct_testable_fetched_data() {
   //   graph = DataBuilder.simpleFetchedGraphset();

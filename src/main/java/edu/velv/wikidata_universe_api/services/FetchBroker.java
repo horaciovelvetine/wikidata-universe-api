@@ -31,15 +31,6 @@ public class FetchBroker {
     this.fetcher = WikibaseDataFetcher.getWikidataDataFetcher();
   }
 
-  /**
-   * Injectable dependency is used for mocking and testing the fetcher for testing this class.
-   * @apiNote do not use this constructor in any sort of actual serving of data/or services, providing a real
-   * instance of the fetcher should still maintain functionality. 
-   */
-  public FetchBroker(WikibaseDataFetcher fetcher) {
-    this.fetcher = fetcher;
-  }
-
   public String iri() {
     return this.wikiIri;
   }

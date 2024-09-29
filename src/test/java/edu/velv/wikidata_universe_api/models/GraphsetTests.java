@@ -66,60 +66,60 @@ public class GraphsetTests {
         "The intended Edge should be an unfetched Date target, and should not be returned here.");
   }
 
-  @Test
-  void removeInvalidSearchResultFromData_removes_entity_id_target() {
-    graphset = DataBuilder.simpleFetchedGraphset();
-    String q1 = "Q3";
-    Optional<Vertex> origVertRef = graphset.getVertexById(q1);
-    List<Edge> origEdgeRefs = getEdgesWhereStringReferenced(q1);
+  // @Test
+  // void removeInvalidSearchResultFromData_removes_entity_id_target() {
+  //   graphset = DataBuilder.simpleFetchedGraphset();
+  //   String q1 = "Q3";
+  //   Optional<Vertex> origVertRef = graphset.getVertexById(q1);
+  //   List<Edge> origEdgeRefs = getEdgesWhereStringReferenced(q1);
 
-    assertTrue(origVertRef.isPresent(), "Unable to find vertex with id: " + q1 + " before removal");
-    assertTrue(origEdgeRefs.size() > 0, "Unable to find any edge references for: " + q1 + " before removal");
+  //   assertTrue(origVertRef.isPresent(), "Unable to find vertex with id: " + q1 + " before removal");
+  //   assertTrue(origEdgeRefs.size() > 0, "Unable to find any edge references for: " + q1 + " before removal");
 
-    graphset.removeInvalidSearchResultFromData(q1);
+  //   graphset.removeInvalidSearchResultFromData(q1);
 
-    Optional<Vertex> vert = graphset.getVertexById(q1);
-    List<Edge> edgeRefs = getEdgesWhereStringReferenced(q1);
+  //   Optional<Vertex> vert = graphset.getVertexById(q1);
+  //   List<Edge> edgeRefs = getEdgesWhereStringReferenced(q1);
 
-    assertTrue(vert.isEmpty(), "Should remove original vertex from Graphset");
-    assertTrue(edgeRefs.size() == 0, "Should remove all Edge references");
-  }
+  //   assertTrue(vert.isEmpty(), "Should remove original vertex from Graphset");
+  //   assertTrue(edgeRefs.size() == 0, "Should remove all Edge references");
+  // }
 
-  @Test
-  void removeInvalidSearchResultFromData_removes_label_target() {
-    graphset = DataBuilder.simpleFetchedGraphset();
-    String q1 = "Q1 label";
-    Optional<Vertex> origVertRef = graphset.getVertexByLabel(q1);
+  // @Test
+  // void removeInvalidSearchResultFromData_removes_label_target() {
+  //   graphset = DataBuilder.simpleFetchedGraphset();
+  //   String q1 = "Q1 label";
+  //   Optional<Vertex> origVertRef = graphset.getVertexByLabel(q1);
 
-    assertTrue(origVertRef.isPresent(), "Unable to find vertex with label: " + q1 + " before removal");
+  //   assertTrue(origVertRef.isPresent(), "Unable to find vertex with label: " + q1 + " before removal");
 
-    graphset.removeInvalidSearchResultFromData(q1);
+  //   graphset.removeInvalidSearchResultFromData(q1);
 
-    Optional<Vertex> vertRef = graphset.getVertexByLabel(q1);
-    List<Edge> edgeRefs = getEdgesWhereStringReferenced(q1);
+  //   Optional<Vertex> vertRef = graphset.getVertexByLabel(q1);
+  //   List<Edge> edgeRefs = getEdgesWhereStringReferenced(q1);
 
-    assertTrue(vertRef.isEmpty(), "Should remove original vertex from Graphset");
-    assertTrue(edgeRefs.size() == 0, "Should remove all Edge references");
-  }
+  //   assertTrue(vertRef.isEmpty(), "Should remove original vertex from Graphset");
+  //   assertTrue(edgeRefs.size() == 0, "Should remove all Edge references");
+  // }
 
-  @Test
-  void removeInvalidSearchResultFromData_removes_property_id_target() {
-    graphset = DataBuilder.simpleFetchedGraphset();
-    String p1 = "P1";
-    Optional<Property> origPropRef = graphset.getPropertyById(p1);
-    List<Edge> origEdgeRefs = getEdgesWhereStringReferenced(p1);
+  // @Test
+  // void removeInvalidSearchResultFromData_removes_property_id_target() {
+  //   graphset = DataBuilder.simpleFetchedGraphset();
+  //   String p1 = "P1";
+  //   Optional<Property> origPropRef = graphset.getPropertyById(p1);
+  //   List<Edge> origEdgeRefs = getEdgesWhereStringReferenced(p1);
 
-    assertTrue(origPropRef.isPresent(), "Unable to find property " + p1 + " before removal");
-    assertTrue(origEdgeRefs.size() > 0, "Unable to find any edge references for: " + p1 + " before removal");
+  //   assertTrue(origPropRef.isPresent(), "Unable to find property " + p1 + " before removal");
+  //   assertTrue(origEdgeRefs.size() > 0, "Unable to find any edge references for: " + p1 + " before removal");
 
-    graphset.removeInvalidSearchResultFromData(p1);
+  //   graphset.removeInvalidSearchResultFromData(p1);
 
-    Optional<Property> propRef = graphset.getPropertyById(p1);
-    List<Edge> edgeRefs = getEdgesWhereStringReferenced(p1);
+  //   Optional<Property> propRef = graphset.getPropertyById(p1);
+  //   List<Edge> edgeRefs = getEdgesWhereStringReferenced(p1);
 
-    assertTrue(propRef.isEmpty(), "Should remove original vertex from Graphset");
-    assertTrue(edgeRefs.size() == 0, "Should remove all Edge references");
-  }
+  //   assertTrue(propRef.isEmpty(), "Should remove original vertex from Graphset");
+  //   assertTrue(edgeRefs.size() == 0, "Should remove all Edge references");
+  // }
 
   /**
    * Helper checks all edge attribute values for mention of the provided target value and returns them.

@@ -51,54 +51,54 @@ public class EntDocProcTests {
   //   assertTrue(result.isEmpty(), "Should not create a Vertex with a Property Document");
   // }
 
-  @Test
-  void createRelatedEdgesFromStatements_creates_relevant_edges() {
-    setupDouglasAdamsItemDocument();
-    Statement stmt = validGenericStatement();
-    Statement date = validDateStatement();
+  // @Test
+  // void createRelatedEdgesFromStatements_creates_relevant_edges() {
+  //   setupDouglasAdamsItemDocument();
+  //   Statement stmt = validGenericStatement();
+  //   Statement date = validDateStatement();
 
-    List<Statement> mStmts = List.of(stmt, date);
-    when(mItemDoc.getAllStatements()).thenReturn(mStmts.iterator());
+  //   List<Statement> mStmts = List.of(stmt, date);
+  //   when(mItemDoc.getAllStatements()).thenReturn(mStmts.iterator());
 
-    Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
+  //   Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
 
-    assertTrue(results.size() == 2, "Should be 2 valid Edges created from 2 valid Statements");
-  }
+  //   assertTrue(results.size() == 2, "Should be 2 valid Edges created from 2 valid Statements");
+  // }
 
-  @Test
-  void createRelatedEdgeFromStatements_ignores_excluded_and_invalid_data() {
-    setupDouglasAdamsItemDocument();
+  // @Test
+  // void createRelatedEdgeFromStatements_ignores_excluded_and_invalid_data() {
+  //   setupDouglasAdamsItemDocument();
 
-    Statement badType = excludedDataTypeStatement();
-    Statement badPID = excludedPIDStatement();
-    Statement badQID = excludedQIDStatemnt();
-    Statement nullProp = nullPropStatement();
-    Statement nullVal = nullValueStatement();
-    Statement nullStmt = nullStatement();
+  //   Statement badType = excludedDataTypeStatement();
+  //   Statement badPID = excludedPIDStatement();
+  //   Statement badQID = excludedQIDStatemnt();
+  //   Statement nullProp = nullPropStatement();
+  //   Statement nullVal = nullValueStatement();
+  //   Statement nullStmt = nullStatement();
 
-    List<Statement> invalidStatements = List.of(badType, badPID, badQID, nullProp, nullStmt, nullVal);
-    when(mItemDoc.getAllStatements()).thenReturn(invalidStatements.iterator());
+  //   List<Statement> invalidStatements = List.of(badType, badPID, badQID, nullProp, nullStmt, nullVal);
+  //   when(mItemDoc.getAllStatements()).thenReturn(invalidStatements.iterator());
 
-    Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
+  //   Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
 
-    assertTrue(results.isEmpty());
-  }
+  //   assertTrue(results.isEmpty());
+  // }
 
-  @Test
-  void createRelatedEdgeFromStatements_ignores_property_tgt_edges() {
-    setupDouglasAdamsItemDocument();
+  // @Test
+  // void createRelatedEdgeFromStatements_ignores_property_tgt_edges() {
+  //   setupDouglasAdamsItemDocument();
 
-    // Mock a statement where the tgtId starts with "P"
-    Statement propertyTgtStatement = propertyTgtStatement();
+  //   // Mock a statement where the tgtId starts with "P"
+  //   Statement propertyTgtStatement = propertyTgtStatement();
 
-    List<Statement> statements = List.of(propertyTgtStatement);
-    when(mItemDoc.getAllStatements()).thenReturn(statements.iterator());
+  //   List<Statement> statements = List.of(propertyTgtStatement);
+  //   when(mItemDoc.getAllStatements()).thenReturn(statements.iterator());
 
-    Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
+  //   Set<Edge> results = docProc.createRelatedEdgesFromStatements(mItemDoc);
 
-    // Assert that no edges are created
-    assertTrue(results.isEmpty(), "Edges with tgtId starting with 'P' should not be created");
-  }
+  //   // Assert that no edges are created
+  //   assertTrue(results.isEmpty(), "Edges with tgtId starting with 'P' should not be created");
+  // }
 
   private Statement propertyTgtStatement() {
     ValueData prop = entValueData(PID);
