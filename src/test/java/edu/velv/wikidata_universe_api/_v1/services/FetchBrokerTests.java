@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api._v1.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;

@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api._v1.models;
 
 import java.awt.Dimension;
 import java.util.HashMap;
@@ -8,7 +8,9 @@ import java.util.Map.Entry;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import edu.velv.wikidata_universe_api.DataBuilder;
+import edu.velv.wikidata_universe_api.TestableDataBuilders;
+import edu.velv.wikidata_universe_api.models.FR3DLayout;
+import edu.velv.wikidata_universe_api.models.Graphset;
 
 public class FR3DLayoutTest {
 

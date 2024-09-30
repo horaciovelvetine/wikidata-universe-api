@@ -1,10 +1,13 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api._v1.models;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import edu.velv.wikidata_universe_api.DataBuilder;
+import edu.velv.wikidata_universe_api.TestableDataBuilders;
+import edu.velv.wikidata_universe_api.models.Edge;
+import edu.velv.wikidata_universe_api.models.Graphset;
+import edu.velv.wikidata_universe_api.models.Vertex;
 import io.vavr.Tuple2;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +28,7 @@ public class GraphsetTests {
 
   @Test
   void constructs_graphset_using_fetched_example_data() {
-    graphset = DataBuilder.simpleFetchedGraphset();
+    graphset = TestableDataBuilders.simpleFetchedGraphset();
     assertEquals(6, graphset.vertexCount());
     assertEquals(3, graphset.propertyCount());
     assertEquals(7, graphset.edgeCount());
@@ -33,7 +36,7 @@ public class GraphsetTests {
 
   @Test
   void constructs_graphset_using_unfetched_example_data() {
-    graphset = DataBuilder.simpleUnfetchedGraphset();
+    graphset = TestableDataBuilders.simpleUnfetchedGraphset();
     assertEquals(4, graphset.vertexCount());
     assertEquals(2, graphset.propertyCount());
     assertEquals(3, graphset.edgeCount());
@@ -41,7 +44,7 @@ public class GraphsetTests {
 
   @Test
   void getIncidentEdges_finds_all_related_edges() {
-    graphset = DataBuilder.simpleFetchedGraphset();
+    graphset = TestableDataBuilders.simpleFetchedGraphset();
     Optional<Vertex> vert1 = graphset.getVertexById("Q1");
     Optional<Vertex> vert6 = graphset.getVertexById("Q6");
     assertEquals(1, graphset.getIncidentEdges(vert1.orElse(null)).size(), "The Q1 Vertex should have only one edge");
@@ -50,7 +53,7 @@ public class GraphsetTests {
 
   @Test
   void getEndpoints_finds_correct_vertices() {
-    graphset = DataBuilder.simpleFetchedGraphset();
+    graphset = TestableDataBuilders.simpleFetchedGraphset();
     Optional<Edge> edge = graphset.edges().stream().findAny();
     Optional<Tuple2<Vertex, Vertex>> endpoints = graphset.getEndpoints(edge.orElse(null));
     assertEquals(edge.map(Edge::srcId).orElse(null), endpoints.map(Tuple2::_1).map(Vertex::id).orElse(null));
@@ -59,7 +62,7 @@ public class GraphsetTests {
 
   @Test
   void getEndpoints_empty_when_edge_still_unfetched() {
-    graphset = DataBuilder.simpleUnfetchedGraphset();
+    graphset = TestableDataBuilders.simpleUnfetchedGraphset();
     Optional<Edge> edge = graphset.edges().stream().filter(e -> e.tgtId() == null).findFirst();
     Optional<Tuple2<Vertex, Vertex>> missingEndpoint = graphset.getEndpoints(edge.orElse(null));
     assertTrue(missingEndpoint.isEmpty(),

@@ -1,7 +1,10 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api._v1.models;
 
 import org.junit.jupiter.api.Test;
 
+import edu.velv.wikidata_universe_api.models.Edge;
+import edu.velv.wikidata_universe_api.models.SnakData;
+import edu.velv.wikidata_universe_api.models.ValueData;
 import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
 
 import static org.junit.jupiter.api.Assertions.*;

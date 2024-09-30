@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api._v1.models;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
+
+import edu.velv.wikidata_universe_api.models.ValueData;
 
 public class ValueDataTests {
 

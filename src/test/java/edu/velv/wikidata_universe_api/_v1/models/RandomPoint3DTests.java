@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api._v1.models;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,6 +6,9 @@ import java.awt.Dimension;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import edu.velv.wikidata_universe_api.models.Point3D;
+import edu.velv.wikidata_universe_api.models.RandomPoint3D;
 
 public class RandomPoint3DTests {
 

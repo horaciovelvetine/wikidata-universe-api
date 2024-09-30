@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api._v1.services;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
@@ -11,6 +11,7 @@ import edu.velv.wikidata_universe_api.models.SnakData;
 import edu.velv.wikidata_universe_api.models.ValueData;
 import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
+import edu.velv.wikidata_universe_api.services.EntDocProc;
 
 import org.junit.jupiter.api.Test;
 

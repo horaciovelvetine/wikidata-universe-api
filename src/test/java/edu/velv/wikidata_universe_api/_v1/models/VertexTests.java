@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.models;
+package edu.velv.wikidata_universe_api._v1.models;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
+
+import edu.velv.wikidata_universe_api.models.Point3D;
+import edu.velv.wikidata_universe_api.models.Vertex;
 
 // import edu.velv.wikidata_universe_api.Constables;
 
