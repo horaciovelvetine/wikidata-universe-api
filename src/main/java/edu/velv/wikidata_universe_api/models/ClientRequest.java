@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api;
+package edu.velv.wikidata_universe_api.models;
 
 import java.awt.Dimension;
 import java.util.Optional;
@@ -6,10 +6,6 @@ import java.util.Optional;
 import io.vavr.control.Either;
 
 import edu.velv.wikidata_universe_api.errors.Err;
-import edu.velv.wikidata_universe_api.models.Graphset;
-import edu.velv.wikidata_universe_api.models.FR3DLayout;
-import edu.velv.wikidata_universe_api.models.RequestPayloadData;
-import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 

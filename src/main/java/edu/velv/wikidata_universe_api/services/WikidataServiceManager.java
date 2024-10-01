@@ -15,7 +15,7 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
-import edu.velv.wikidata_universe_api.ClientRequest;
+import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.errors.Err;
@@ -23,10 +23,10 @@ import edu.velv.wikidata_universe_api.errors.Err;
 public class WikidataServiceManager implements Printable {
 
   @Autowired
-  private FetchBroker api;
+  public FetchBroker api;
 
   @Autowired
-  private EntDocProc docProc;
+  public EntDocProc docProc;
 
   public WikidataServiceManager() {
     // Default a constructor
