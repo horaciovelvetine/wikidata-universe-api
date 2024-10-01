@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api._TestUtils._v1.services;
+package _v1.services;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;

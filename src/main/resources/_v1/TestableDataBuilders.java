@@ -1,3 +1,4 @@
+package _v1;
 // package edu.velv.wikidata_universe_api;
 
 // import java.util.List;

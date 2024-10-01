@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api._TestUtils._v1.models;
+package _v1.models;
 
 import java.awt.Dimension;
 import java.util.HashMap;
