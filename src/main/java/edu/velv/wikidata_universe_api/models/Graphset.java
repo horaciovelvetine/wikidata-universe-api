@@ -68,6 +68,13 @@ public class Graphset {
   }
 
   /**
+   * Checks Vertices, Edges & Property are empty.
+   */
+  public boolean isEmpty() {
+    return properties.isEmpty() || vertices.isEmpty() || edges.isEmpty();
+  }
+
+  /**
    * Validates a new Vertex has no existing duplicate before adding to the Graphset by checking if 
    * either the vertex id or label already exists.
    */
@@ -199,6 +206,16 @@ public class Graphset {
 
       return srcMatch || tgtMatch || propMatch || lblMatch;
     });
+  }
+
+  /**
+   * Iterates over the current set of vertices and updates their coordinates to those calculated by
+   * the provided layout.
+   */
+  public void updateVertexCoordinatesFromLayout(FR3DLayout layout) {
+    for (Vertex vert : vertices) {
+      vert.coords(layout.apply(vert));
+    }
   }
 
   /**
