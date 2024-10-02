@@ -24,7 +24,8 @@ import io.vavr.Tuple2;
  * @see https://github.com/horaciovelvetine/ForceDrawnGraphs
  */
 public class FR3DLayout {
-  private Graphset graph;
+  private ClientRequest request;
+  // private Graphset graph;
   private Set<Vertex> lockedVertices = new HashSet<>();
   LoadingCache<Vertex, Point3D> locationData = CacheBuilder.newBuilder().build(new CacheLoader<Vertex, Point3D>() {
     public Point3D load(Vertex v) throws Exception {
@@ -37,20 +38,18 @@ public class FR3DLayout {
     }
   });
 
-  private Dimension size;
-  private int curIteration;
+  // protected Dimension size;
+  protected final FR3DConfig config;
+  protected final double EPSILON = 0.000001D; // prevents 0 div
+  protected int curIteration;
+  protected double temperature;
+  protected double forceConst;
+  protected double attrConst;
+  protected double repConst;
 
-  private final double EPSILON = 0.000001D; // prevents 0 div
-  private final FR3DConfig constants;
-  private double temperature;
-  private double forceConst;
-  private double attrConst;
-  private double repConst;
-
-  public FR3DLayout(Dimension dimensions, Graphset graph, FR3DConfig config) {
-    this.size = dimensions;
-    this.graph = graph;
-    this.constants = config;
+  public FR3DLayout(ClientRequest request, FR3DConfig config) {
+    this.request = request;
+    this.config = config;
   }
 
   /**
@@ -60,7 +59,7 @@ public class FR3DLayout {
    */
   public void initialize() {
     scaleDimensionsToGraphsetSize();
-    setInitialRandomPositions(new RandomPoint3D<>(size));
+    setInitialRandomPositions(new RandomPoint3D<>(request.dimensions()));
     initializeLayoutConstants();
   }
 
@@ -90,7 +89,7 @@ public class FR3DLayout {
    * Locks or unlock the state of all vertices in the graph
    */
   public void lock(boolean lock) {
-    for (Vertex v : graph.vertices()) {
+    for (Vertex v : request.graph().vertices()) {
       lock(v, lock);
     }
   }
@@ -105,7 +104,7 @@ public class FR3DLayout {
     curIteration++;
     while (true) {
       try {
-        for (Vertex v : graph.vertices()) {
+        for (Vertex v : request.graph().vertices()) {
           if (isLocked(v))
             continue;
           calcRepulsion(v);
@@ -116,7 +115,7 @@ public class FR3DLayout {
     }
     while (true) {
       try {
-        for (Edge e : graph.edges()) {
+        for (Edge e : request.graph().edges()) {
           calcAttraction(e);
         }
         break;
@@ -125,7 +124,7 @@ public class FR3DLayout {
     }
     while (true) {
       try {
-        for (Vertex v : graph.vertices()) {
+        for (Vertex v : request.graph().vertices()) {
           if (isLocked(v))
             continue;
           calcPosition(v);
@@ -141,7 +140,7 @@ public class FR3DLayout {
    * Checks wether or not the current layout has reached either the maximum iterations or an acceptable temperature.
   */
   public boolean done() {
-    return curIteration > constants.maxIters() || temperature < 1.0 / maxDim();
+    return curIteration > config.maxIters() || temperature < 1.0 / maxDim();
   }
 
   //=====================================================================================================================>
@@ -156,7 +155,7 @@ public class FR3DLayout {
     Point3D curOffset = getOffsetData(v);
     curOffset.setLocation(0, 0, 0); //? offset data resets on step here @ start of iteration
 
-    for (Vertex v2 : graph.vertices()) {
+    for (Vertex v2 : request.graph().vertices()) {
       if (bothVerticesLocked(v, v2))
         continue;
 
@@ -182,7 +181,7 @@ public class FR3DLayout {
   //=====================================================================================================================>
 
   protected void calcAttraction(Edge e) {
-    Optional<Tuple2<Vertex, Vertex>> endpoints = graph.getEndpoints(e);
+    Optional<Tuple2<Vertex, Vertex>> endpoints = request.graph().getEndpoints(e);
     if (endpoints.isEmpty())
       return;
 
@@ -236,8 +235,8 @@ public class FR3DLayout {
     double nY = loc.getY() + clampToMaxIterMvmnt(yDisp);
     double nZ = loc.getZ() + clampToMaxIterMvmnt(zDisp);
 
-    Point3D clamped = clampNewPositionsToDimensions(nX, nY, nZ);
-    loc.setLocation(clamped);
+    // Point3D clamped = clampNewPositionsToDimensions(nX, nY, nZ);
+    loc.setLocation(new Point3D(nX, nY, nZ));
 
   }
 
@@ -282,17 +281,19 @@ public class FR3DLayout {
    * @apinote Uses the maximum of Width || Height for Depth per app convention
    */
   protected void scaleDimensionsToGraphsetSize() {
-    int totalVerts = graph.vertexCount();
-    double initWidth = size.getWidth();
-    double initHeight = size.getHeight();
-    double initDepth = Math.max(initHeight, initWidth);
-    double initVol = initWidth * initHeight * initDepth;
-    double curDens = (totalVerts * Math.pow(Vertex.RADIUS, 3) / initVol);
-    double scale = Math.cbrt(constants.targetDensity() / curDens);
-    int scWidth = (int) Math.ceil(initWidth * scale);
-    int scHeigt = (int) Math.ceil(initHeight * scale);
-    Dimension scDimension = new Dimension(scWidth, scHeigt);
-    this.size = scDimension;
+    if (!request.graph().isEmpty()) {
+      int totalVerts = request.graph().vertexCount();
+      double initWidth = request.dimensions().getWidth();
+      double initHeight = request.dimensions().getHeight();
+      double initDepth = Math.max(initHeight, initWidth);
+      double initVol = initWidth * initHeight * initDepth;
+      double curDens = (totalVerts * Math.pow(Vertex.RADIUS, 3) / initVol);
+      double scale = Math.cbrt(config.targetDensity() / curDens);
+      int scWidth = (int) Math.ceil(initWidth * scale);
+      int scHeigt = (int) Math.ceil(initHeight * scale);
+
+      request.dimensions(new Dimension(scWidth, scHeigt));
+    }
   }
 
   /**
@@ -300,10 +301,11 @@ public class FR3DLayout {
    */
   protected void initializeLayoutConstants() {
     curIteration = 0;
-    temperature = size.getWidth() / constants.tempMult();
-    forceConst = Math.sqrt(size.getHeight() * size.getWidth() / graph.vertexCount());
-    attrConst = forceConst * constants.attrMult();
-    repConst = forceConst * constants.repMult();
+    temperature = request.dimensions.getWidth() / config.tempMult();
+    forceConst = Math
+        .sqrt(request.dimensions.getHeight() * request.dimensions.getWidth() / request.graph().vertexCount());
+    attrConst = forceConst * config.attrMult();
+    repConst = forceConst * config.repMult();
   }
 
   /**
@@ -336,7 +338,7 @@ public class FR3DLayout {
    * Gets the largest of the two Dimensions (used for a depth (Z) value throghout app)
    */
   protected double maxDim() {
-    return Math.max(size.getWidth(), size.getHeight());
+    return Math.max(request.dimensions().getWidth(), request.dimensions().getHeight());
   }
 
   /**
@@ -379,7 +381,7 @@ public class FR3DLayout {
    * the algorithim steps, allowing for less overall movement and a measure of 'completeness'
    */
   protected void cool() {
-    temperature *= (1.0 - curIteration / (double) constants.maxIters());
+    temperature *= (1.0 - curIteration / (double) config.maxIters());
     if (curIteration % 100 == 0) {
       adjustForceConstants();
     }
@@ -409,7 +411,7 @@ public class FR3DLayout {
   protected double calculateAverageRepulsionForce() {
     double totalRepulsionForce = 0;
     int count = 0;
-    Set<Vertex> verts = graph.vertices();
+    Set<Vertex> verts = request.graph().vertices();
     for (Vertex v1 : verts) {
       for (Vertex v2 : verts) {
         if (v1 != v2) {
@@ -433,10 +435,10 @@ public class FR3DLayout {
   protected double calculateAverageAttractionForce() {
     double totalAttractionForce = 0;
     int count = 0;
-    Set<Edge> eds = graph.edges();
+    Set<Edge> eds = request.graph().edges();
 
     for (Edge e : eds) {
-      Optional<Tuple2<Vertex, Vertex>> endpoints = graph.getEndpoints(e);
+      Optional<Tuple2<Vertex, Vertex>> endpoints = request.graph().getEndpoints(e);
       if (endpoints.isEmpty()) {
         continue;
       }
@@ -460,15 +462,15 @@ public class FR3DLayout {
    * Clamps the magnitude of the movement allowed on any iteration to the set constant  
    */
   protected double clampToMaxIterMvmnt(double disp) {
-    return Math.max(-constants.maxIterMvmnt(), Math.min(constants.maxIterMvmnt(), disp));
+    return Math.max(-config.maxIterMvmnt(), Math.min(config.maxIterMvmnt(), disp));
   }
 
   /**
   * Clamps the given value to the dimensions and return a new Point inside the dimensions boundaries
   */
   protected Point3D clampNewPositionsToDimensions(double newX, double newY, double newZ) {
-    double maxX = size.getWidth() / 2;
-    double maxY = size.getHeight() / 2;
+    double maxX = request.dimensions().getWidth() / 2;
+    double maxY = request.dimensions().getHeight() / 2;
     double maxZ = Math.max(maxX, maxY) / 2;
 
     newX = Math.max(-maxX, Math.min(maxX, newX));

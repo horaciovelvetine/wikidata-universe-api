@@ -21,7 +21,7 @@ public class ClientRequest {
     this.query = this.sanitizeQueryString(query);
     this.dimensions = new Dimension();
     this.graph = new Graphset();
-    this.layout = new FR3DLayout(dimensions, graph, config);
+    this.layout = new FR3DLayout(this, config);
     this.wikidata = wd;
   }
 
@@ -29,7 +29,7 @@ public class ClientRequest {
     this.query = payload.query();
     this.dimensions = payload.dimensions();
     this.graph = new Graphset(payload.vertices(), payload.edges(), payload.properties());
-    this.layout = new FR3DLayout(dimensions, graph, config);
+    this.layout = new FR3DLayout(this, config);
     this.wikidata = wd;
   }
 
@@ -41,8 +41,19 @@ public class ClientRequest {
     return dimensions;
   }
 
+  /**
+   * @apiNote used in the layout to scale these by the total number of Vertices
+   */
+  public void dimensions(Dimension dim) {
+    this.dimensions = dim;
+  }
+
   public Graphset graph() {
     return graph;
+  }
+
+  public FR3DLayout layout() {
+    return layout;
   }
 
   /**
@@ -86,9 +97,8 @@ public class ClientRequest {
     // while (!layout.done()) {
     //   layout.step();
     // }
-    for (Vertex vert : graph.vertices()) {
-      vert.coords(layout.apply(vert));
-    }
+
+    graph.updateVertexCoordinatesFromLayout(layout);
   }
 
   /**
