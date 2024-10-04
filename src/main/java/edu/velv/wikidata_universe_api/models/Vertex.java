@@ -1,11 +1,9 @@
 package edu.velv.wikidata_universe_api.models;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
-import org.wikidata.wdtk.datamodel.implementation.SitesImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Vertex {
