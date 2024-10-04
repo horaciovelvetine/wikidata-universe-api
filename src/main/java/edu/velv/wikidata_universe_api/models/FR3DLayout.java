@@ -231,13 +231,11 @@ public class FR3DLayout {
     if (Double.isNaN(xDisp) || Double.isNaN(yDisp) || Double.isNaN(zDisp))
       throw new IllegalArgumentException("NaN value found in update position displacement calcs");
 
-    double nX = loc.getX() + clampToMaxIterMvmnt(xDisp);
-    double nY = loc.getY() + clampToMaxIterMvmnt(yDisp);
-    double nZ = loc.getZ() + clampToMaxIterMvmnt(zDisp);
+    double cX = loc.getX() + clampToMaxIterMvmnt(xDisp);
+    double cY = loc.getY() + clampToMaxIterMvmnt(yDisp);
+    double cZ = loc.getZ() + clampToMaxIterMvmnt(zDisp);
 
-    // Point3D clamped = clampNewPositionsToDimensions(nX, nY, nZ);
-    loc.setLocation(new Point3D(nX, nY, nZ));
-
+    loc.setLocation(clampNewPositionsToDimensions(cX, cY, cZ));
   }
 
   //=====================================================================================================================>
@@ -469,9 +467,9 @@ public class FR3DLayout {
   * Clamps the given value to the dimensions and return a new Point inside the dimensions boundaries
   */
   protected Point3D clampNewPositionsToDimensions(double newX, double newY, double newZ) {
-    double maxX = request.dimensions().getWidth() / 2;
-    double maxY = request.dimensions().getHeight() / 2;
-    double maxZ = Math.max(maxX, maxY) / 2;
+    double maxX = request.dimensions().getWidth();
+    double maxY = request.dimensions().getHeight();
+    double maxZ = Math.max(maxX, maxY);
 
     newX = Math.max(-maxX, Math.min(maxX, newX));
     newY = Math.max(-maxY, Math.min(maxY, newY));
