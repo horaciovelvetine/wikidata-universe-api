@@ -1,6 +1,8 @@
 package edu.velv.wikidata_universe_api._Utils;
 
 public interface FailedTestMessageTemplates {
+  public static final String c = ", ";
+  public static final String expected = "expected ";
   public static final String empty = "empty ";
   public static final String unable = "unable ";
   public static final String toFind = "to find ";
@@ -16,6 +18,7 @@ public interface FailedTestMessageTemplates {
   public static final String val = "value ";
   public static final String vert = "Vertex ";
   public static final String edge = "Edge ";
+  public static final String edges = "edges ";
   public static final String prop = "Property ";
   public static final String relEdges = " related edges ";
   public static final String init = "initialize ";
@@ -28,4 +31,5 @@ public interface FailedTestMessageTemplates {
   public static final String initedWO = inited + without;
   public static final String beforeRemoval = "before removal ";
   public static final String afterRemoval = " after removal ";
+  public static final String gs = "getters and setters";
 }
