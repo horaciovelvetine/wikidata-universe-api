@@ -1,15 +1,38 @@
 package edu.velv.wikidata_universe_api._Utils;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.awt.Dimension;
 import java.util.List;
+
+import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.Snak;
+import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.Graphset;
 import edu.velv.wikidata_universe_api.models.Vertex;
+import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
 import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
+import edu.velv.wikidata_universe_api.models.SnakData;
+import edu.velv.wikidata_universe_api.models.ValueData;
 
 public interface TestDataBuilders {
+  //default for @WikidataToolkit Items
+  final String QID = "Q123";
+
+  //default for @WikidataToolkit Properties
+  final String PID = "P123";
+
+  //default for @WikidataToolkit enLangKey used to fetch details (#see application.properties)
+  final String en = "en";
+
+  //default type-str for entities fetched from @WikidataToolkit 
+  final String entStrType = "entity-id";
   final String la = "label";
   final String de = "description";
 
@@ -99,5 +122,147 @@ public interface TestDataBuilders {
         buildEdge(2, 5, 3),
         buildEdge(5, 2, 3));
     return new Graphset(verts, edges, props);
+  }
+
+  /**
+   * Creates a <mock> of a @WikidataToolkit ItemIdValue with the provided QID
+   */
+  default ItemIdValue mockItemIDValue(Integer id) {
+    ItemIdValue mItemId = mock(ItemIdValue.class);
+    when(mItemId.getId()).thenReturn("Q" + 1);
+    return mItemId;
+  }
+
+  /**
+   * Creates a <mock:> of a @WikidataToolkit ItemDocument(impl) with the provided QID and default values
+   */
+  default ItemDocumentImpl mockItemDocument(Integer id) {
+    ItemIdValue mId = mockItemIDValue(id);
+    ItemDocumentImpl mocDoc = mock(ItemDocumentImpl.class);
+    String qid = "Q" + id;
+    when(mocDoc.getEntityId()).thenReturn(mId);
+    when(mocDoc.findLabel(en)).thenReturn(qid + " " + la);
+    when(mocDoc.findDescription(en)).thenReturn(de);
+    return mocDoc;
+  }
+
+  /**
+   * Uses default values to create a Statement which should be evaluated as relevant for ingest
+   */
+  default Statement mockStatement_valid_generic() {
+    ValueData prop = buildEntityValueData(PID);
+    ValueData val = buildEntityValueData(QID);
+    SnakData snakData = new SnakData(entStrType, prop, val);
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses default values and a randomly selected date to create a Statement which should be evaluated as relevant for ingest
+   */
+  default Statement mockStatement_valid_date() {
+    ValueData prop = buildEntityValueData(PID);
+    ValueData val = buildDateValueData("1945-12-22");
+    SnakData snakData = new SnakData("time-value", prop, val);
+
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses "external-id" an excluded data type to create a Statement which should be evaluated as irrelevant for ingest
+   */
+  default Statement mockStatement_invalid_externalIdType() {
+    ValueData prop = buildEntityValueData(PID);
+    ValueData val = buildEntityValueData(QID);
+    SnakData snakData = new SnakData("external-id", prop, val); //! invalid
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses a Property string from the excluded list to create a Statement which should be evaluated as irrelevant for ingest
+   */
+  default Statement mockStatement_invalid_property() {
+    ValueData prop = buildEntityValueData("P213"); //! invalid
+    ValueData val = buildEntityValueData(QID);
+    SnakData snakData = new SnakData(entStrType, prop, val);
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses an Entity string from the excluded list to create a Statement which should be evaludated as irrelevant for ingest
+   */
+  default Statement mockStatment_invalid_entity() {
+    ValueData prop = buildEntityValueData(PID);
+    ValueData val = buildEntityValueData("Q32351192"); //! invalid
+    SnakData snakData = new SnakData(entStrType, prop, val);
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+  * Uses an Entity string indicating this Statement should target a Property Entity which should be evaludated as irrelevant for ingest
+  */
+  default Statement mockStatement_invalid_propertyTarget() {
+    ValueData prop = buildEntityValueData(PID);
+    ValueData val = buildEntityValueData("P456"); //!invalid
+    SnakData snakData = new SnakData(entStrType, prop, val);
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses a ValueData of null for the property to create a Statement which should be evaludated as irrelevant for ingest
+   */
+  default Statement mockStatement_invalid_nullProp() {
+    ValueData val = buildEntityValueData(QID);
+    SnakData snakData = new SnakData(entStrType, null, val);
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses a ValueData of null for the value to create a Statement which should be evaludated as irrelevant for ingest
+   */
+  default Statement mockStatement_invalid_nullValue() {
+    ValueData prop = buildEntityValueData(PID);
+    SnakData snakData = new SnakData(entStrType, prop, null);
+    return mockStmtFromData(snakData);
+  }
+
+  /**
+   * Uses null to create a Statement which should be evaludated as irrelevant for ingest
+   */
+  default Statement mockStatement_invalid_null() {
+    return mockStmtFromData(null);
+  }
+
+  /**
+   *  Wraps the additional needed mock calls to create a Statement which can be run against the EntDocProc 
+   */
+  private Statement mockStmtFromData(SnakData data) {
+    Snak mSnak = mock(Snak.class);
+    when(mSnak.accept(any())).thenReturn(data);
+
+    Statement mStatement = mock(Statement.class);
+    when(mStatement.getMainSnak()).thenReturn(mSnak);
+    return mStatement;
+  }
+
+  /**
+   * Creates a ValueData where .type() == EntityId with the provided either QID or PID
+   * @apiNote the first letter of the string from the EntityIdValue indicates the underlying entity sub-type
+   */
+  default ValueData buildEntityValueData(String QPid) {
+    ValueData vd = new ValueData();
+    vd.type = ValueType.EntityId;
+    vd.value = QPid;
+    return vd;
+  }
+
+  /**
+   * Creates a ValueData where .type() == DateTime with the provided date string
+   * @apiNote the date strings actual value is essentially meaningless, but does need to be something...
+   */
+  default ValueData buildDateValueData(String date) {
+    ValueData vd = new ValueData();
+    vd.type = ValueType.DateTime;
+    vd.value = date;
+    return vd;
   }
 }
