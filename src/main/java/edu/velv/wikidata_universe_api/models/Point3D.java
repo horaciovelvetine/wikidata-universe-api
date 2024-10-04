@@ -55,7 +55,7 @@ public class Point3D extends Point2D.Double {
    * @param p The JPoint3D object whose coordinates will be used.
    */
   public void setLocation(Point3D p) {
-    setLocation(p.x, p.y, p.z);
+    this.setLocation(p.getX(), p.getY(), p.getZ());
   }
 
   /**
@@ -155,11 +155,15 @@ public class Point3D extends Point2D.Double {
    */
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Point3D) {
-      Point3D p = (Point3D) obj;
-      return x == p.getX() && y == p.getY() && z == p.getZ();
-    }
-    return super.equals(obj);
+    if (this == obj)
+      return true;
+    if (obj == null || getClass() != obj.getClass())
+      return false;
+    Point3D p = (Point3D) obj;
+    final double EPSILON = 1e-9; // Tolerance for floating-point comparison
+    return Math.abs(getX() - p.getX()) < EPSILON &&
+        Math.abs(getY() - p.getY()) < EPSILON &&
+        Math.abs(getZ() - p.getZ()) < EPSILON;
   }
 
   /**
