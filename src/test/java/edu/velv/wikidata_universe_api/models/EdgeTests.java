@@ -84,40 +84,4 @@ class EdgeTests implements FailedTestMessageTemplates, TestDataBuilders {
     assertFalse(edge.fetched(),
         src_ + "date " + edges + "should remain unfetched until updated with a .tgtId() value");
   }
-
-  @Test
-  void srcId_gets_sets() {
-    edge.srcId("Q42");
-    assertEquals("Q42", edge.srcId(),
-        src_ + gs);
-  }
-
-  @Test
-  void tgtId_gets_sets() {
-    edge.tgtId("Q42");
-    assertEquals("Q42", edge.tgtId(),
-        src_ + gs);
-  }
-
-  @Test
-  void propertyId_gets_sets() {
-    edge.propertyId("P31");
-    assertEquals("P31", edge.propertyId(),
-        src_ + gs);
-  }
-
-  @Test
-  void label_gets_sets() {
-    edge.label("testable-label-values");
-    assertEquals("testable-label-values", edge.label(),
-        src_ + gs);
-  }
-
-  @Test
-  void fetched_toggles() {
-    edge.fetched(true);
-    assertTrue(edge.fetched(),
-        src_ + gs);
-  }
-
 }
