@@ -88,6 +88,9 @@ public interface TestDataBuilders {
     return new Dimension(width, height);
   }
 
+  /**
+   * @return a ClientRequest obj filled with the generic testable Graphset values implemented in the interface
+   */
   default RequestPayloadData buildGenericRequestPayload() {
     Graphset gs = buildGenericGraphset();
     List<Vertex> verts = gs.vertices().stream().toList();
