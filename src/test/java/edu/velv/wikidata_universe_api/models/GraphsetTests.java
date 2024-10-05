@@ -27,7 +27,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
 
   @Test
   void constructs_using_existing_data() {
-    graphset = buildGenericGraphset();
+    graphset = buildGraphset_generic();
     checkGraphsetDataStorageNotNull();
     assertEquals(5, graphset.vertexCount(), src_ + shouldBeEq);
     assertEquals(9, graphset.edgeCount(), src_ + shouldBeEq);
@@ -36,7 +36,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
 
   @Test
   void getIncidentEdges_finds_all_related_edges() {
-    graphset = buildGenericGraphset();
+    graphset = buildGraphset_generic();
     Optional<Vertex> vert1 = graphset.getVertexById("Q1");
     Optional<Vertex> vert5 = graphset.getVertexById("Q5");
     assertEquals(3, graphset.getIncidentEdges(vert1.orElse(null)).size(),
@@ -47,7 +47,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
 
   @Test
   void getEndpoints_finds_correct_vertices() {
-    graphset = buildGenericGraphset();
+    graphset = buildGraphset_generic();
     Optional<Edge> edge = graphset.edges().stream().findAny();
     Optional<Tuple2<Vertex, Vertex>> endpoints = graphset.getEndpoints(edge.orElse(null));
     assertEquals(edge.map(Edge::srcId).orElse(null), endpoints.map(Tuple2::_1).map(Vertex::id).orElse(null));
@@ -56,7 +56,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
 
   @Test
   void removeInvalidSearchResultFromData_removes_entity_id_target() {
-    graphset = buildGenericGraphset();
+    graphset = buildGraphset_generic();
     String q1 = "Q3";
     Optional<Vertex> origVertRef = graphset.getVertexById(q1);
     List<Edge> origEdgeRefs = getEdgesWhereStringReferenced(q1);
@@ -75,7 +75,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
 
   @Test
   void removeInvalidSearchResultFromData_removes_label_target() {
-    graphset = buildGenericGraphset();
+    graphset = buildGraphset_generic();
     String q1 = "Q1 label";
     Optional<Vertex> origVertRef = graphset.getVertexByLabel(q1);
 
@@ -92,7 +92,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
 
   @Test
   void removeInvalidSearchResultFromData_removes_property_id_target() {
-    graphset = buildGenericGraphset();
+    graphset = buildGraphset_generic();
     String p1 = "P1";
     Optional<Property> origPropRef = graphset.getPropertyById(p1);
     List<Edge> origEdgeRefs = getEdgesWhereStringReferenced(p1);
@@ -112,7 +112,7 @@ public class GraphsetTests implements FailedTestMessageTemplates, TestDataBuilde
   /**
    * Helper checks all present edges for a possible mention of the provided value
    */
-  public List<Edge> getEdgesWhereStringReferenced(String value) {
+  private List<Edge> getEdgesWhereStringReferenced(String value) {
     return graphset.edges().stream()
         .filter(e -> {
           boolean srcMatch = e.srcId().equals(value);

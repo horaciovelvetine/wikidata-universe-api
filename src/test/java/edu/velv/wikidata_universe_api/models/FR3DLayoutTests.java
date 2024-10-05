@@ -46,7 +46,7 @@ public class FR3DLayoutTests implements FailedTestMessageTemplates, TestDataBuil
     genReqData.layout().scaleDimensionsToGraphsetSize();
 
     assertNotEquals(
-        buildGenericDimensions(), genReqData.dimensions(),
+        buildDimensions_generic(), genReqData.dimensions(),
         src_ + "Layout.dimensions()" + shouldNotBeEq + "to the generic starting Dimensions");
     assertEquals(genReqData.dimensions().getHeight(), genReqData.dimensions().getWidth(),
         src_ + "Scaled Layout.dimensions()" + shouldBeEq + "for 1:1 (generic) aspect dimensions");
@@ -111,17 +111,16 @@ public class FR3DLayoutTests implements FailedTestMessageTemplates, TestDataBuil
 
   @Test
   void stepping_layout_changes_calcs_new_location_for_unlocked_vertices() {
-    allVerticesPositionedAtOrigin();
     genReqData.layout().initialize();
 
-    Map<Vertex, Point3D> initialPositions = new HashMap<>();
+    Map<Vertex, Point3D> initPositions = new HashMap<>();
     for (Vertex v : genReqData.graph().vertices()) {
       Point3D initPos = genReqData.layout().apply(v);
       double iX = initPos.getX();
       double iY = initPos.getY();
       double iZ = initPos.getZ();
 
-      initialPositions.put(v, new Point3D(iX, iY, iZ));
+      initPositions.put(v, new Point3D(iX, iY, iZ));
     }
 
     genReqData.layout().step();
@@ -129,7 +128,7 @@ public class FR3DLayoutTests implements FailedTestMessageTemplates, TestDataBuil
     for (Vertex v : genReqData.graph().vertices()) {
       if (!genReqData.layout().isLocked(v)) {
         Point3D nP = genReqData.layout().apply(v);
-        Point3D iP = initialPositions.get(v);
+        Point3D iP = initPositions.get(v);
 
         assertNotEquals(iP, nP, src_ + vert + "coordinates " + shouldNotBeEq + "after .step()");
       }

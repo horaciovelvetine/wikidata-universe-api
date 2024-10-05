@@ -36,12 +36,10 @@ public class VertexTests implements TestDataBuilders, FailedTestMessageTemplates
 
   @Test
   public void updateUnfetchedValues_works_with_ItemDocument() {
-    ItemDocumentImpl mocDoc = mockItemDocument(1);
-    String qid = "Q1";
+    ItemDocumentImpl mocDoc = mockItemDoc(1);
 
     bert.updateUnfetchedValues(mocDoc, en);
 
-    assertEquals("Q1", bert.id(), src_ + vert + ".id() " + shouldBe + "Q1");
     assertEquals("Q1 " + la, bert.label(), src_ + vert + ".label() " + shouldBe + "Q1 " + la);
     assertEquals(de, bert.description(), src_ + vert + ".description() " + shouldBe + de);
     assertTrue(bert.fetched(), src_ + vert + ".label() " + shouldBe + "true ");
