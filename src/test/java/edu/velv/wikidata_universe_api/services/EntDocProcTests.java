@@ -31,7 +31,7 @@ public class EntDocProcTests implements FailedTestMessageTemplates, TestDataBuil
 
   @Test
   void attemptVertexCreateUnkownTypeEntDoc_creates_vertex_when_expected() throws Exception {
-    Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mockItemDocument(1), enWikiKey);
+    Optional<Vertex> result = docProc.createVertexFromUnknownEntDoc(mockItemDoc(1), enWikiKey);
     String mId = "Q1"; // from the int 1 above...
     assertNotNull(result, src_ + unableToFind + vert);
     assertEquals(mId, result.get().id(), src_ + vert + "id " + shouldBe + mId);
@@ -48,7 +48,7 @@ public class EntDocProcTests implements FailedTestMessageTemplates, TestDataBuil
 
   @Test
   void createRelatedEdgesFromStatements_creates_relevant_edges() {
-    ItemDocumentImpl mItemDoc = mockItemDocument(1);
+    ItemDocumentImpl mItemDoc = mockItemDoc(1);
 
     List<Statement> mStmts = List.of(
         mockStatement_valid_generic(),
@@ -62,7 +62,7 @@ public class EntDocProcTests implements FailedTestMessageTemplates, TestDataBuil
 
   @Test
   void createRelatedEdgeFromStatements_ignores_excluded_and_invalid_data() {
-    ItemDocumentImpl mItemDoc = mockItemDocument(1);
+    ItemDocumentImpl mItemDoc = mockItemDoc(1);
 
     Statement badType = mockStatement_invalid_externalIdType();
     Statement badPID = mockStatement_invalid_property();
