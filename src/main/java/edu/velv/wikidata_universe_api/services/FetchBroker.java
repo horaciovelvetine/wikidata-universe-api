@@ -8,6 +8,7 @@ import io.vavr.CheckedFunction0;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
@@ -27,8 +28,13 @@ public class FetchBroker {
   @Value("${edu.velv.WikiData.en_lang_wiki_key}")
   private String wikiLangKey;
 
+  @Autowired
   public FetchBroker() {
-    this.fetcher = WikibaseDataFetcher.getWikidataDataFetcher();
+    this(WikibaseDataFetcher.getWikidataDataFetcher());
+  }
+
+  public FetchBroker(WikibaseDataFetcher fetcher) {
+    this.fetcher = fetcher; // provides an injectable constructor for non-IT testing
   }
 
   public String iri() {
@@ -68,7 +74,7 @@ public class FetchBroker {
       return Either.left(err);
     }, response -> {
       response.entrySet().forEach(ent -> {
-        results.put(ent.getKey(), handleNoSuchEntityResults(ent.getValue()));
+        results.put(ent.getKey(), handleNoSuchEntityResults(ent.getValue(), ent.getKey()));
       });
       return Either.right(results);
     });
@@ -84,8 +90,11 @@ public class FetchBroker {
   protected Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> fetchEntitiesByDateList(
       List<String> dateBatch) {
     Map<String, Either<Err, WbSearchEntitiesResult>> results = new HashMap<>();
+    
     for (String dateTgt : dateBatch) {
+    
       Either<Err, WbSearchEntitiesResult> fetchRes = fetchSearchResultsByAnyMatch(dateTgt);
+    
       if (fetchRes.isLeft() && fetchRes.getLeft().getClass().equals(ApiUnavailableError.class)) {
         // prevent spamming requests if Wikidata offline
         return Either.left(fetchRes.getLeft());
@@ -150,7 +159,7 @@ public class FetchBroker {
    */
   private Either<Err, EntityDocument> fetchEntityByIdMatch(String id) {
     return fetchWithApiUnavailableErrorHandler(() -> fetcher.getEntityDocument(id))
-        .flatMap(this::handleNoSuchEntityResults);
+        .flatMap(res -> this.handleNoSuchEntityResults(res, id));
   }
 
   /**
@@ -161,8 +170,10 @@ public class FetchBroker {
    */
   private Either<Err, WbSearchEntitiesResult> fetchSearchResultsByAnyMatch(String query) {
     return fetchWithApiUnavailableErrorHandler(() -> fetcher.searchEntities(query, wikiLangKey))
-        .flatMap(this::handleSearchedEntitiesResults);
+        .flatMap(res -> this.handleSearchedEntitiesResults(res, query));
   }
+
+  private final String noMatchFor = "was unable to find any match for: ";
 
   /**
    * Validates and returns the closest matching search result if it exists, else returns the appropriately instantiated Err(or)
@@ -170,10 +181,11 @@ public class FetchBroker {
    * @param List<WbSearchEntitiesResult> results from the WikidataAPI.searchEntities() method
    * @return Search result or a NoSuchEntityFoundError
    */
-  private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(List<WbSearchEntitiesResult> results) {
+  private Either<Err, WbSearchEntitiesResult> handleSearchedEntitiesResults(List<WbSearchEntitiesResult> results,
+      String query) {
     return results.isEmpty()
         ? Either.left(new NoSuchEntityFoundError(
-            "@handleSearchedEntitiesResults() was unable to find any matching SearchResults"))
+            "@handleSearchedEntitiesResults()" + noMatchFor + query))
         : Either.right(results.get(0));
   }
 
@@ -186,7 +198,7 @@ public class FetchBroker {
    */
   private Either<Err, EntityDocument> fetchEntityByTitleMatch(String query) {
     return fetchWithApiUnavailableErrorHandler(() -> fetcher.getEntityDocumentByTitle(wikiIri, query))
-        .flatMap(this::handleNoSuchEntityResults);
+        .flatMap(res -> this.handleNoSuchEntityResults(res, query));
   }
 
   /**
@@ -207,9 +219,10 @@ public class FetchBroker {
    * @param EntityDocument response
    * @return return a result match, else returns a NoSuchEntityFoundError
    */
-  private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument res) {
+  private Either<Err, EntityDocument> handleNoSuchEntityResults(EntityDocument res, String query) {
     return res == null
-        ? Either.left(new NoSuchEntityFoundError("@handleNoSuchEntitiesResult() was unable to find a matching Entity"))
+        ? Either.left(
+            new NoSuchEntityFoundError("@handleNoSuchEntitiesResult()" + noMatchFor + query))
         : Either.right(res);
   }
 
