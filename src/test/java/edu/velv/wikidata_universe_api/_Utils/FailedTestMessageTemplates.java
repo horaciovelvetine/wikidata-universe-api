@@ -2,6 +2,7 @@ package edu.velv.wikidata_universe_api._Utils;
 
 public interface FailedTestMessageTemplates {
   public static final String c = ", ";
+  public static final String unexpected = "unexpected ";
   public static final String expected = "expected ";
   public static final String empty = "empty ";
   public static final String unable = "unable ";
@@ -31,5 +32,4 @@ public interface FailedTestMessageTemplates {
   public static final String initedWO = inited + without;
   public static final String beforeRemoval = "before removal ";
   public static final String afterRemoval = " after removal ";
-  public static final String gs = "getters and setters";
 }

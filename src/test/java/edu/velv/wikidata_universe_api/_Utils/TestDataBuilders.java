@@ -8,7 +8,9 @@ import java.awt.Dimension;
 import java.util.List;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
+import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.Snak;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
@@ -77,7 +79,7 @@ public interface TestDataBuilders {
   /**
    * @return a 300 by 300 unit Dimension obj
    */
-  default Dimension buildGenericDimensions() {
+  default Dimension buildDimensions_generic() {
     return buildDimension(300, 300);
   }
 
@@ -92,18 +94,18 @@ public interface TestDataBuilders {
    * @return a ClientRequest obj filled with the generic testable Graphset values implemented in the interface
    */
   default RequestPayloadData buildGenericRequestPayload() {
-    Graphset gs = buildGenericGraphset();
+    Graphset gs = buildGraphset_generic();
     List<Vertex> verts = gs.vertices().stream().toList();
     List<Edge> edges = gs.edges().stream().toList();
     List<Property> props = gs.properties().stream().toList();
-    return new RequestPayloadData("generic_graphset_test", buildGenericDimensions(), verts, edges,
+    return new RequestPayloadData("generic_graphset_test", buildDimensions_generic(), verts, edges,
         props);
   }
 
   /**
    * Creates a testable graphset of 5 vertices, 3 properties, and 9 edges. Each entity is fetched and considered complete withd default values applied for labels and descriptions.
    */
-  default Graphset buildGenericGraphset() {
+  default Graphset buildGraphset_generic() {
     List<Vertex> verts = List.of(
         buildVertex(1),
         buildVertex(2),
@@ -128,23 +130,45 @@ public interface TestDataBuilders {
   }
 
   /**
-   * Creates a <mock> of a @WikidataToolkit ItemIdValue with the provided QID
+   * Creates a mock @WikidataToolkit PropertyDocument with the provided PID and default values 
    */
-  default ItemIdValue mockItemIDValue(Integer id) {
-    ItemIdValue mItemId = mock(ItemIdValue.class);
-    when(mItemId.getId()).thenReturn("Q" + 1);
-    return mItemId;
+  default PropertyDocumentImpl mockPropertyDoc(Integer id) {
+    PropertyIdValue mId = mockPropertyIdVal(id);
+    PropertyDocumentImpl mocDoc = mock(PropertyDocumentImpl.class);
+
+    when(mocDoc.getEntityId()).thenReturn(mId);
+    when(mocDoc.findLabel(en)).thenReturn("P" + id + " " + la);
+    when(mocDoc.findDescription(en)).thenReturn(de);
+    return mocDoc;
   }
 
   /**
-   * Creates a <mock:> of a @WikidataToolkit ItemDocument(impl) with the provided QID and default values
+   * Creates a mock @WikidataToolkit PropertyIdValue with the provided PID
    */
-  default ItemDocumentImpl mockItemDocument(Integer id) {
-    ItemIdValue mId = mockItemIDValue(id);
+  default PropertyIdValue mockPropertyIdVal(Integer id) {
+    PropertyIdValue mId = mock(PropertyIdValue.class);
+    when(mId.getId()).thenReturn("P" + id);
+    return mId;
+  }
+
+  /**
+   * Creates a mock @WikidataToolkit ItemIdValue with the provided QID
+   */
+  default ItemIdValue mockItemIDVal(Integer id) {
+    ItemIdValue mId = mock(ItemIdValue.class);
+    when(mId.getId()).thenReturn("Q" + id);
+    return mId;
+  }
+
+  /**
+   * Creates a mock @WikidataToolkit ItemDocument(impl) with the provided QID and default values
+   */
+  default ItemDocumentImpl mockItemDoc(Integer id) {
+    ItemIdValue mId = mockItemIDVal(id);
     ItemDocumentImpl mocDoc = mock(ItemDocumentImpl.class);
-    String qid = "Q" + id;
+
     when(mocDoc.getEntityId()).thenReturn(mId);
-    when(mocDoc.findLabel(en)).thenReturn(qid + " " + la);
+    when(mocDoc.findLabel(en)).thenReturn("Q" + id + " " + la);
     when(mocDoc.findDescription(en)).thenReturn(de);
     return mocDoc;
   }
