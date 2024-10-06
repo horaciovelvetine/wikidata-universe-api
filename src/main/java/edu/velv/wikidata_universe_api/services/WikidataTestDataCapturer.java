@@ -7,11 +7,13 @@ import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 
+import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class WikidataTestDataCapturer implements Printable {
   @Value("${edu.velv.Wikiverse.test_data_dir}")
   private String testDataDir;
+  private String json = ".json";
 
   private final ObjectMapper mapper;
 
@@ -24,16 +26,16 @@ public class WikidataTestDataCapturer implements Printable {
       String fileName = entDoc.getEntityId().getId();
       switch (entDoc) {
         case ItemDocumentImpl cDoc -> {
-          fileName += "-" + cDoc.findLabel("en") + "-item-doc";
+          fileName += "-item-doc";
         }
         case PropertyDocumentImpl cDoc -> {
-          fileName += "-" + cDoc.findLabel("en") + "-property-doc";
-          // Handle PropertyDocumentImpl specific logic here
+          fileName += "-property-doc";
         }
         default -> {
           fileName += "-entity-doc";
         }
       }
+      fileName += json;
       mapper.writeValue(new File(testDataDir + fileName), entDoc);
     } catch (Exception e) {
       print(e);
@@ -51,7 +53,12 @@ public class WikidataTestDataCapturer implements Printable {
 
   public ItemDocumentImpl readItemDocFromStorage(String fileName) {
     try {
-      return mapper.readValue(new File(testDataDir) + fileName, ItemDocumentImpl.class);
+      //? values injected for site-iri are unused in tests...
+      InjectableValues.Std injectableValues = new InjectableValues.Std();
+      injectableValues.addValue("siteIri", "demoiri");
+
+      mapper.setInjectableValues(injectableValues);
+      return mapper.readValue(new File(testDataDir + fileName), ItemDocumentImpl.class);
     } catch (Exception e) {
       print(e);
       return null;
@@ -60,7 +67,7 @@ public class WikidataTestDataCapturer implements Printable {
 
   public PropertyDocumentImpl readPropertyDocFromStorage(String fileName) {
     try {
-      return mapper.readValue(new File(testDataDir) + fileName, PropertyDocumentImpl.class);
+      return mapper.readValue(new File(testDataDir + fileName), PropertyDocumentImpl.class);
     } catch (Exception e) {
       print(e);
       return null;
