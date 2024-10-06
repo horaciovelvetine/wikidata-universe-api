@@ -4,8 +4,6 @@ import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
-import edu.velv.wikidata_universe_api._Utils.FailedTestMessageTemplates;
-import edu.velv.wikidata_universe_api._Utils.TestDataBuilders;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.Vertex;
 
@@ -22,7 +20,7 @@ import java.util.Set;
 import java.util.List;
 
 @SpringBootTest
-public class EntDocProcTests implements FailedTestMessageTemplates, TestDataBuilders {
+public class EntDocProcTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
   private final String src_ = "@EntDocProcTests:: ";
   private final String enWikiKey = "en";
 
