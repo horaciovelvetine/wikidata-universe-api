@@ -19,13 +19,11 @@ import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 
-import edu.velv.wikidata_universe_api._Utils.FailedTestMessageTemplates;
-import edu.velv.wikidata_universe_api._Utils.TestDataBuilders;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
 
-public class FetchBrokerTests implements FailedTestMessageTemplates, TestDataBuilders {
+public class FetchBrokerTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
   private final String src_ = "@FetchBrokerTests";
   private final String entDocResults = "Entity Document results ";
   private final String dateDocResults = "Date Document results ";
