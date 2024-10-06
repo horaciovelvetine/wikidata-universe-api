@@ -34,8 +34,8 @@ public class WikidataServiceManager implements Printable {
 
   /**
    * Uses the initial query value to find the target of the request and then gather the initial data
-   * used to construct a Graph (no layout for this request), then return the initial results for the client.
-   * Results in a single vertex on screen, with further fetch details stored for a subsequent request task. 
+   * used to construct a Graph and return the initial results for the client. This doesn't include any
+   * layout data placing a single vertex (the origin) at a new Point3D (0,0,0)
    */
   public Optional<Err> fetchInitQueryDataTask(ClientRequest req) {
     Either<Err, EntityDocument> initQueryDataTask = api.fetchEntityByAnyQueryMatch(req.query());
