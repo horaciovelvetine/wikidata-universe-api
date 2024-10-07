@@ -65,6 +65,7 @@ public class ClientRequest {
    */
   public Either<Err, ClientRequest> getInitialQueryData() {
     Optional<Err> fetchInitQueryTask = wikidata.fetchInitQueryDataTask(this);
+    runLayoutAlgoProcess();
 
     return fetchInitQueryTask.isPresent() ? Either.left(fetchInitQueryTask.get()) : Either.right(this);
   }
@@ -92,11 +93,9 @@ public class ClientRequest {
   private void runLayoutAlgoProcess() {
     layout.initialize();
 
-    //todo -> back to test strange single coordinate layout results
-
-    // while (!layout.done()) {
-    //   layout.step();
-    // }
+    while (!layout.done()) {
+      layout.step();
+    }
 
     graph.updateVertexCoordinatesFromLayout(layout);
   }
