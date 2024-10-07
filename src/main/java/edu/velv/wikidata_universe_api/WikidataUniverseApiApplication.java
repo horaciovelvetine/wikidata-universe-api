@@ -8,7 +8,6 @@ import edu.velv.wikidata_universe_api.services.EntDocProc;
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.FetchBroker;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
-import edu.velv.wikidata_universe_api.services.WikidataTestDataCapturer;
 
 @SpringBootApplication
 public class WikidataUniverseApiApplication {
@@ -35,10 +34,5 @@ public class WikidataUniverseApiApplication {
 	@Bean
 	FR3DConfig fr3dConfig() {
 		return new FR3DConfig();
-	}
-
-	@Bean
-	WikidataTestDataCapturer wikidataTestDataCapturer() {
-		return new WikidataTestDataCapturer();
 	}
 }
