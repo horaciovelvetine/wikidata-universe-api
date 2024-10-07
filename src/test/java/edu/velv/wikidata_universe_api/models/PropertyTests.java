@@ -8,10 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 
-import edu.velv.wikidata_universe_api.services.FailedTestMessageTemplates;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
 
-public class PropertyTests implements WikidataTestDataBuilders, FailedTestMessageTemplates {
+public class PropertyTests implements WikidataTestDataBuilders, FailedTestMsgTemplates {
   private final String src_ = "@PropertyTests:: ";
   Property property;
   PropertyDocument mProppaDoc = mock(PropertyDocument.class);

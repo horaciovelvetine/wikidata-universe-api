@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
-import edu.velv.wikidata_universe_api.services.FailedTestMessageTemplates;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
 
 // import edu.velv.wikidata_universe_api.Constables;
 
-public class VertexTests implements WikidataTestDataBuilders, FailedTestMessageTemplates {
+public class VertexTests implements WikidataTestDataBuilders, FailedTestMsgTemplates {
   private final String src_ = "@VertexTests:: ";
   Vertex bert; // the vert
   WbSearchEntitiesResult mSearchResult = mock(WbSearchEntitiesResult.class);

@@ -3,7 +3,7 @@ package edu.velv.wikidata_universe_api.models;
 import org.junit.jupiter.api.Test;
 
 import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
-import edu.velv.wikidata_universe_api.services.FailedTestMessageTemplates;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 
-class EdgeTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
+class EdgeTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
   private final String src_ = "@EdgeTests:: ";
   Edge edge;
 

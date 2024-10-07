@@ -7,9 +7,9 @@ import java.awt.Dimension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import edu.velv.wikidata_universe_api.services.FailedTestMessageTemplates;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 
-public class RandomPoint3DTests implements FailedTestMessageTemplates {
+public class RandomPoint3DTests implements FailedTestMsgTemplates {
   private final String src_ = "@RandomPoint3DTests:: ";
 
   private RandomPoint3D<Object> randomPoint3D;

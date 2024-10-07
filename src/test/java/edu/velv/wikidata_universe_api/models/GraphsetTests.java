@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import edu.velv.wikidata_universe_api.services.FailedTestMessageTemplates;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
 
-public class GraphsetTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
+public class GraphsetTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
   private final String src_ = "@GraphsetTests::";
 
   private Graphset graphset;

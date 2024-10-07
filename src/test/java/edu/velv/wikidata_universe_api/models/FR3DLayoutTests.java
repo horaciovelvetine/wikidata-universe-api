@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
-import edu.velv.wikidata_universe_api.services.FailedTestMessageTemplates;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
 
 @SpringBootTest
-public class FR3DLayoutTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
+public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
   private final String src_ = "@FR3DLayoutTests:: ";
 
   @Autowired
