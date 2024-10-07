@@ -38,9 +38,6 @@ public class ClientRequestsController implements Printable {
 
   @PostMapping("api/fetch-related")
   public ResponseEntity<RequestResponseBody> fetchRelatedDataDetails(@RequestBody RequestPayloadData payload) {
-
-    print("FetchRelated: " + payload.query());
-
     return new ClientRequest(wikidataServiceManager, fr3DConfig, payload)
         .getUnfetchedData()
         .mapLeft(Err::mapErrResponse)

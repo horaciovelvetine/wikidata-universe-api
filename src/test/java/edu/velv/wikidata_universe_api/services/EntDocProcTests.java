@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.List;
 
 @SpringBootTest
-public class EntDocProcTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
+public class EntDocProcTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
   private final String src_ = "@EntDocProcTests:: ";
   private final String enWikiKey = "en";
 

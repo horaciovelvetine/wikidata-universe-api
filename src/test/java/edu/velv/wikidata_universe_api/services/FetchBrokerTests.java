@@ -23,7 +23,7 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
 
-public class FetchBrokerTests implements FailedTestMessageTemplates, WikidataTestDataBuilders {
+public class FetchBrokerTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
   private final String src_ = "@FetchBrokerTests";
   private final String entDocResults = "Entity Document results ";
   private final String dateDocResults = "Date Document results ";

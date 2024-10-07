@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import edu.velv.wikidata_universe_api._Utils.FailedTestMessageTemplates;
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 @SpringBootTest
-public class WikidataUniverseApiApplicationTests implements FailedTestMessageTemplates {
+public class WikidataUniverseApiApplicationTests implements FailedTestMsgTemplates {
   private final String src_ = "@WikidataUniverseApiApplicationTests ";
   @Autowired
   private WikidataServiceManager wikidataSrvcMngr;
