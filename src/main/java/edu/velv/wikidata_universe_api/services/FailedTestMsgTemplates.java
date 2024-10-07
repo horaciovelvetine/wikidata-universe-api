@@ -1,6 +1,6 @@
 package edu.velv.wikidata_universe_api.services;
 
-public interface FailedTestMessageTemplates {
+public interface FailedTestMsgTemplates {
   public static final String c = ", ";
   public static final String unexpected = "unexpected ";
   public static final String expected = "expected ";
