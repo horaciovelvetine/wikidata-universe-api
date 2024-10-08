@@ -54,14 +54,12 @@ public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestData
 
   @Test
   void setInitialRandomPositions_initializes_unlocked_vertices() {
-    genReqData.layout().setInitialRandomPositions(new RandomPoint3D<>(genReqData.dimensions()));
+    assertFalse(genReqData.graph().vertexCoordsUniqueForEach(), src_ + expected + "each Vertex to start at (0,0,0)");
+    genReqData.layout().initialize();
     genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
 
-    for (Vertex gnVert : genReqData.graph().vertices()) {
-      assertNotEquals(new Point3D(), gnVert.coords(),
-          src_ + vert + "coordinates " + shouldNotBeEq + "to (0,0,0) after" + inited);
-    }
-
+    assertTrue(genReqData.graph.vertexCoordsUniqueForEach(),
+        src_ + expected + "each Vertex to have unique Coordinates");
   }
 
   @Test
@@ -69,23 +67,12 @@ public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestData
     Optional<Vertex> lockVert = genReqData.graph().getVertexById("Q1");
     if (lockVert.isPresent()) {
       genReqData.layout().lock(lockVert.get(), true);
-
-      genReqData.layout().setInitialRandomPositions(new RandomPoint3D<>(genReqData.dimensions()));
+      genReqData.layout().initialize(); //==> calls setInitialRandomPositions...
       genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
 
-      for (Vertex gnVert : genReqData.graph().vertices()) {
-        if (lockVert.get().equals(gnVert)) {
-          assertEquals(new Point3D(), gnVert.coords(), src_ + vert + shouldBe + "locked to (0,0,0)");
-        } else {
-          assertNotEquals(new Point3D(), gnVert.coords(),
-              src_ + vert + "coordinates " + shouldNotBeEq + "to (0,0,0) after" + inited);
-        }
-      }
-
-      genReqData.layout().lock(lockVert.get(), false);
-      genReqData.layout().setInitialRandomPositions(new RandomPoint3D<>(genReqData.dimensions()));
-      genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
-      assertNotEquals(new Point3D(), lockVert.get().coords(), src_ + vert + "coordinates " + shouldBe + "changed");
+      assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
+          src_ + expected + "each Vertex to have unique Coordinates");
+      assertTrue(vertexCoordsAreZeroes(lockVert.get()), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
     }
 
   }
@@ -137,27 +124,39 @@ public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestData
 
   @Test
   void running_layout_maintains_locked_vertices_positions() {
-    allVerticesPositionedAtOrigin();
-    Vertex vert = genReqData.graph().getVertexById("Q1").get();
-    genReqData.layout().lock(vert, true); // lock vert as origin
-    genReqData.layout().initialize();
 
-    assertEquals(vert.coords(), genReqData.layout().apply(vert),
-        src_ + "locked" + vert + should + "remain at (0,0,0)");
+    Vertex lockVert = genReqData.graph().getVertexById("Q1").get();
+    genReqData.layout().lock(lockVert, true); // lock vert at (0,0,0);
+    genReqData.layout().initialize();
+    genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
+
+    assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
+        src_ + expected + "each Vertex to have unique Coordinates");
+    assertTrue(vertexCoordsAreZeroes(lockVert), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
 
     while (!genReqData.layout().done()) {
       genReqData.layout().step();
     }
 
-    assertEquals(vert.coords(), genReqData.layout().apply(vert),
-        src_ + "locked" + vert + should + "remain at (0,0,0)");
-
+    assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
+        src_ + expected + "each Vertex to have unique Coordinates");
+    assertTrue(vertexCoordsAreZeroes(lockVert), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
   }
 
+  /**
+   * Iterates over all vertices in the genRequestData and checks they are all at (0,0,0)
+   */
   private void allVerticesPositionedAtOrigin() {
     genReqData.graph.vertices.forEach(gnVert -> {
       assertEquals(new Point3D(), gnVert.coords(),
           src_ + vert + "coordinates " + shouldBeEq + " to (0,0,0) pre-" + init);
     });
+  }
+
+  /**
+   * @return true if the provided Vertex's coordinates are at (0,0,0)
+   */
+  private boolean vertexCoordsAreZeroes(Vertex vert) {
+    return vert.coords().equals(new Point3D());
   }
 }
