@@ -56,4 +56,33 @@ public class ErrTests {
     assertEquals(expectedMessage, error.msg());
     assertSame(expectedCause, error.cause());
   }
+
+
+  @Test
+  public void mapErrResponse_DebugDetailsError() {
+    Err error = new Err.WikiverseServiceError.DebugDetailsError("Debug error occurred");
+    Err.RequestErrResponse response = Err.mapErrResponse(error);
+    assertEquals(404, response.status());
+    assertEquals("A Debug, oh no squish it!", response.msg());
+    assertEquals(error, response.e());
+  }
+
+  @Test
+  public void mapErrResponse_ApiUnavailableError() {
+    Throwable cause = new Throwable("API down");
+    Err error = new Err.WikidataServiceError.ApiUnavailableError(cause);
+    Err.RequestErrResponse response = Err.mapErrResponse(error);
+    assertEquals(404, response.status());
+    assertEquals("Wikidata's API is currently unavailable, try again later.", response.msg());
+    assertEquals(error, response.e());
+  }
+
+  @Test
+  public void mapErrResponse_NoSuchEntityFoundError() {
+    Err error = new Err.WikidataServiceError.NoSuchEntityFoundError("test query");
+    Err.RequestErrResponse response = Err.mapErrResponse(error);
+    assertEquals(404, response.status());
+    assertEquals("Seems like there is no such matching record, check your search and try again.", response.msg());
+    assertEquals(error, response.e());
+  }
 }
