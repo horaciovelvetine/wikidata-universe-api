@@ -1,7 +1,6 @@
 package edu.velv.wikidata_universe_api.models;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
-import org.wikidata.wdtk.datamodel.implementation.SitesImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -74,10 +73,12 @@ public class Vertex {
     this.coords = point;
   }
 
+  @JsonIgnore
   public boolean isFetchedOrDate() {
     return fetched || id == null;
   }
 
+  @JsonIgnore
   public boolean isFetchedOrId() {
     return fetched && !id.isBlank();
   }

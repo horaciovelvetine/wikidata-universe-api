@@ -1,19 +1,19 @@
 package edu.velv.wikidata_universe_api.services;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.vavr.control.Either;
 
+import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
@@ -23,105 +23,123 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
 
-public class FetchBrokerTests {
+public class FetchBrokerTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
+  private final String src_ = "@FetchBrokerTests";
+  private final String entDocResults = "Entity Document results ";
+  private final String dateDocResults = "Date Document results ";
 
-  // private WikibaseDataFetcher wdtkFetcher = mock(WikibaseDataFetcher.class);
-  // private FetchBroker fetchBroker = new FetchBroker(wdtkFetcher);
+  private WikibaseDataFetcher mFetcher;
+  private FetchBroker fetchBroker;
 
-  // @Test
-  // void fetchEntityByAnyQueryMatch_success() throws Exception {
-  //   String query = "Q123";
-  //   EntityDocument mEntDoc = mock(EntityDocument.class);
-  //   when(wdtkFetcher.getEntityDocumentByTitle(anyString(), eq(query))).thenReturn(mEntDoc);
+  @BeforeEach
+  public void setUpMockInjectedFetcher() {
+    mFetcher = mock(WikibaseDataFetcher.class);
+    fetchBroker = new FetchBroker(mFetcher);
+  }
 
-  //   Either<Err, EntityDocument> result = fetchBroker.fetchEntityByAnyQueryMatch(query);
-  //   assertTrue(result.isRight(), "Should return a right instance of Either containing an EntityDocument (mock).");
-  // }
+  @Test
+  public void fetchEntityByAnyQueryMatch_returns_expected_results() throws Exception {
+    ItemDocumentImpl mocDoc = mockItemDoc(1);
 
-  // @Test
-  // void fetchEntityByAny_handles_no_such_entity_found() throws Exception {
-  //   String q1 = "Q123";
-  //   EntityDocument mEntDoc = null;
-  //   when(wdtkFetcher.getEntityDocumentByTitle(anyString(), eq(q1))).thenReturn(mEntDoc);
-  //   when(wdtkFetcher.searchEntities(anyString(), eq(q1))).thenReturn(Collections.emptyList());
+    //? any() as FetchBroker config values will be unconfigured outside the SpringBoot context
+    when(mFetcher.getEntityDocumentByTitle(any(), eq(QID))).thenReturn(mocDoc);
 
-  //   Either<Err, EntityDocument> result = fetchBroker.fetchEntityByAnyQueryMatch(q1);
+    Either<Err, EntityDocument> result = fetchBroker.fetchEntityByAnyQueryMatch(QID);
 
-  //   assertTrue(result.isLeft(), "Null & Empty List results should return a left instance of Either containing an Err.");
-  //   assertTrue(result.getLeft() instanceof NoSuchEntityFoundError,
-  //       "No matching records should return a NoSuchEntityFoundError.");
-  // }
+    assertTrue(result.isRight(), src_ + entDocResults + shouldNotBe + empty);
+    assertEquals(mocDoc, result.get(), src_ + entDocResults + shouldBeEq + "mocked ItemDoc");
+  }
 
-  // @Test
-  // void fetchEntityByAny_handles_wikidata_api_unavailable_with_unavailable_error() throws Exception {
-  //   String q1 = "Q123";
-  //   MediaWikiApiErrorException err = mock(MediaWikiApiErrorException.class);
-  //   when(wdtkFetcher.getEntityDocumentByTitle(anyString(), eq(q1))).thenThrow(err);
+  @Test
+  public void fetchEntityByAnyQueryMatch_handles_no_results_gracefully() throws Exception {
 
-  //   Either<Err, EntityDocument> result = fetchBroker.fetchEntityByAnyQueryMatch(q1);
-  //   assertTrue(result.isLeft(),
-  //       "Should catch the MediaWikiApiErrorException thrown for an unavailable API, and wrap that result in an Either Left");
-  //   assertTrue(result.getLeft() instanceof ApiUnavailableError, "Error should relay API Unavailable message");
-  // }
+    when(mFetcher.getEntityDocumentByTitle(any(), eq(QID))).thenReturn(null);
+    when(mFetcher.searchEntities(eq(QID), any(String.class))).thenReturn(null);
 
-  // @Test
-  // void fetchEntitiesByIdList_success() throws Exception {
-  //   List<String> queryIds = Arrays.asList("Q1", "Q2");
-  //   EntityDocument mEntDoc1 = mock(EntityDocument.class);
-  //   EntityDocument mEntDoc2 = mock(EntityDocument.class);
-  //   Map<String, EntityDocument> mResponse = new HashMap<>();
-  //   mResponse.put("Q1", mEntDoc1);
-  //   mResponse.put("Q2", mEntDoc2);
-  //   when(wdtkFetcher.getEntityDocuments(queryIds)).thenReturn(mResponse);
+    Either<Err, EntityDocument> result = fetchBroker.fetchEntityByAnyQueryMatch(QID);
+    assertTrue(result.isLeft(), src_ + entDocResults + shouldBe + "an Err when null results are given");
+    assertTrue(result.getLeft() instanceof NoSuchEntityFoundError,
+        src_ + entDocResults + shouldBe + " a NoSuchEntityFoundError with a helpful message");
 
-  //   Either<Err, Map<String, Either<Err, EntityDocument>>> result = fetchBroker.fetchEntitiesByIdList(queryIds);
+  }
 
-  //   assertTrue(result.isRight());
-  //   assertEquals(2, result.get().size());
-  //   assertEquals(mEntDoc1, result.get().get("Q1").get());
-  //   assertEquals(mEntDoc2, result.get().get("Q2").get());
-  // }
+  @Test
+  public void fetchEntityByAnyQueryMatch_doesnt_retry_if_API_offline() throws Exception {
 
-  // @Test
-  // void testFetchEntitiesByIdList_handles_no_suc_entity_found() throws Exception {
-  //   List<String> queryIds = Arrays.asList("Q1", "Q2");
-  //   Map<String, EntityDocument> mockResponse = new HashMap<>();
-  //   mockResponse.put("Q1", null);
-  //   mockResponse.put("Q2", null);
-  //   when(wdtkFetcher.getEntityDocuments(queryIds)).thenReturn(mockResponse);
+    when(mFetcher.getEntityDocumentByTitle(any(), eq(QID))).thenThrow(MediaWikiApiErrorException.class);
 
-  //   Either<Err, Map<String, Either<Err, EntityDocument>>> result = fetchBroker.fetchEntitiesByIdList(queryIds);
+    Either<Err, EntityDocument> result = fetchBroker.fetchEntityByAnyQueryMatch(QID);
+    assertTrue(result.isLeft(),
+        src_ + entDocResults + shouldBe + "an Err when a MediaWikiApiErrorException is thrown");
+    assertTrue(result.getLeft() instanceof ApiUnavailableError,
+        src_ + entDocResults + shouldBe + "wrapped in a WikidataServiceError to notify client");
 
-  //   assertTrue(result.isRight());
-  //   assertTrue(result.get().get("Q1").isLeft());
-  //   assertTrue(result.get().get("Q2").isLeft());
-  // }
+  }
 
-  // @Test
-  // void testFetchEntitiesByDateList_Success() throws Exception {
-  //   List<String> dateBatch = Arrays.asList("2021-01-01", "2021-01-02");
-  //   WbSearchEntitiesResult mockResult1 = mock(WbSearchEntitiesResult.class);
-  //   WbSearchEntitiesResult mockResult2 = mock(WbSearchEntitiesResult.class);
-  //   when(wdtkFetcher.searchEntities(eq("2021-01-01"), anyString())).thenReturn(Arrays.asList(mockResult1));
-  //   when(wdtkFetcher.searchEntities(eq("2021-01-02"), anyString())).thenReturn(Arrays.asList(mockResult2));
+  @Test
+  void fetchEntitiesByIdList_returns_expected_results() throws Exception {
+    List<String> queryIds = Arrays.asList("Q1", "Q2");
+    EntityDocument mEntDoc1 = mockItemDoc(1);
+    EntityDocument mEntDoc2 = mockItemDoc(2);
+    Map<String, EntityDocument> mResponse = Map.of("Q1", mEntDoc1, "Q2", mEntDoc2);
 
-  //   Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> result = fetchBroker
-  //       .fetchEntitiesByDateList(dateBatch);
+    when(mFetcher.getEntityDocuments(queryIds)).thenReturn(mResponse);
 
-  //   assertTrue(result.isRight());
-  //   assertEquals(2, result.get().size());
-  //   assertEquals(mockResult1, result.get().get("2021-01-01").get());
-  //   assertEquals(mockResult2, result.get().get("2021-01-02").get());
-  // }
+    Either<Err, Map<String, Either<Err, EntityDocument>>> result = fetchBroker.fetchEntitiesByIdList(queryIds);
 
-  void testFetchEntitiesByDateList_ApiUnavailable() {
-    // List<String> dateBatch = Arrays.asList("2021-01-01", "2021-01-02");
-    // when(fetcher.searchEntities(eq("2021-01-01"), anyString())).thenThrow(new RuntimeException("API unavailable"));
+    assertTrue(result.isRight(), src_ + entDocResults + shouldNotBe + empty);
+    assertEquals(2, result.get().size(), src_ + expected + entDocResults + should + "have two ItemDoc results entries");
+    assertEquals(mEntDoc1, result.get().get("Q1").get(),
+        src_ + expected + entDocResults + shouldBeEq + "to mock of Q1");
+    assertEquals(mEntDoc2, result.get().get("Q2").get(),
+        src_ + expected + entDocResults + shouldBeEq + "to mock of Q2");
+  }
 
-    // Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> result = fetchBroker
-    //     .fetchEntitiesByDateList(dateBatch);
+  @Test
+  void fetchEntitiesByIdList_doesnt_retry_if_API_offline() throws Exception {
+    List<String> queryIds = Arrays.asList("Q1", "Q2");
+    when(mFetcher.getEntityDocuments(queryIds)).thenThrow(MediaWikiApiErrorException.class);
 
-    // assertTrue(result.isLeft());
-    // assertTrue(result.getLeft() instanceof Err.WikidataServiceError.ApiUnavailableError);
+    Either<Err, Map<String, Either<Err, EntityDocument>>> result = fetchBroker.fetchEntitiesByIdList(queryIds);
+
+    assertTrue(result.isLeft(),
+        src_ + entDocResults + shouldBe + "an Err when a MediaWikiApiErrorException is thrown");
+    assertTrue(result.getLeft() instanceof ApiUnavailableError,
+        src_ + entDocResults + shouldBe + "wrapped in a WikidataServiceError to notify client");
+
+  }
+
+  @Test
+  void fetchEntitiesByDateList_returns_expected_results() throws Exception {
+    List<String> dateBatch = Arrays.asList("2021-01-01", "2021-01-02");
+    WbSearchEntitiesResult mockResult1 = mock(WbSearchEntitiesResult.class);
+    WbSearchEntitiesResult mockResult2 = mock(WbSearchEntitiesResult.class);
+    when(mFetcher.searchEntities(eq("2021-01-01"), nullable(String.class))).thenReturn(Arrays.asList(mockResult1));
+    when(mFetcher.searchEntities(eq("2021-01-02"), nullable(String.class))).thenReturn(Arrays.asList(mockResult2));
+
+    Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> result = fetchBroker
+        .fetchEntitiesByDateList(dateBatch);
+
+    assertTrue(result.isRight(), src_ + dateDocResults + shouldNotBe + empty);
+    assertEquals(2, result.get().size(),
+        src_ + expected + dateDocResults + should + "have two WbSearchEntitiesResult entries");
+    assertEquals(mockResult1, result.get().get("2021-01-01").get(),
+        src_ + dateDocResults + shouldBeEq + "mockDateResult 1");
+    assertEquals(mockResult2, result.get().get("2021-01-02").get(),
+        src_ + dateDocResults + shouldBeEq + "mockDateResult 2");
+  }
+
+  @Test
+  void fetchEntitiesByDateList_doesnt_retry_if_API_offline() throws Exception {
+    List<String> dateBatch = Arrays.asList("2021-01-01", "2021-01-02");
+    when(mFetcher.searchEntities(eq("2021-01-01"), nullable(String.class))).thenThrow(MediaWikiApiErrorException.class);
+
+    Either<Err, Map<String, Either<Err, WbSearchEntitiesResult>>> result = fetchBroker
+        .fetchEntitiesByDateList(dateBatch);
+
+    assertTrue(result.isLeft(),
+        src_ + dateDocResults + shouldBe + "an Err when a MediaWikiApiErrorException is thrown");
+    assertTrue(result.getLeft() instanceof ApiUnavailableError,
+        src_ + dateDocResults + shouldBe + "wrapped in a WikidataServiceError to notify client");
   }
 }

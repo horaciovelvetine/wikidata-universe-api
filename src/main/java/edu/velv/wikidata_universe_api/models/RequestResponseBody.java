@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-import edu.velv.wikidata_universe_api.ClientRequest;
 import edu.velv.wikidata_universe_api.errors.Err;
 
 import java.awt.Dimension;

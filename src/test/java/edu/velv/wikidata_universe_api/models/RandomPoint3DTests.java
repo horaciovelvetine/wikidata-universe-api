@@ -7,7 +7,10 @@ import java.awt.Dimension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class RandomPoint3DTests {
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
+
+public class RandomPoint3DTests implements FailedTestMsgTemplates {
+  private final String src_ = "@RandomPoint3DTests:: ";
 
   private RandomPoint3D<Object> randomPoint3D;
   private Dimension dimension;
@@ -20,17 +23,20 @@ public class RandomPoint3DTests {
 
   @Test
   public void can_be_initialized_with_dimension() {
-    assertNotNull(randomPoint3D, "RandomPoint3D should be initialized");
+    assertNotNull(randomPoint3D, src_ + shouldBe + inited);
   }
 
   @Test
   public void returns_random_point_on_apply() {
     Point3D point = randomPoint3D.apply(new Object());
-    assertNotNull(point, "Point3D should not be null");
-    assertTrue(point.getX() >= 0 && point.getX() <= dimension.width, "X coordinate is out of bounds");
-    assertTrue(point.getY() >= 0 && point.getY() <= dimension.height, "Y coordinate is out of bounds");
+    assertNotNull(point, src_ + shouldNotBe + "null on" + inited);
+    assertTrue(point.getX() >= 0 && point.getX() <= dimension.width,
+        src_ + "X coordinates" + shouldBe + "in-bounds");
+    assertTrue(point.getY() >= 0 && point.getY() <= dimension.height,
+        src_ + "Y coordinates" + shouldBe + "in-bounds");
     double max = Math.max(dimension.width, dimension.height);
-    assertTrue(point.getZ() >= 0 && point.getZ() <= max, "Z coordinate is out of bounds");
+    assertTrue(point.getZ() >= 0 && point.getZ() <= max,
+        src_ + "Z coordinates" + shouldBe + "in-bounds");
   }
 
   @Test
@@ -38,9 +44,9 @@ public class RandomPoint3DTests {
     Dimension zeroDimension = new Dimension(0, 0);
     RandomPoint3D<Object> zeroDimRandomPoint3D = new RandomPoint3D<>(zeroDimension);
     Point3D point = zeroDimRandomPoint3D.apply(new Object());
-    assertNotNull(point, "Point3D should not be null");
-    assertTrue(point.getX() == 0, "X coordinate should be 0");
-    assertTrue(point.getY() == 0, "Y coordinate should be 0");
-    assertTrue(point.getZ() == 0, "Z coordinate should be 0");
+    assertNotNull(point, src_ + shouldNotBe + "null on" + inited);
+    assertTrue(point.getX() == 0, src_ + "X coordinates" + shouldBe + 0);
+    assertTrue(point.getY() == 0, src_ + "Y coordinates" + shouldBe + 0);
+    assertTrue(point.getZ() == 0, src_ + "Z coordinates" + shouldBe + 0);
   }
 }
