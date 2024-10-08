@@ -3,6 +3,8 @@ package edu.velv.wikidata_universe_api.models;
 import java.util.Optional;
 import java.util.Set;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -27,7 +29,7 @@ public class Graphset {
   }
 
   public Graphset(List<Vertex> payloadVerts, List<Edge> payloadEdges, List<Property> payloadProps) {
-    //? iteration prevents unintentional duplicates from being added
+    //? prevents unintentional duplicates
     for (Vertex vert : payloadVerts) {
       addVertex(vert);
     }
@@ -55,16 +57,16 @@ public class Graphset {
     return vertices.size();
   }
 
-  public boolean hasNoExistingVertices() {
-    return vertexCount() == 0;
+  public Integer propertyCount() {
+    return properties.size();
   }
 
   public Integer edgeCount() {
     return edges.size();
   }
 
-  public Integer propertyCount() {
-    return properties.size();
+  public boolean hasNoExistingVertices() {
+    return vertexCount() == 0;
   }
 
   /**
@@ -190,36 +192,59 @@ public class Graphset {
    * removing it. The target values are provided from Wikidata so this should be a particularly rare call/result. There are no
    * additional details to handle from this target.
    */
-  public void removeInvalidSearchResultFromData(String targetValue) {
+public void removeInvalidSearchResultFromData(String targetValue) {
     // Remove vertices with matching id or label
-    vertices.removeIf(v -> v.id().equals(targetValue) || v.label().equals(targetValue));
+    if (targetValue != null) {
+        vertices.removeIf(v -> 
+            (v.id() != null && v.id().equals(targetValue)) || 
+            (v.label() != null && v.label().equals(targetValue))
+        );
 
-    // Remove properties with matching id
-    properties.removeIf(p -> p.id().equals(targetValue));
+        // Remove properties with matching id
+        properties.removeIf(p -> 
+            p.id() != null && p.id().equals(targetValue)
+        );
 
-    // Remove edges with matching tgtId, srcId, propertyId, or label
-    edges.removeIf(e -> {
-      boolean srcMatch = e.srcId().equals(targetValue);
-      boolean tgtMatch = e.tgtId() != null && e.tgtId().equals(targetValue);
-      boolean propMatch = e.tgtId() != null && e.propertyId().equals(targetValue);
-      boolean lblMatch = e.label() != null && e.propertyId().equals(targetValue);
+        // Remove edges with matching tgtId, srcId, propertyId, or label
+        edges.removeIf(e -> {
+            boolean srcMatch = e.srcId() != null && e.srcId().equals(targetValue);
+            boolean tgtMatch = e.tgtId() != null && e.tgtId().equals(targetValue);
+            boolean propMatch = e.propertyId() != null && e.propertyId().equals(targetValue);
+            boolean lblMatch = e.label() != null && e.label().equals(targetValue);
 
-      return srcMatch || tgtMatch || propMatch || lblMatch;
-    });
-  }
+            return srcMatch || tgtMatch || propMatch || lblMatch;
+        });
+    }
+}
+
 
   /**
    * Iterates over the current set of vertices and updates their coordinates to those calculated by
    * the provided layout.
    */
   public void updateVertexCoordinatesFromLayout(FR3DLayout layout) {
-    for (Vertex vert : vertices) {
-      vert.coords(layout.apply(vert));
+    for (Vertex iVertex : vertices) {
+      iVertex.coords(layout.apply(iVertex));
     }
   }
 
   /**
-  * @apiNote Slight variation to prevent adding duplicate edges
+  * @return true if each Vertex in the genReqData's graph has a unique coordinate value
+  */
+  public boolean vertexCoordsUniqueForEach() {
+    Map<Point3D, Vertex> coordsMap = new HashMap<>();
+    for (Vertex v : vertices()) {
+      Point3D coords = v.coords();
+      if (coordsMap.containsKey(coords)) {
+        return false;
+      }
+      coordsMap.put(coords, v);
+    }
+    return true;
+  }
+
+  /**
+  * @apiNote Slight variation to prevent adding duplicate edges, only used to grab and update privately
   * 
   * @param edge the edge to look for
   * @return an Edge, or empty if none exists matching the provided
