@@ -24,8 +24,8 @@ public class WikidataUniverseApiApplicationTests implements FailedTestMsgTemplat
     checkWikidataToolkitConfigValuesArePresent();
     checkFR3DConfigValuesArePresent();
     assertNotNull(wikidataSrvcMngr, src_ + unableToFind + "WikidataServiceManager @Bean");
-    assertNotNull(wikidataSrvcMngr.docProc, src_ + unableToFind + "EntDocProc @Bean");
-    assertNotNull(wikidataSrvcMngr.api, src_ + unableToFind + "FetchBroker @Bean");
+    assertNotNull(wikidataSrvcMngr.docProc(), src_ + unableToFind + "EntDocProc @Bean");
+    assertNotNull(wikidataSrvcMngr.api(), src_ + unableToFind + "FetchBroker @Bean");
   }
 
   /**
@@ -41,10 +41,10 @@ public class WikidataUniverseApiApplicationTests implements FailedTestMsgTemplat
   }
 
   private void checkWikidataToolkitConfigValuesArePresent() {
-    assertNotNull(wikidataSrvcMngr.api.enLangKey(), src_ + unableToFind + "Wikidata enLangKey()");
-    assertNotNull(wikidataSrvcMngr.api.iri(), src_ + unableToFind + "Wikidata iri()");
-    assertNotNull(wikidataSrvcMngr.docProc.excludedDataTypes(), src_ + unableToFind + "Wikidata excludedDataTypes()");
-    assertNotNull(wikidataSrvcMngr.docProc.excludedIds(), src_ + unableToFind + "Wikidata excludedIds()");
+    assertNotNull(wikidataSrvcMngr.api().enLangKey(), src_ + unableToFind + "Wikidata enLangKey()");
+    assertNotNull(wikidataSrvcMngr.api().iri(), src_ + unableToFind + "Wikidata iri()");
+    assertNotNull(wikidataSrvcMngr.docProc().excludedDataTypes(), src_ + unableToFind + "Wikidata excludedDataTypes()");
+    assertNotNull(wikidataSrvcMngr.docProc().excludedIds(), src_ + unableToFind + "Wikidata excludedIds()");
 
   }
 }

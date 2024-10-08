@@ -4,6 +4,7 @@ import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Vertex {
@@ -72,10 +73,12 @@ public class Vertex {
     this.coords = point;
   }
 
+  @JsonIgnore
   public boolean isFetchedOrDate() {
     return fetched || id == null;
   }
 
+  @JsonIgnore
   public boolean isFetchedOrId() {
     return fetched && !id.isBlank();
   }

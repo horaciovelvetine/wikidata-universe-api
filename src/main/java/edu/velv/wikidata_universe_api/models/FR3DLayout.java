@@ -71,7 +71,7 @@ public class FR3DLayout {
    * @return Point3D position
    */
   public Point3D apply(Vertex v) {
-    return getLocationData(v);
+    return this.getLocationData(v);
   }
 
   /**

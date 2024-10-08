@@ -7,9 +7,10 @@ import io.vavr.control.Either;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
+import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
-public class ClientRequest {
+public class ClientRequest implements Printable {
   protected String query;
   protected Dimension dimensions;
   protected Graphset graph;
@@ -19,7 +20,7 @@ public class ClientRequest {
 
   public ClientRequest(WikidataServiceManager wd, FR3DConfig config, String query) {
     this.query = this.sanitizeQueryString(query);
-    this.dimensions = new Dimension();
+    this.dimensions = new Dimension(400, 300); // uses a default size to prevent any 0-div problems
     this.graph = new Graphset();
     this.layout = new FR3DLayout(this, config);
     this.wikidata = wd;
@@ -64,8 +65,7 @@ public class ClientRequest {
    * @return an error if one was encountered while carrying out the fetch request(s)
    */
   public Either<Err, ClientRequest> getInitialQueryData() {
-    Optional<Err> fetchInitQueryTask = wikidata.fetchInitQueryDataTask(this);
-    runLayoutAlgoProcess();
+    Optional<Err> fetchInitQueryTask = wikidata.fetchInitialQueryData(this);
 
     return fetchInitQueryTask.isPresent() ? Either.left(fetchInitQueryTask.get()) : Either.right(this);
   }
@@ -78,11 +78,11 @@ public class ClientRequest {
    * @return an error if one was enountered while carrying out the fetches requests 
    */
   public Either<Err, ClientRequest> getUnfetchedData() {
-    layout.lock(this.graph().getOriginVertex(), true);
+    layout().lock(this.graph().getOriginVertex(), true);
 
-    Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteDataTask(this);
-
+    Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteData(this);
     runLayoutAlgoProcess();
+
     return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
   }
 
@@ -91,13 +91,13 @@ public class ClientRequest {
    * Graphset so that each Vertex is aware of its update Point3D coords.
    */
   private void runLayoutAlgoProcess() {
-    layout.initialize();
+    layout().initialize();
 
     while (!layout.done()) {
-      layout.step();
+      layout().step();
     }
 
-    graph.updateVertexCoordinatesFromLayout(layout);
+    graph().updateVertexCoordinatesFromLayout(layout());
   }
 
   /**

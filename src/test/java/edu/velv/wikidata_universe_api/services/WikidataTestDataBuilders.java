@@ -36,7 +36,7 @@ public interface WikidataTestDataBuilders extends Printable {
   final String testDataDir = "src/test/java/edu/velv/wikidata_universe_api/resources/data/";
   final String json = ".json";
   final String kbTestItemDocData = "Q3454165-item-doc" + json;
-  final String kbTestUnfDataCxRequest = "kevin-bacon-init-query-request-response" + json;
+  final String kbTestUnfDataCxRequest = "kevin-bacon-init-query-task-fin-request-response" + json;
 
   //default for @WikidataToolkit Items
   final String QID = "Q123";
@@ -107,7 +107,7 @@ public interface WikidataTestDataBuilders extends Printable {
   }
 
   /**
-   * @return a ClientRequest obj filled with the generic testable Graphset values implemented in the interface
+   * @return a ClientRequest with the generic 5 Vertex, 3 Property, 9 Edge Graphset used in the body of the request. Dimensions are set to 300x300.
    */
   default RequestPayloadData buildGenericRequestPayload() {
     Graphset gs = buildGraphset_generic();
@@ -311,7 +311,8 @@ public interface WikidataTestDataBuilders extends Printable {
 
   /**
    * Creates an ItemDocument from stored test data (Item Q3454165 (Kevin Bacon)) from the Wikidata API. If the file
-   * to recreate the Document is missing, a request is made to get the Doc, which is then stored in the resrources/data dir.
+   * to recreate the Document is missing, a request is made to get the Doc using the Wikidata API, which then stores the
+   * file in the appropriate dir for later tests. 
    */
   default ItemDocumentImpl buildKevinBaconDocFromData() {
     ItemDocumentImpl doc = null;
@@ -419,7 +420,11 @@ public interface WikidataTestDataBuilders extends Printable {
    */
   default RequestPayloadData readClientRequestPayloadFromStorage(String fileName) {
     try {
-      return mapper.readValue(new File(testDataDir + kbTestUnfDataCxRequest), RequestPayloadData.class);
+      ObjectMapper mapperWithIgnore = mapper.copy();
+      mapperWithIgnore.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+          false);
+      return mapperWithIgnore.readValue(new File(testDataDir + kbTestUnfDataCxRequest),
+          RequestPayloadData.class);
     } catch (Exception e) {
       print(e);
       return null;
