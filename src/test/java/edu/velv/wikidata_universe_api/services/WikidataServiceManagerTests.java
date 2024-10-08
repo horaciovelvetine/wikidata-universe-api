@@ -39,7 +39,7 @@ public class WikidataServiceManagerTests implements WikidataTestDataBuilders, Fa
   private ClientRequest request;
 
   @Test
-  void fetchInitQueryDataTask_bubbles_up_API_offline_error() {
+  void fetchInitQueryData_bubbles_up_API_offline_error() {
     FetchBroker mApi = mock(FetchBroker.class);
     when(mApi.fetchEntityByAnyQueryMatch(kbQuery))
         .thenReturn(Either.left(new ApiUnavailableError(new Throwable("API OFFLINE MOCK"))));
@@ -53,7 +53,7 @@ public class WikidataServiceManagerTests implements WikidataTestDataBuilders, Fa
   }
 
   @Test
-  void fetchInitQueryDataTask_builds_graphset_stg1_for_KevinBacon_test_data() {
+  void fetchInitQueryData_builds_graphset_stg1_for_KevinBacon_test_data() {
     // setup to retrieve stored copy of previous request w/ 
     FetchBroker mApi = mock(FetchBroker.class);
     when(mApi.fetchEntityByAnyQueryMatch(kbQuery)).thenReturn(Either.right(buildKevinBaconDocFromData()));
@@ -73,7 +73,7 @@ public class WikidataServiceManagerTests implements WikidataTestDataBuilders, Fa
   }
 
   @Test
-  void fetchIncompleteDataTask_finds_and_ingests_unfetched_data() {
+  void fetchIncompleteData_ingests_unfetched_data_by_NoSuchError_removals() {
     FetchBroker mApi = mock(FetchBroker.class);
     RequestPayloadData data = readClientRequestPayloadFromStorage(kbTestUnfDataCxRequest);
 
@@ -91,6 +91,26 @@ public class WikidataServiceManagerTests implements WikidataTestDataBuilders, Fa
 
     assertTrue(request.graph().vertexCount() == 1,
         src_ + expected + "Mocked NoSuchEnt responses should remove all data except Origin Query vertex from Graphset");
+  }
+
+  @Test
+  void fetchIncompleteData_skips_fetches_and_runs_layout_for_KevinBacon_test_data() {
+    FetchBroker mApi = mock(FetchBroker.class);
+    RequestPayloadData data = readClientRequestPayloadFromStorage(kbTestUnfDataCxRequest);
+    injWikidataSrvc = new WikidataServiceManager(mApi, docProc);
+    request = new ClientRequest(injWikidataSrvc, config, data);
+
+    // ignore data incompleteness, manually run layout steps...
+    request.layout().initialize();
+    request.layout().lock(request.graph().getOriginVertex(), true);
+    while (!request.layout().done()) {
+      request.layout().step();
+    }
+
+    request.graph().updateVertexCoordinatesFromLayout(request.layout());
+    captureClientRequest(request, "ignore-and-layout-unfetch");
+    assertTrue(request.graph().vertexCoordsUniqueForEach(),
+        src_ + expected + "Vertex coords to be unique after layout");
   }
 
   /**
