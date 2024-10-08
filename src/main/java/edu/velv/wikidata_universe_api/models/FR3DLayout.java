@@ -380,7 +380,7 @@ public class FR3DLayout {
    */
   protected void cool() {
     temperature *= (1.0 - curIteration / (double) config.maxIters());
-    if (curIteration % 100 == 0) {
+    if (curIteration % 25 == 0) {
       adjustForceConstants();
     }
   }
