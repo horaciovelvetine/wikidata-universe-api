@@ -24,8 +24,10 @@ public class RandomPoint3D<V> implements Function<V, Point3D> {
   @Override
   public Point3D apply(V input) {
     double max = Math.max(dimensions.width, dimensions.height);
-    return new Point3D(random.nextDouble() * dimensions.width, random.nextDouble() * dimensions.height,
-        random.nextDouble() * max);
+    return new Point3D(
+        (random.nextDouble() - 0.5) * 2 * dimensions.width,
+        (random.nextDouble() - 0.5) * 2 * dimensions.height,
+        (random.nextDouble() - 0.5) * 2 * max);
   }
 
 }
