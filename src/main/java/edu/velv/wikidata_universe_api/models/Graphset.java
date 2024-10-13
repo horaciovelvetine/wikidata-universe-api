@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+import org.wikidata.wdtk.datamodel.interfaces.LabeledDocument;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import io.vavr.Tuple2;
@@ -113,7 +116,6 @@ public class Graphset {
   }
 
   /**
-   * @param id string id to look for
    * @return a Vertex, or empty if none exists with the given id
    */
   public Optional<Vertex> getVertexById(String id) {
@@ -125,14 +127,26 @@ public class Graphset {
 
   /**
    * @apiNote for unfetched Date Vertices
-   * @param label to look for
-   * @return a Vertex, or empty if none exists witht the given label;
+   * @return a Vertex, or empty if none exists with the given label;
    */
   public Optional<Vertex> getVertexByLabel(String label) {
     return vertices.stream().filter(v -> {
       String vertLabel = v.label();
       return vertLabel != null && vertLabel.equals(label);
     }).findAny();
+  }
+
+  /**
+   * Combines calling get's by Id & Label into one call based on the values present on the provided Vertex
+   * @return A Vertex, or empty if none exists which match the provided Vertex details
+   */
+  public Optional<Vertex> getVertexByIdOrLabel(EntityDocument doc) {
+    Optional<Vertex> existingVert = getVertexById(doc.getEntityId().getId());
+    if (doc instanceof LabeledDocument) {
+      LabeledDocument lDoc = (LabeledDocument) doc;
+      existingVert = getVertexByLabel(lDoc.findLabel("en"));
+    }
+    return existingVert;
   }
 
   /**
@@ -192,31 +206,26 @@ public class Graphset {
    * removing it. The target values are provided from Wikidata so this should be a particularly rare call/result. There are no
    * additional details to handle from this target.
    */
-public void removeInvalidSearchResultFromData(String targetValue) {
+  public void removeInvalidSearchResultFromData(String targetValue) {
     // Remove vertices with matching id or label
     if (targetValue != null) {
-        vertices.removeIf(v -> 
-            (v.id() != null && v.id().equals(targetValue)) || 
-            (v.label() != null && v.label().equals(targetValue))
-        );
+      vertices.removeIf(v -> (v.id() != null && v.id().equals(targetValue)) ||
+          (v.label() != null && v.label().equals(targetValue)));
 
-        // Remove properties with matching id
-        properties.removeIf(p -> 
-            p.id() != null && p.id().equals(targetValue)
-        );
+      // Remove properties with matching id
+      properties.removeIf(p -> p.id() != null && p.id().equals(targetValue));
 
-        // Remove edges with matching tgtId, srcId, propertyId, or label
-        edges.removeIf(e -> {
-            boolean srcMatch = e.srcId() != null && e.srcId().equals(targetValue);
-            boolean tgtMatch = e.tgtId() != null && e.tgtId().equals(targetValue);
-            boolean propMatch = e.propertyId() != null && e.propertyId().equals(targetValue);
-            boolean lblMatch = e.label() != null && e.label().equals(targetValue);
+      // Remove edges with matching tgtId, srcId, propertyId, or label
+      edges.removeIf(e -> {
+        boolean srcMatch = e.srcId() != null && e.srcId().equals(targetValue);
+        boolean tgtMatch = e.tgtId() != null && e.tgtId().equals(targetValue);
+        boolean propMatch = e.propertyId() != null && e.propertyId().equals(targetValue);
+        boolean lblMatch = e.label() != null && e.label().equals(targetValue);
 
-            return srcMatch || tgtMatch || propMatch || lblMatch;
-        });
+        return srcMatch || tgtMatch || propMatch || lblMatch;
+      });
     }
-}
-
+  }
 
   /**
    * Iterates over the current set of vertices and updates their coordinates to those calculated by
