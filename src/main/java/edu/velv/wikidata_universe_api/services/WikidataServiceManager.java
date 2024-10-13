@@ -2,7 +2,6 @@ package edu.velv.wikidata_universe_api.services;
 
 import java.util.Optional;
 import java.util.List;
-import java.util.ArrayList;
 
 import io.vavr.control.Either;
 
@@ -94,6 +93,7 @@ public class WikidataServiceManager implements Printable {
    * @apiNote This should cover every possible means this application encounters EntityDocuments form WikidataAPI.
    */
   private void processEntityDocument(EntityDocument entityDoc, ClientRequest req) {
+
     // Doc already exists as Vertex, update unknown values and ingest edge data
     if (req.graph().getVertexByIdOrLabel(entityDoc).isPresent()) {
       req.graph().getVertexByIdOrLabel(entityDoc).ifPresent(existingVert -> {
@@ -103,7 +103,7 @@ public class WikidataServiceManager implements Printable {
       return;
     }
 
-    // Doc is a new Item Document, ingest and add edge data
+    // Doc is a new Item Document, create a new Vertex and ingest edge data
     if (docProc().createVertexFromUnknownEntDoc(entityDoc, api().enLangKey()).isPresent()) {
       docProc().createVertexFromUnknownEntDoc(entityDoc, api().enLangKey())
           .ifPresent(newVert -> {
