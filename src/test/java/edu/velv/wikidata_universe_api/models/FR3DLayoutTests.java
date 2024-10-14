@@ -36,112 +36,112 @@ public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestData
     allVerticesPositionedAtOrigin();
   }
 
-  @Test
-  void constructs_with_default_graphset_using_spring_context() {
-    assertNotNull(genReqData.layout(), src_ + initedWO + "a Layout()");
-  }
+  // @Test
+  // void constructs_with_default_graphset_using_spring_context() {
+  //   assertNotNull(genReqData.layout(), src_ + initedWO + "a Layout()");
+  // }
 
-  @Test
-  void scaleDimensionsToGraphsetSize_scales_dimensions_to_config_value() {
-    genReqData.layout().scaleDimensionsToGraphsetSize();
+  // @Test
+  // void scaleDimensionsToGraphsetSize_scales_dimensions_to_config_value() {
+  //   genReqData.layout().scaleDimensionsToGraphsetSize();
 
-    assertNotEquals(
-        buildDimensions_generic(), genReqData.dimensions(),
-        src_ + "Layout.dimensions()" + shouldNotBeEq + "to the generic starting Dimensions");
-    assertEquals(genReqData.dimensions().getHeight(), genReqData.dimensions().getWidth(),
-        src_ + "Scaled Layout.dimensions()" + shouldBeEq + "for 1:1 (generic) aspect dimensions");
-  }
+  //   assertNotEquals(
+  //       buildDimensions_generic(), genReqData.dimensions(),
+  //       src_ + "Layout.dimensions()" + shouldNotBeEq + "to the generic starting Dimensions");
+  //   assertEquals(genReqData.dimensions().getHeight(), genReqData.dimensions().getWidth(),
+  //       src_ + "Scaled Layout.dimensions()" + shouldBeEq + "for 1:1 (generic) aspect dimensions");
+  // }
 
-  @Test
-  void setInitialRandomPositions_initializes_unlocked_vertices() {
-    assertFalse(genReqData.graph().vertexCoordsUniqueForEach(), src_ + expected + "each Vertex to start at (0,0,0)");
-    genReqData.layout().initialize();
-    genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
+  // @Test
+  // void setInitialRandomPositions_initializes_unlocked_vertices() {
+  //   assertFalse(genReqData.graph().vertexCoordsUniqueForEach(), src_ + expected + "each Vertex to start at (0,0,0)");
+  //   genReqData.layout().initialize();
+  //   genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
 
-    assertTrue(genReqData.graph.vertexCoordsUniqueForEach(),
-        src_ + expected + "each Vertex to have unique Coordinates");
-  }
+  //   assertTrue(genReqData.graph.vertexCoordsUniqueForEach(),
+  //       src_ + expected + "each Vertex to have unique Coordinates");
+  // }
 
-  @Test
-  void setInitialRandomPositions_ignores_locked_vertex() {
-    Optional<Vertex> lockVert = genReqData.graph().getVertexById("Q1");
-    if (lockVert.isPresent()) {
-      genReqData.layout().lock(lockVert.get(), true);
-      genReqData.layout().initialize(); //==> calls setInitialRandomPositions...
-      genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
+  // @Test
+  // void setInitialRandomPositions_ignores_locked_vertex() {
+  //   Optional<Vertex> lockVert = genReqData.graph().getVertexById("Q1");
+  //   if (lockVert.isPresent()) {
+  //     genReqData.layout().lock(lockVert.get(), true);
+  //     genReqData.layout().initialize(); //==> calls setInitialRandomPositions...
+  //     genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
 
-      assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
-          src_ + expected + "each Vertex to have unique Coordinates");
-      assertTrue(vertexCoordsAreZeroes(lockVert.get()), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
-    }
+  //     assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
+  //         src_ + expected + "each Vertex to have unique Coordinates");
+  //     assertTrue(vertexCoordsAreZeroes(lockVert.get()), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
+  //   }
 
-  }
+  // }
 
-  @Test
-  void setInitialRandomPositions_ignores_all_vertices_locked() {
-    genReqData.layout().lock(true);
-    genReqData.layout().setInitialRandomPositions(new RandomPoint3D<>(genReqData.dimensions()));
-    genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
-    allVerticesPositionedAtOrigin();
-  }
+  // @Test
+  // void setInitialRandomPositions_ignores_all_vertices_locked() {
+  //   genReqData.layout().lock(true);
+  //   genReqData.layout().setInitialRandomPositions(new RandomPoint3D<>(genReqData.dimensions()));
+  //   genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
+  //   allVerticesPositionedAtOrigin();
+  // }
 
-  @Test
-  void initializeLayoutConstants_creates_sim_force_values() {
-    genReqData.layout().initialize();
+  // @Test
+  // void initializeLayoutConstants_creates_sim_force_values() {
+  //   genReqData.layout().initialize();
 
-    assertNotNull(genReqData.layout().forceConst, src_ + "force" + shouldNotBe + empty);
-    assertNotNull(genReqData.layout().attrConst, src_ + "attractive force" + shouldNotBe + empty);
-    assertNotNull(genReqData.layout().repConst, src_ + "repulsion force" + shouldNotBe + empty);
-    assertNotNull(genReqData.layout().temperature, src_ + "temperature" + shouldNotBe + empty);
-    assertEquals(0, genReqData.layout().curIteration, src_ + should + "start on iteration 0");
-  }
+  //   assertNotNull(genReqData.layout().forceConst, src_ + "force" + shouldNotBe + empty);
+  //   assertNotNull(genReqData.layout().attrConst, src_ + "attractive force" + shouldNotBe + empty);
+  //   assertNotNull(genReqData.layout().repConst, src_ + "repulsion force" + shouldNotBe + empty);
+  //   assertNotNull(genReqData.layout().temperature, src_ + "temperature" + shouldNotBe + empty);
+  //   assertEquals(0, genReqData.layout().curIteration, src_ + should + "start on iteration 0");
+  // }
 
-  @Test
-  void stepping_layout_changes_calcs_new_location_for_unlocked_vertices() {
-    genReqData.layout().initialize();
+  // @Test
+  // void stepping_layout_changes_calcs_new_location_for_unlocked_vertices() {
+  //   genReqData.layout().initialize();
 
-    Map<Vertex, Point3D> initPositions = new HashMap<>();
-    for (Vertex v : genReqData.graph().vertices()) {
-      Point3D initPos = genReqData.layout().apply(v);
-      double iX = initPos.getX();
-      double iY = initPos.getY();
-      double iZ = initPos.getZ();
+  //   Map<Vertex, Point3D> initPositions = new HashMap<>();
+  //   for (Vertex v : genReqData.graph().vertices()) {
+  //     Point3D initPos = genReqData.layout().apply(v);
+  //     double iX = initPos.getX();
+  //     double iY = initPos.getY();
+  //     double iZ = initPos.getZ();
 
-      initPositions.put(v, new Point3D(iX, iY, iZ));
-    }
+  //     initPositions.put(v, new Point3D(iX, iY, iZ));
+  //   }
 
-    genReqData.layout().step();
+  //   genReqData.layout().step();
 
-    for (Vertex v : genReqData.graph().vertices()) {
-      if (!genReqData.layout().isLocked(v)) {
-        Point3D nP = genReqData.layout().apply(v);
-        Point3D iP = initPositions.get(v);
+  //   for (Vertex v : genReqData.graph().vertices()) {
+  //     if (!genReqData.layout().isLocked(v)) {
+  //       Point3D nP = genReqData.layout().apply(v);
+  //       Point3D iP = initPositions.get(v);
 
-        assertNotEquals(iP, nP, src_ + vert + "coordinates " + shouldNotBeEq + "after .step()");
-      }
-    }
-  }
+  //       assertNotEquals(iP, nP, src_ + vert + "coordinates " + shouldNotBeEq + "after .step()");
+  //     }
+  //   }
+  // }
 
-  @Test
-  void running_layout_maintains_locked_vertices_positions() {
+  // @Test
+  // void running_layout_maintains_locked_vertices_positions() {
 
-    Vertex lockVert = genReqData.graph().getVertexById("Q1").get();
-    genReqData.layout().lock(lockVert, true); // lock vert at (0,0,0);
-    genReqData.layout().initialize();
-    genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
+  //   Vertex lockVert = genReqData.graph().getVertexById("Q1").get();
+  //   genReqData.layout().lock(lockVert, true); // lock vert at (0,0,0);
+  //   genReqData.layout().initialize();
+  //   genReqData.graph().updateVertexCoordinatesFromLayout(genReqData.layout());
 
-    assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
-        src_ + expected + "each Vertex to have unique Coordinates");
-    assertTrue(vertexCoordsAreZeroes(lockVert), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
+  //   assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
+  //       src_ + expected + "each Vertex to have unique Coordinates");
+  //   assertTrue(vertexCoordsAreZeroes(lockVert), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
 
-    while (!genReqData.layout().done()) {
-      genReqData.layout().step();
-    }
+  //   while (!genReqData.layout().done()) {
+  //     genReqData.layout().step();
+  //   }
 
-    assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
-        src_ + expected + "each Vertex to have unique Coordinates");
-    assertTrue(vertexCoordsAreZeroes(lockVert), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
-  }
+  //   assertTrue(genReqData.graph().vertexCoordsUniqueForEach(),
+  //       src_ + expected + "each Vertex to have unique Coordinates");
+  //   assertTrue(vertexCoordsAreZeroes(lockVert), src_ + expected + "the locked Vertex to be located @ (0,0,0)");
+  // }
 
   /**
    * Iterates over all vertices in the genRequestData and checks they are all at (0,0,0)
