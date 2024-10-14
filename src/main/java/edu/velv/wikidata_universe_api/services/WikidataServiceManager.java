@@ -93,26 +93,24 @@ public class WikidataServiceManager implements Printable {
    * @apiNote This should cover every possible means this application encounters EntityDocuments form WikidataAPI.
    */
   private void processEntityDocument(EntityDocument entityDoc, ClientRequest req) {
-
     // Doc already exists as Vertex, update unknown values and ingest edge data
-    if (req.graph().getVertexByIdOrLabel(entityDoc).isPresent()) {
-      req.graph().getVertexByIdOrLabel(entityDoc).ifPresent(existingVert -> {
-        existingVert.updateUnfetchedValues((ItemDocumentImpl) entityDoc, api().enLangKey());
-        processEdgesFromVertex(entityDoc, req);
-      });
+    Optional<Vertex> existingVert = req.graph().getVertexByIdOrLabel(entityDoc);
+    if (existingVert.isPresent()) {
+      ItemDocumentImpl itemDoc = (ItemDocumentImpl) entityDoc;
+      Vertex vertex = existingVert.get();
+      vertex.updateUnfetchedValues(itemDoc, api().enLangKey());
+      processEdgesFromVertex(entityDoc, req);
       return;
     }
 
     // Doc is a new Item Document, create a new Vertex and ingest edge data
-    if (docProc().createVertexFromUnknownEntDoc(entityDoc, api().enLangKey()).isPresent()) {
-      docProc().createVertexFromUnknownEntDoc(entityDoc, api().enLangKey())
-          .ifPresent(newVert -> {
-            if (req.graph().hasNoExistingVertices()) {
-              newVert.setAsOrigin();
-            }
-            req.graph().addVertex(newVert);
-            processEdgesFromVertex(entityDoc, req);
-          });
+    Optional<Vertex> newVert = docProc().createVertexFromUnknownEntDoc(entityDoc, api().enLangKey());
+    if (newVert.isPresent()) {
+      if (req.graph().hasNoExistingVertices()) {
+        newVert.get().setAsOrigin();
+      }
+      req.graph().addVertex(newVert.get());
+      processEdgesFromVertex(entityDoc, req);
       return;
     }
 
@@ -172,8 +170,8 @@ public class WikidataServiceManager implements Printable {
     return api.fetchEntitiesByDateList(dateBatch).fold(
         err -> Optional.of(err),
         dateResults -> {
-          dateResults.forEach((id, result) -> {
-            handleDateFetchResult(queue, id, result, req);
+          dateResults.forEach((date, result) -> {
+            handleDateFetchResult(queue, date, result, req);
           });
           return Optional.empty();
         });
@@ -182,13 +180,13 @@ public class WikidataServiceManager implements Printable {
   /**
    * Handles possible invalid & Err results from these fetches, and removes the target from mention in the Graph.
    */
-  private void handleDateFetchResult(IncompleteDataQueue queue, String id, Either<Err, WbSearchEntitiesResult> result,
+  private void handleDateFetchResult(IncompleteDataQueue queue, String date, Either<Err, WbSearchEntitiesResult> result,
       ClientRequest req) {
-    queue.removeFromQueue(id);
     if (result.isLeft()) {
-      req.graph().removeInvalidSearchResultFromData(id);
+      req.graph().removeInvalidSearchResultFromData(date);
     } else {
-      req.graph().getVertexById(id).ifPresent(vertex -> vertex.updateUnfetchedValues(result.get()));
+      req.graph().getVertexById(date).ifPresent(vertex -> vertex.updateUnfetchedValues(result.get()));
     }
+    queue.removeFromQueue(date);
   }
 }
