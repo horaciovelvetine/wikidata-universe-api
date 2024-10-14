@@ -142,7 +142,7 @@ public class Graphset {
    */
   public Optional<Vertex> getVertexByIdOrLabel(EntityDocument doc) {
     Optional<Vertex> existingVert = getVertexById(doc.getEntityId().getId());
-    if (doc instanceof LabeledDocument) {
+    if (existingVert.isEmpty() && doc instanceof LabeledDocument) {
       LabeledDocument lDoc = (LabeledDocument) doc;
       existingVert = getVertexByLabel(lDoc.findLabel("en"));
     }
