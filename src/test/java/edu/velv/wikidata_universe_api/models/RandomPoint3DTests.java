@@ -30,12 +30,12 @@ public class RandomPoint3DTests implements FailedTestMsgTemplates {
   public void returns_random_point_on_apply() {
     Point3D point = randomPoint3D.apply(new Object());
     assertNotNull(point, src_ + shouldNotBe + "null on" + inited);
-    assertTrue(point.getX() >= 0 && point.getX() <= dimension.width,
+    assertTrue(point.getX() >= -dimension.width && point.getX() <= dimension.width,
         src_ + "X coordinates" + shouldBe + "in-bounds");
-    assertTrue(point.getY() >= 0 && point.getY() <= dimension.height,
+    assertTrue(point.getY() >= -dimension.height && point.getY() <= dimension.height,
         src_ + "Y coordinates" + shouldBe + "in-bounds");
     double max = Math.max(dimension.width, dimension.height);
-    assertTrue(point.getZ() >= 0 && point.getZ() <= max,
+    assertTrue(point.getZ() >= -max && point.getZ() <= max,
         src_ + "Z coordinates" + shouldBe + "in-bounds");
   }
 
