@@ -52,8 +52,6 @@ public interface WikidataTestDataBuilders extends Printable {
   final String la = "label";
   final String de = "description";
 
-  static final ObjectMapper mapper = new ObjectMapper();
-
   /**
    * @return a Vertex with the provided ID & default fetched values
    */
@@ -437,4 +435,5 @@ public interface WikidataTestDataBuilders extends Printable {
   private EntityDocument fetchKevinBaconData() throws Exception {
     return WikibaseDataFetcher.getWikidataDataFetcher().getEntityDocumentByTitle("enwiki", "Kevin Bacon");
   }
+
 }

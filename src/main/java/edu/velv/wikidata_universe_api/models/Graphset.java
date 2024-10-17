@@ -265,4 +265,8 @@ public class Graphset {
     }).findAny();
   }
 
+  @Override
+  public String toString() {
+    return "{ verts: " + vertexCount() + ", edges: " + edgeCount() + ", props: " + propertyCount() + "}";
+  }
 }

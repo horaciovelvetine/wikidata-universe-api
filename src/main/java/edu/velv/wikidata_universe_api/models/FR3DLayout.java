@@ -13,6 +13,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
+import edu.velv.wikidata_universe_api.services.Printable;
 import io.vavr.Tuple2;
 
 /**
@@ -23,10 +24,8 @@ import io.vavr.Tuple2;
  * This process is covered in depth inside my prototype(-ing) repo, with detailed README's here:
  * @see https://github.com/horaciovelvetine/ForceDrawnGraphs
  */
-public class FR3DLayout {
+public class FR3DLayout implements Printable {
   private ClientRequest request;
-  // private Graphset graph;
-  private Set<Vertex> lockedVertices = new HashSet<>();
   LoadingCache<Vertex, Point3D> locationData = CacheBuilder.newBuilder().build(new CacheLoader<Vertex, Point3D>() {
     public Point3D load(Vertex v) throws Exception {
       return new Point3D();
@@ -53,14 +52,78 @@ public class FR3DLayout {
   }
 
   /**
-   * Run prior to stepping the layout: scales the layout dimensions to the Graphset's details, 
-   * initializes positions for any unlocked positions, and calculates constants used to simulate
-   * the 'physical constants' of the layout itself. 
+  * Calculates the density of Vertices in the overall space, then scales them to be placed in a way which makes them 
+  * the most readable for the Client (application). Simple mean calculates current density, then uses it to scale and
+  * setSize() for the layout with the scaled width and height.
+  *
+  * @apinote Uses the maximum of Width || Height for Depth per app convention
+  */
+  public void scaleDimensionsToGraphsetSize() {
+    if (!request.graph().isEmpty()) {
+      int totalVerts = request.graph().vertexCount();
+      int initWidth = (int) request.dimensions().getWidth();
+      int initHeight = (int) request.dimensions().getHeight();
+
+      double initDepth = Math.max(initHeight, initWidth);
+
+      double initVol = initWidth * initHeight * initDepth;
+
+      double initDens = (totalVerts * Math.pow(Vertex.RADIUS, 3) / initVol);
+
+      double scale = Math.cbrt(initDens / config.targetDensity());
+      int scWidth = (int) Math.ceil(initWidth * scale);
+      int scHeight = (int) Math.ceil(initHeight * scale);
+
+      //todo remove once proofed
+      StringBuilder logDetails = new StringBuilder();
+      logDetails.append("scaleDimensionsToGraphsetSize() ").append(request.query()).append("\n")
+          .append(request.graph().toString()).append("\n")
+          .append("initDim(").append(initWidth).append("x").append(initHeight).append(")").append("\n")
+          .append("initVol=").append(initVol).append("\n")
+          .append("initDens=").append(initDens).append("\n")
+          .append("scale=").append(scale).append("\n")
+          .append("scaleDim(").append(scWidth).append("x").append(scHeight).append(")").append("\n");
+      logRunDetails(logDetails.toString());
+      request.dimensions(new Dimension(scWidth, scHeight));
+    }
+  }
+
+  /**
+   * Sets the 'physical' constants used in each calculation for the layout, these define the overall shape
    */
-  public void initialize() {
-    scaleDimensionsToGraphsetSize();
-    setInitialRandomPositions(new RandomPoint3D<>(request.dimensions()));
-    initializeLayoutConstants();
+  public void initializeLayoutConstants() {
+    curIteration = 0;
+    temperature = request.dimensions.getWidth() / config.tempMult();
+    forceConst = Math
+        .sqrt(request.dimensions.getHeight() * request.dimensions.getWidth() / request.graph().vertexCount());
+    attrConst = forceConst * config.attrMult();
+    repConst = forceConst * config.repMult();
+  }
+
+  /**
+   * Composes a chain function to call which guarentees unrelated Random Positions are initialized for any unlocked Vertex.
+   * This needs to be called before the step() function is called for the layout to work correctly.
+   *
+   * @param initializer - any function which given a Vertex provides a Point3D in return
+   */
+  public void initializeRandomPositions() {
+    Function<Vertex, Point3D> rndmInitializer = new RandomPoint3D<>(request.dimensions());
+    Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
+      public Point3D apply(Point3D input) {
+        return (Point3D) input.clone();
+      }
+    }, new Function<Vertex, Point3D>() {
+      public Point3D apply(Vertex v) {
+        if (v.locked() && v.coords() != null) {
+          return v.coords();
+        } else {
+          return rndmInitializer.apply(v);
+        }
+      }
+    });
+    this.locationData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
+    //? sets up corresponding {K,V} to ref -> ea. iter resets to: {0,0,0}
+    this.offsetData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
   }
 
   /**
@@ -75,26 +138,6 @@ public class FR3DLayout {
   }
 
   /**
-   * Reverse the lock state of the given vertex
-   */
-  public void lock(Vertex v, boolean state) {
-    if (state) {
-      lockedVertices.add(v);
-    } else {
-      lockedVertices.remove(v);
-    }
-  }
-
-  /**
-   * Locks or unlock the state of all vertices in the graph
-   */
-  public void lock(boolean lock) {
-    for (Vertex v : request.graph().vertices()) {
-      lock(v, lock);
-    }
-  }
-
-  /**
    * Moves the algorithm exactly 1 step forward - calculating the cumulative offset effected on each member of the Graphset
    * then applying that cumulative offset to each Vertice's current location to move to their new 'better fit' position
    * 
@@ -105,7 +148,7 @@ public class FR3DLayout {
     while (true) {
       try {
         for (Vertex v : request.graph().vertices()) {
-          if (isLocked(v))
+          if (v.locked())
             continue;
           calcRepulsion(v);
         }
@@ -125,7 +168,7 @@ public class FR3DLayout {
     while (true) {
       try {
         for (Vertex v : request.graph().vertices()) {
-          if (isLocked(v))
+          if (v.locked())
             continue;
           calcPosition(v);
         }
@@ -140,7 +183,7 @@ public class FR3DLayout {
    * Checks wether or not the current layout has reached either the maximum iterations or an acceptable temperature.
   */
   public boolean done() {
-    return curIteration > config.maxIters() || temperature < 1.0 / maxDim();
+    return curIteration > 100 || temperature < 1.0 / maxDim();
   }
 
   //=====================================================================================================================>
@@ -151,29 +194,42 @@ public class FR3DLayout {
   //=====================================================================================================================>
   //=====================================================================================================================>
 
-  protected void calcRepulsion(Vertex v) {
-    Point3D curOffset = getOffsetData(v);
-    curOffset.setLocation(0, 0, 0); //? offset data resets on step here @ start of iteration
+  protected void calcRepulsion(Vertex v1) {
+    Point3D curOffset = getOffsetData(v1);
+    if (curOffset == null) // Vertex is not part of initialized set
+      return;
 
-    for (Vertex v2 : request.graph().vertices()) {
-      if (bothVerticesLocked(v, v2))
-        continue;
+    curOffset.setLocation(0, 0, 0); // Offset resets here on each this.step()
 
-      Point3D p1 = getLocationData(v);
-      Point3D p2 = getLocationData(v2);
+    try {
+      for (Vertex v2 : request.graph().vertices()) {
+        if (v1.equals(v2))
+          continue;
 
-      double deltaLen = Math.max(EPSILON, p1.distance(p2));
-      double force = (repConst * repConst) / deltaLen;
+        if (v1.locked() && v2.locked())
+          continue;
 
-      if (Double.isNaN(force))
-        throw new IllegalArgumentException("NaN in repulsion force calc.");
+        Point3D p1 = getLocationData(v1);
+        Point3D p2 = getLocationData(v2);
 
-      double scale = isLocked(v2) ? 2 : 1;
-      double xDisp = xDiff(p1, p2) * force;
-      double yDisp = yDiff(p1, p2) * force;
-      double zDisp = zDiff(p1, p2) * force;
+        if (p1 == null || p2 == null)
+          continue;
 
-      updateOffset(v, xDisp, yDisp, zDisp, scale);
+        double deltaLen = Math.max(EPSILON, p1.distance(p2));
+        double force = (repConst * repConst) / deltaLen;
+
+        if (Double.isNaN(force)) {
+          throw new RuntimeException("calcRepulsion(): unexpected force value");
+        }
+
+        double xDisp = (xDelt(p1, p2) / deltaLen) * force;
+        double yDisp = (yDelt(p1, p2) / deltaLen) * force;
+        double zDisp = (zDelt(p1, p2) / deltaLen) * force;
+        double scale = v2.locked() ? 2 : 1; // move twice as far since the opposing vertex is locked
+        updateOffset(v1, xDisp, yDisp, zDisp, scale);
+      }
+    } catch (ConcurrentModificationException cme) {
+      calcRepulsion(v1);
     }
   }
 
@@ -187,31 +243,31 @@ public class FR3DLayout {
 
     Vertex v1 = endpoints.get()._1();
     Vertex v2 = endpoints.get()._2();
-    if (bothVerticesLocked(v1, v2))
+
+    if (v1.locked() && v2.locked())
       return;
 
     Point3D p1 = getLocationData(v1);
     Point3D p2 = getLocationData(v2);
 
-    double dl = Math.max(EPSILON, p1.distance(p2));
-    double force = dl / attrConst;
+    if (p1 == null || p2 == null)
+      return;
+
+    double deltaLen = Math.max(EPSILON, p1.distance(p2));
+    double force = (deltaLen * deltaLen) / attrConst;
 
     if (Double.isNaN(force))
       throw new IllegalArgumentException("NaN in repulsion force calc.");
 
-    double xDisp = xDiff(p1, p2) * force;
-    double yDisp = yDiff(p1, p2) * force;
-    double zDisp = zDiff(p1, p2) * force;
+    double xDisp = (xDelt(p1, p2) / deltaLen) * force;
+    double yDisp = (yDelt(p1, p2) / deltaLen) * force;
+    double zDisp = (zDelt(p1, p2) / deltaLen) * force;
 
-    if (!isLocked(v1)) {
-      int scale = isLocked(v2) ? 2 : 1;
-      updateOffset(v1, xDisp, yDisp, zDisp, scale);
-    }
-
-    if (!isLocked(v2)) {
-      int scale = isLocked(v1) ? 2 : 1;
-      updateOffset(v2, xDisp, yDisp, zDisp, scale);
-    }
+    int v1Scale = v2.locked() ? 2 : 1;
+    int v2Scale = v1.locked() ? 2 : 1;
+    // negative to push in opposite directions
+    updateOffset(v1, -xDisp, -yDisp, -zDisp, v1Scale);
+    updateOffset(v2, xDisp, yDisp, zDisp, v2Scale);
 
   }
 
@@ -219,23 +275,27 @@ public class FR3DLayout {
   //=====================================================================================================================>
 
   protected void calcPosition(Vertex v) {
-    Point3D loc = getLocationData(v);
-    Point3D off = getOffsetData(v);
+    Point3D offset = getOffsetData(v);
+    if (offset == null)
+      return;
+
+    Point3D location = getLocationData(v);
 
     double deltaLen = Math.max(EPSILON,
-        Math.sqrt((off.getX() * off.getX()) + (off.getY() * off.getY()) + (off.getZ() * off.getZ())));
-    double xDisp = off.getX() / deltaLen * Math.min(deltaLen, temperature);
-    double yDisp = off.getY() / deltaLen * Math.min(deltaLen, temperature);
-    double zDisp = off.getZ() / deltaLen * Math.min(deltaLen, temperature);
+        Math.sqrt((offset.getX() * offset.getX()) + (offset.getY() * offset.getY()) + (offset.getZ() * offset.getZ())));
+
+    double xDisp = offset.getX() / deltaLen * Math.min(deltaLen, temperature);
+    double yDisp = offset.getY() / deltaLen * Math.min(deltaLen, temperature);
+    double zDisp = offset.getZ() / deltaLen * Math.min(deltaLen, temperature);
 
     if (Double.isNaN(xDisp) || Double.isNaN(yDisp) || Double.isNaN(zDisp))
       throw new IllegalArgumentException("NaN value found in update position displacement calcs");
 
-    double cX = loc.getX() + clampToMaxIterMvmnt(xDisp);
-    double cY = loc.getY() + clampToMaxIterMvmnt(yDisp);
-    double cZ = loc.getZ() + clampToMaxIterMvmnt(zDisp);
+    double nX = location.getX() + clampToMaxIterMvmnt(xDisp);
+    double nY = location.getY() + clampToMaxIterMvmnt(yDisp);
+    double nZ = location.getZ() + clampToMaxIterMvmnt(zDisp);
 
-    loc.setLocation(clampNewPositionsToDimensions(cX, cY, cZ));
+    location.setLocation(clampNewPositionsToDimensions(nX, nY, nZ));
   }
 
   //=====================================================================================================================>
@@ -245,66 +305,6 @@ public class FR3DLayout {
   //=====================================================================================================================>
   //! HELPERS...
   //=====================================================================================================================>
-
-  /**
-   * Composes a chain function to call which guarentees unrelated Random Positions are initialized for any unlocked Vertex.
-   * This needs to be called before the step() function is called for the layout to work correctly.
-   *
-   * @param initializer - any function which given a Vertex provides a Point3D in return
-   */
-  protected void setInitialRandomPositions(Function<Vertex, Point3D> initializer) {
-    Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
-      public Point3D apply(Point3D input) {
-        return (Point3D) input.clone();
-      }
-    }, new Function<Vertex, Point3D>() {
-      public Point3D apply(Vertex v) {
-        if (lockedVertices.contains(v) && v.coords() != null) {
-          return v.coords();
-        } else {
-          return initializer.apply(v);
-        }
-      }
-    });
-    this.locationData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
-    //? sets up corresponding {K,V} to ref -> ea. iter resets to: {0,0,0}
-    this.offsetData = CacheBuilder.newBuilder().build(CacheLoader.from(chain));
-  }
-
-  /**
-   * Calculates the density of Vertices in the overall space, then scales them to be placed in a way which makes them 
-   * the most readable for the Client (application). Simple mean calculates current density, then uses it to scale and
-   * setSize() for the layout with the scaled width and height.
-   *
-   * @apinote Uses the maximum of Width || Height for Depth per app convention
-   */
-  protected void scaleDimensionsToGraphsetSize() {
-    if (!request.graph().isEmpty()) {
-      int totalVerts = request.graph().vertexCount();
-      double initWidth = request.dimensions().getWidth();
-      double initHeight = request.dimensions().getHeight();
-      double initDepth = Math.max(initHeight, initWidth);
-      double initVol = initWidth * initHeight * initDepth;
-      double curDens = (totalVerts * Math.pow(Vertex.RADIUS, 3) / initVol);
-      double scale = Math.cbrt(config.targetDensity() / curDens);
-      int scWidth = (int) Math.ceil(initWidth * scale);
-      int scHeigt = (int) Math.ceil(initHeight * scale);
-
-      request.dimensions(new Dimension(scWidth, scHeigt));
-    }
-  }
-
-  /**
-   * Sets the 'physical' constants used in each calculation for the layout, these define the overall shape
-   */
-  protected void initializeLayoutConstants() {
-    curIteration = 0;
-    temperature = request.dimensions.getWidth() / config.tempMult();
-    forceConst = Math
-        .sqrt(request.dimensions.getHeight() * request.dimensions.getWidth() / request.graph().vertexCount());
-    attrConst = forceConst * config.attrMult();
-    repConst = forceConst * config.repMult();
-  }
 
   /**
    * Gets the offset data from the cache for the provided Vertex
@@ -321,29 +321,10 @@ public class FR3DLayout {
   }
 
   /**
-   * Checks if the provided Vertex's position is locked and should not be moved
-   */
-  protected boolean isLocked(Vertex v) {
-    for (Vertex lockedVertex : lockedVertices) {
-      if (lockedVertex.id().equals(v.id())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * Gets the largest of the two Dimensions (used for a depth (Z) value throghout app)
    */
   protected double maxDim() {
     return Math.max(request.dimensions().getWidth(), request.dimensions().getHeight());
-  }
-
-  /**
-   * Checks the both provided vertices are in the locked vertex
-   */
-  protected boolean bothVerticesLocked(Vertex v1, Vertex v2) {
-    return isLocked(v1) && isLocked(v2);
   }
 
   /**
@@ -356,21 +337,21 @@ public class FR3DLayout {
    */
   protected void updateOffset(Vertex v, double dx, double dy, double dz, double scale) {
     Point3D curOffset = getOffsetData(v);
-    double newX = curOffset.getX() - (scale * dx);
-    double newY = curOffset.getY() - (scale * dy);
-    double newZ = curOffset.getZ() - (scale * dz);
+    double newX = curOffset.getX() + (scale * dx);
+    double newY = curOffset.getY() + (scale * dy);
+    double newZ = curOffset.getZ() + (scale * dz);
     curOffset.setLocation(newX, newY, newZ);
   }
 
-  protected double xDiff(Point3D p1, Point3D p2) {
+  protected double xDelt(Point3D p1, Point3D p2) {
     return p1.getX() - p2.getX();
   }
 
-  protected double yDiff(Point3D p1, Point3D p2) {
+  protected double yDelt(Point3D p1, Point3D p2) {
     return p1.getY() - p2.getY();
   }
 
-  protected double zDiff(Point3D p1, Point3D p2) {
+  protected double zDelt(Point3D p1, Point3D p2) {
     return p1.getZ() - p2.getZ();
   }
 

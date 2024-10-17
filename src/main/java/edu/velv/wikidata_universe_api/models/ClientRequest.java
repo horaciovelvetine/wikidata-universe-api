@@ -20,7 +20,7 @@ public class ClientRequest implements Printable {
 
   public ClientRequest(WikidataServiceManager wd, FR3DConfig config, String query) {
     this.query = this.sanitizeQueryString(query);
-    this.dimensions = new Dimension(400, 300); // uses a default size to prevent any 0-div problems
+    this.dimensions = new Dimension(800, 600); // init w/ a default size, which will be scaled 
     this.graph = new Graphset();
     this.layout = new FR3DLayout(this, config);
     this.wikidata = wd;
@@ -66,7 +66,6 @@ public class ClientRequest implements Printable {
    */
   public Either<Err, ClientRequest> getInitialQueryData() {
     Optional<Err> fetchInitQueryTask = wikidata.fetchInitialQueryData(this);
-
     return fetchInitQueryTask.isPresent() ? Either.left(fetchInitQueryTask.get()) : Either.right(this);
   }
 
@@ -78,26 +77,19 @@ public class ClientRequest implements Printable {
    * @return an error if one was enountered while carrying out the fetches requests 
    */
   public Either<Err, ClientRequest> getUnfetchedData() {
-    layout().lock(this.graph().getOriginVertex(), true);
-
+    graph().getOriginVertex().lock();
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteData(this);
-    runLayoutAlgoProcess();
 
-    return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
-  }
+    layout().scaleDimensionsToGraphsetSize(); // scale based on number of verts
+    layout().initializeRandomPositions(); // initialize positions for new vertices
+    layout().initializeLayoutConstants(); // initialize forces 
 
-  /**
-   * Initializes, and steps the Layout process to provide vertices with updates layout positions - then updates
-   * Graphset so that each Vertex is aware of its update Point3D coords.
-   */
-  private void runLayoutAlgoProcess() {
-    layout().initialize();
-
-    while (!layout.done()) {
+    while (!layout().done()) {
       layout().step();
     }
 
     graph().updateVertexCoordinatesFromLayout(layout());
+    return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
   }
 
   /**

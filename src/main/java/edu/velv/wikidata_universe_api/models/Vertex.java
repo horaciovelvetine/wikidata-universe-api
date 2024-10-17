@@ -15,6 +15,7 @@ public class Vertex {
   private String description;
   private boolean fetched;
   private boolean origin;
+  private boolean locked = false;
   private Point3D coords;
 
   public Vertex() {
@@ -85,10 +86,31 @@ public class Vertex {
 
   public void setAsOrigin() {
     this.origin = true;
+    this.lock();
   }
 
   public boolean origin() {
     return this.origin;
+  }
+
+  public boolean locked() {
+    return this.locked;
+  }
+
+  /**
+   * Sets this vertices locked attribute to true, preventing the FR3D layout from moving this vertices position when calculating a layout
+   */
+  @JsonIgnore
+  public void lock() {
+    this.locked = true;
+  }
+
+  /**
+   * Sets this vertices locked attribute to false, allowing the FR3D layout from moving this vertices position when calculating a layout
+   */
+  @JsonIgnore
+  public void unlock() {
+    this.locked = false;
   }
 
   public void updateUnfetchedValues(ItemDocumentImpl doc, String enLangKey) {
