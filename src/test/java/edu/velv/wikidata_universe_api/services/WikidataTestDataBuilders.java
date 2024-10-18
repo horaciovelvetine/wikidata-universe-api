@@ -33,7 +33,7 @@ import edu.velv.wikidata_universe_api.models.ValueData;
 
 public interface WikidataTestDataBuilders extends Printable {
   // dir for sampled test data which has been stored
-  final String testDataDir = "src/test/java/edu/velv/wikidata_universe_api/resources/data/";
+  final String testDataDir = "src/test/java/edu/velv/wikidata_universe_api/data/";
   final String json = ".json";
   final String kbTestItemDocData = "Q3454165-item-doc" + json;
   final String kbTestUnfDataCxRequest = "kevin-bacon-init-query-task-fin-request-response" + json;
