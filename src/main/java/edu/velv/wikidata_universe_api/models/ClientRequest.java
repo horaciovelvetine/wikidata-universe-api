@@ -80,15 +80,19 @@ public class ClientRequest implements Printable {
     graph().getOriginVertex().lock();
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteData(this);
 
-    layout().scaleDimensionsToGraphsetSize(); // scale based on number of verts
-    layout().initializeRandomPositions(); // initialize positions for new vertices
-    layout().initializeLayoutConstants(); // initialize forces 
+    if (fetchIncompleteDataTask.isEmpty()) {
+      layout().scaleDimensionsToGraphsetSize(); // scale based on number of verts
+      layout().initializeRandomPositions(); // initialize positions for new vertices
+      layout().initializeLayoutConstants(); // initialize forces 
 
-    while (!layout().done()) {
-      layout().step();
+      while (!layout().done()) {
+        layout().step();
+      }
+
+      graph().updateVertexCoordinatesFromLayout(layout());
+      logClientRequestData(this);
     }
 
-    graph().updateVertexCoordinatesFromLayout(layout());
     return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
   }
 
