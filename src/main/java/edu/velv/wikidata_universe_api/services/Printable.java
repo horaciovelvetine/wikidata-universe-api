@@ -3,6 +3,10 @@ package edu.velv.wikidata_universe_api.services;
 import java.io.File;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.velv.wikidata_universe_api.models.ClientRequest;
+import edu.velv.wikidata_universe_api.models.RequestResponseBody;
+
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -29,6 +33,20 @@ public interface Printable {
     } catch (IOException e) {
       print(e);
       print("Error writing to runtime log: " + details);
+    }
+  }
+
+  default void logClientRequestData(ClientRequest request) {
+    String fileName = LOGS_DIR + "client_request_" + System.currentTimeMillis() + ".json";
+    try {
+      String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(new RequestResponseBody(request));
+      File logFile = new File(fileName);
+      try (FileWriter writer = new FileWriter(logFile)) {
+        writer.write(json);
+      }
+    } catch (IOException e) {
+      print(e);
+      print("Error writing client request data to log: " + request);
     }
   }
 }
