@@ -62,6 +62,7 @@ public class WikidataServiceManager implements Printable {
   public Optional<Err> fetchIncompleteData(ClientRequest req) {
     IncompleteDataQueue taskQueue = new IncompleteDataQueue(req);
     Optional<Err> apiOffline = Optional.empty();
+
     while (!taskQueue.isEmpty()) {
       List<String> tgtBatch = taskQueue.getEntityBatch();
 
@@ -78,6 +79,7 @@ public class WikidataServiceManager implements Printable {
         }
       }
     }
+    cleanUpUnfetchedGraphVerts(req);
     return apiOffline;
   }
 
@@ -149,7 +151,7 @@ public class WikidataServiceManager implements Printable {
         entityResults -> {
           entityResults.forEach((id, result) -> {
             if (result.isLeft()) {
-              req.graph().removeInvalidSearchResultFromData(id);
+              req.graph().removeTargetValueFromGraph(id);
             } else {
               processEntityDocument(result.get(), req);
             }
@@ -183,10 +185,27 @@ public class WikidataServiceManager implements Printable {
   private void handleDateFetchResult(IncompleteDataQueue queue, String date, Either<Err, WbSearchEntitiesResult> result,
       ClientRequest req) {
     if (result.isLeft()) {
-      req.graph().removeInvalidSearchResultFromData(date);
+      req.graph().removeTargetValueFromGraph(date);
     } else {
       req.graph().getVertexById(date).ifPresent(vertex -> vertex.updateUnfetchedValues(result.get()));
     }
     queue.removeFromQueue(date);
+  }
+
+  /**
+   * Removes mentions of currently unfetched Vertices from the Graph by iterating over the whole set of vertices
+   */
+  private void cleanUpUnfetchedGraphVerts(ClientRequest req) {
+    for (Vertex vert : req.graph().vertices()) {
+      if (!vert.fetched()) {
+        if (vert.id() != null) {
+          req.graph().removeTargetValueFromGraph(vert.id());
+        } else if (vert.label() != null) {
+          req.graph().removeTargetValueFromGraph(vert.label());
+        } else {
+          print("What is going on here");
+        }
+      }
+    }
   }
 }

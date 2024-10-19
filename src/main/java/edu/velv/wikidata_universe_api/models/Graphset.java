@@ -202,11 +202,9 @@ public class Graphset {
   }
 
   /**
-   * Removes the given target value from mention in the data set by searching for any entitiy where it might be mentioned and
-   * removing it. The target values are provided from Wikidata so this should be a particularly rare call/result. There are no
-   * additional details to handle from this target.
+   * Removes the given target value from mention in the data set by searching for any entitiy where it might be mentioned and removing that entity. 
    */
-  public void removeInvalidSearchResultFromData(String targetValue) {
+  public void removeTargetValueFromGraph(String targetValue) {
     // Remove vertices with matching id or label
     if (targetValue != null) {
       vertices.removeIf(v -> (v.id() != null && v.id().equals(targetValue)) ||

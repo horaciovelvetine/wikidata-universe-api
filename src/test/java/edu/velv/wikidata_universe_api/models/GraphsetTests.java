@@ -55,7 +55,7 @@ public class GraphsetTests implements FailedTestMsgTemplates, WikidataTestDataBu
   }
 
   @Test
-  void removeInvalidSearchResultFromData_removes_entity_id_target() {
+  void removeTargetValueFromGraph_removes_entity_id_target() {
     graphset = buildGraphset_generic();
     String q1 = "Q3";
     Optional<Vertex> origVertRef = graphset.getVertexById(q1);
@@ -64,7 +64,7 @@ public class GraphsetTests implements FailedTestMsgTemplates, WikidataTestDataBu
     assertTrue(origVertRef.isPresent(), src_ + shouldBe + ableToFind + vert + q1 + beforeRemoval);
     assertTrue(origEdgeRefs.size() > 0, src_ + shouldBe + ableToFind + q1 + relEdges + beforeRemoval);
 
-    graphset.removeInvalidSearchResultFromData(q1);
+    graphset.removeTargetValueFromGraph(q1);
 
     Optional<Vertex> vert = graphset.getVertexById(q1);
     List<Edge> edgeRefs = getEdgesWhereStringReferenced(q1);
@@ -74,14 +74,14 @@ public class GraphsetTests implements FailedTestMsgTemplates, WikidataTestDataBu
   }
 
   @Test
-  void removeInvalidSearchResultFromData_removes_label_target() {
+  void removeTargetValueFromGraph_removes_label_target() {
     graphset = buildGraphset_generic();
     String q1 = "Q1 label";
     Optional<Vertex> origVertRef = graphset.getVertexByLabel(q1);
 
     assertTrue(origVertRef.isPresent(), src_ + shouldBe + ableToFind + vert + q1 + beforeRemoval);
 
-    graphset.removeInvalidSearchResultFromData(q1);
+    graphset.removeTargetValueFromGraph(q1);
 
     Optional<Vertex> vertRef = graphset.getVertexByLabel(q1);
     List<Edge> edgeRefs = getEdgesWhereStringReferenced(q1);
@@ -91,7 +91,7 @@ public class GraphsetTests implements FailedTestMsgTemplates, WikidataTestDataBu
   }
 
   @Test
-  void removeInvalidSearchResultFromData_removes_property_id_target() {
+  void removeTargetValueFromGraph_removes_property_id_target() {
     graphset = buildGraphset_generic();
     String p1 = "P1";
     Optional<Property> origPropRef = graphset.getPropertyById(p1);
@@ -100,7 +100,7 @@ public class GraphsetTests implements FailedTestMsgTemplates, WikidataTestDataBu
     assertTrue(origPropRef.isPresent(), src_ + shouldBe + ableToFind + p1 + beforeRemoval);
     assertTrue(origEdgeRefs.size() > 0, src_ + shouldBe + ableToFind + p1 + relEdges + beforeRemoval);
 
-    graphset.removeInvalidSearchResultFromData(p1);
+    graphset.removeTargetValueFromGraph(p1);
 
     Optional<Property> propRef = graphset.getPropertyById(p1);
     List<Edge> edgeRefs = getEdgesWhereStringReferenced(p1);
