@@ -72,6 +72,12 @@ public class Graphset {
     return vertexCount() == 0;
   }
 
+  public void lockAll() {
+    for (Vertex vert : vertices()) {
+      vert.lock();
+    }
+  }
+
   /**
    * Checks Vertices, Edges & Property are empty.
    */

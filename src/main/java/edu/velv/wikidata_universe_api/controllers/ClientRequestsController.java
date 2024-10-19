@@ -12,6 +12,8 @@ import edu.velv.wikidata_universe_api.models.RequestResponseBody;
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @CrossOrigin
 @RestController
@@ -44,8 +46,15 @@ public class ClientRequestsController implements Printable {
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
-  private ResponseEntity<RequestResponseBody> buildSuccessResponse(ClientRequest request) {
-    return ResponseEntity.status(200).body(new RequestResponseBody(request));
+  @PostMapping("api/click-target")
+  public ResponseEntity<String> postMethodName(@RequestBody RequestPayloadData payload) {
+    ClientRequest req = new ClientRequest(wikidataServiceManager, fr3DConfig, payload);
+
+    return ResponseEntity.ok().body("AOK CHIEF");
+  }
+
+  private ResponseEntity<RequestResponseBody> buildSuccessResponse(RequestResponseBody responseBody) {
+    return ResponseEntity.status(200).body(responseBody);
   }
 
   private ResponseEntity<RequestResponseBody> buildErrorResponse(RequestErrResponse error) {

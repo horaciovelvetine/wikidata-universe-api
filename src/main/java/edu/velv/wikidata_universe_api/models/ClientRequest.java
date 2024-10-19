@@ -6,6 +6,7 @@ import java.util.Optional;
 import io.vavr.control.Either;
 
 import edu.velv.wikidata_universe_api.errors.Err;
+import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.FR3DLayoutProcessError;
 import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
@@ -64,9 +65,10 @@ public class ClientRequest implements Printable {
    *
    * @return an error if one was encountered while carrying out the fetch request(s)
    */
-  public Either<Err, ClientRequest> getInitialQueryData() {
+  public Either<Err, RequestResponseBody> getInitialQueryData() {
     Optional<Err> fetchInitQueryTask = wikidata.fetchInitialQueryData(this);
-    return fetchInitQueryTask.isPresent() ? Either.left(fetchInitQueryTask.get()) : Either.right(this);
+    return fetchInitQueryTask.isPresent() ? Either.left(fetchInitQueryTask.get())
+        : Either.right(new RequestResponseBody(this));
   }
 
   /**
@@ -76,24 +78,35 @@ public class ClientRequest implements Printable {
    * 
    * @return an error if one was enountered while carrying out the fetches requests 
    */
-  public Either<Err, ClientRequest> getUnfetchedData() {
+  public Either<Err, RequestResponseBody> getUnfetchedData() {
     graph().getOriginVertex().lock();
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteData(this);
 
     if (fetchIncompleteDataTask.isEmpty()) {
-      layout().scaleDimensionsToGraphsetSize(); // scale based on number of verts
-      layout().initializeRandomPositions(); // initialize positions for new vertices
-      layout().initializeLayoutConstants(); // initialize forces 
-
-      while (!layout().done()) {
-        layout().step();
-      }
-
-      graph().updateVertexCoordinatesFromLayout(layout());
-      logClientRequestData(this);
+      fetchIncompleteDataTask = runFR3DLayoutProcess();
     }
 
-    return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get()) : Either.right(this);
+    return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get())
+        : Either.right(new RequestResponseBody(this));
+  }
+
+  /**
+   * Fetches details for the query target (which will have been replaced by)
+   */
+  public Either<Err, RequestResponseBody> getClickTargetData() {
+    graph().lockAll(); // lock all vertices to their coordinates 
+    Optional<Err> clickTargetTask = wikidata.fetchInitialQueryData(this);
+    if (clickTargetTask.isPresent()) {
+      return Either.left(clickTargetTask.get());
+    }
+
+    clickTargetTask = wikidata.fetchIncompleteData(this);
+    if (clickTargetTask.isEmpty()) {
+      clickTargetTask = runFR3DLayoutProcess();
+    }
+
+    return clickTargetTask.isPresent() ? Either.left(clickTargetTask.get())
+        : Either.right(new RequestResponseBody(this));
   }
 
   /**
@@ -104,5 +117,18 @@ public class ClientRequest implements Printable {
       return null;
     }
     return query.replaceAll("[^\\w\\s]", "").trim();
+  }
+
+  private Optional<Err> runFR3DLayoutProcess() {
+    try {
+      layout.initializeLayout();
+      while (!layout.done()) {
+        layout.step();
+      }
+      graph().updateVertexCoordinatesFromLayout(layout());
+      return Optional.empty();
+    } catch (Exception e) {
+      return Optional.of(new FR3DLayoutProcessError("runFR3DLayoutProcessFailed", e));
+    }
   }
 }

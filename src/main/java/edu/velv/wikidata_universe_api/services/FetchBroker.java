@@ -46,11 +46,24 @@ public class FetchBroker {
   }
 
   /**
+   * Retrieves a matching EntityDocument by using the provided QID value. Provides handling and Err(or)s in the 
+   * case that the Wikidata API is offline or no such record can be found. 
+   * 
+   * @return a matching EntityDocument or encountered Err(or)
+   */
+  protected Either<Err, EntityDocument> fetchTargetEntityById(String QID) {
+    return fetchEntityByIdMatch(QID).fold((Err err) -> {
+      return Either.left(err);
+    }, (EntityDocument doc) -> {
+      return handleNoSuchEntityResults(doc, QID);
+    });
+  }
+
+  /**
    * Retrieves a matching EntityDocument by first searching for an Entity with a matching label,
    * then expanding to search across all attributes with more leinent match criteria. Provides handling
    * and Err(or)s in the case(s) that the Wikidata API is offline or No Such (matching) Record can be found
    * 
-   * @param query
    * @return a matching EntityDocument or encountered Err(or)
    */
   protected Either<Err, EntityDocument> fetchEntityByAnyQueryMatch(String query) {

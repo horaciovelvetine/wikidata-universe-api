@@ -11,6 +11,10 @@ public sealed interface Err permits Err.WikidataServiceError, Err.WikiverseServi
     record DebugDetailsError(String msg) implements WikiverseServiceError {
       //? Default error
     }
+
+    record FR3DLayoutProcessError(String msg, Exception e) implements WikidataServiceError {
+    
+    }
   }
 
   sealed interface WikidataServiceError extends Err {

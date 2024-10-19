@@ -52,13 +52,22 @@ public class FR3DLayout implements Printable {
   }
 
   /**
+   * Calls each each initializer method in a single helper, scaling dimensions, initializing positions, then calculating and intializing layout constants related to force and step iterations.
+   */
+  public void initializeLayout() {
+    scaleDimensionsToGraphsetSize();
+    initializeRandomPositions();
+    initializeLayoutConstants();
+  }
+
+  /**
   * Calculates the density of Vertices in the overall space, then scales them to be placed in a way which makes them 
   * the most readable for the Client (application). Simple mean calculates current density, then uses it to scale and
   * setSize() for the layout with the scaled width and height.
   *
-  * @apinote Uses the maximum of Width || Height for Depth per app convention
+  * @apinote Uses the maximum of Width || Height for Depth
   */
-  public void scaleDimensionsToGraphsetSize() {
+  private void scaleDimensionsToGraphsetSize() {
     if (!request.graph().isEmpty()) {
       int totalVerts = request.graph().vertexCount();
       int initWidth = (int) request.dimensions().getWidth();
@@ -74,16 +83,6 @@ public class FR3DLayout implements Printable {
       int scWidth = (int) Math.ceil(initWidth * scale);
       int scHeight = (int) Math.ceil(initHeight * scale);
 
-      //todo remove once proofed
-      StringBuilder logDetails = new StringBuilder();
-      logDetails.append("scaleDimensionsToGraphsetSize() ").append(request.query()).append("\n")
-          .append(request.graph().toString()).append("\n")
-          .append("initDim(").append(initWidth).append("x").append(initHeight).append(")").append("\n")
-          .append("initVol=").append(initVol).append("\n")
-          .append("initDens=").append(initDens).append("\n")
-          .append("scale=").append(scale).append("\n")
-          .append("scaleDim(").append(scWidth).append("x").append(scHeight).append(")").append("\n");
-      logRunDetails(logDetails.toString());
       request.dimensions(new Dimension(scWidth, scHeight));
     }
   }
@@ -91,7 +90,7 @@ public class FR3DLayout implements Printable {
   /**
    * Sets the 'physical' constants used in each calculation for the layout, these define the overall shape
    */
-  public void initializeLayoutConstants() {
+  private void initializeLayoutConstants() {
     curIteration = 0;
     temperature = request.dimensions.getWidth() / config.tempMult();
     forceConst = Math
@@ -106,7 +105,7 @@ public class FR3DLayout implements Printable {
    *
    * @param initializer - any function which given a Vertex provides a Point3D in return
    */
-  public void initializeRandomPositions() {
+  private void initializeRandomPositions() {
     Function<Vertex, Point3D> rndmInitializer = new RandomPoint3D<>(request.dimensions());
     Function<Vertex, Point3D> chain = Functions.<Vertex, Point3D, Point3D>compose(new Function<Point3D, Point3D>() {
       public Point3D apply(Point3D input) {
