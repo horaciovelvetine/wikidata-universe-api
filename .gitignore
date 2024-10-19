@@ -37,3 +37,6 @@ src/main/java/.DS_Store
 src/main/.DS_Store
 src/.DS_Store
 src/test/java/edu/velv/wikidata_universe_api/resources/.DS_Store
+
+/target/classes/application.properties
+/target/classes/.DS_STORE
