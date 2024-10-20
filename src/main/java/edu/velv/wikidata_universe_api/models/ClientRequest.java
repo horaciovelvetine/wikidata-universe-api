@@ -60,6 +60,10 @@ public class ClientRequest implements Printable {
     return layout;
   }
 
+  public FR3DConfig layoutConfig() {
+    return layoutConfig;
+  }
+
   /**
    * Fetches the closest matching ItemDocument from Wikidata's API by first searching by label
    * then searching for any matching text, and taking the best match. If no matching ItemDocument

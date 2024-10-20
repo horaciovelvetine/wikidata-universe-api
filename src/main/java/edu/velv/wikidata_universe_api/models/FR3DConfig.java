@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FR3DConfig {
   //Constant, Client Configureable
-  private double dataDensity = 0.0010;
+  private double dataDensity = 0.0001;
   private double repMult = 0.55;
   private double attrMult = 1.75;
 

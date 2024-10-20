@@ -20,6 +20,7 @@ public class RequestResponseBody {
   Collection<Vertex> vertices = new ArrayList<>();
   Collection<Edge> edges = new ArrayList<>();
   Collection<Property> properties = new ArrayList<>();
+  FR3DConfig layoutConfig;
   Err err;
 
   /**
@@ -39,6 +40,7 @@ public class RequestResponseBody {
     this.vertices = request.graph().vertices();
     this.edges = request.graph().edges();
     this.properties = request.graph().properties();
+    this.layoutConfig = request.layoutConfig();
   }
 
   /**
@@ -51,5 +53,6 @@ public class RequestResponseBody {
     this.vertices = null;
     this.edges = null;
     this.properties = null;
+    this.layoutConfig = null;
   }
 }
