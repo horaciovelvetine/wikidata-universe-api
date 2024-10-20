@@ -9,7 +9,6 @@ import edu.velv.wikidata_universe_api.errors.Err.RequestErrResponse;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
-import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,9 +20,6 @@ public class ClientRequestsController implements Printable {
   @Autowired
   private WikidataServiceManager wikidataServiceManager;
 
-  @Autowired
-  private FR3DConfig fr3DConfig;
-
   @GetMapping("api/status")
   public ResponseEntity<RequestResponseBody> getMethodName() {
     return ResponseEntity.status(200).body(new RequestResponseBody("API Online."));
@@ -32,7 +28,7 @@ public class ClientRequestsController implements Printable {
   @GetMapping("api/query-data")
   public ResponseEntity<RequestResponseBody> getInitialQueryData(@RequestParam(required = true) String query) {
     return new ClientRequest(
-        wikidataServiceManager, fr3DConfig, query)
+        wikidataServiceManager, query)
         .getInitialQueryData()
         .mapLeft(Err::mapErrResponse)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
@@ -40,17 +36,26 @@ public class ClientRequestsController implements Printable {
 
   @PostMapping("api/fetch-related")
   public ResponseEntity<RequestResponseBody> fetchRelatedDataDetails(@RequestBody RequestPayloadData payload) {
-    return new ClientRequest(wikidataServiceManager, fr3DConfig, payload)
+    return new ClientRequest(wikidataServiceManager, payload)
         .getUnfetchedData()
         .mapLeft(Err::mapErrResponse)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
   @PostMapping("api/click-target")
-  public ResponseEntity<String> postMethodName(@RequestBody RequestPayloadData payload) {
-    ClientRequest req = new ClientRequest(wikidataServiceManager, fr3DConfig, payload);
+  public ResponseEntity<RequestResponseBody> fetchClickTargetRelatedDetails(@RequestBody RequestPayloadData payload) {
+    return new ClientRequest(wikidataServiceManager, payload)
+        .getClickTargetData()
+        .mapLeft(Err::mapErrResponse)
+        .fold(this::buildErrorResponse, this::buildSuccessResponse);
+  }
 
-    return ResponseEntity.ok().body("AOK CHIEF");
+  @PostMapping("api/refresh-layout")
+  public ResponseEntity<RequestResponseBody> refreshLayoutPositions(@RequestBody RequestPayloadData payload) {
+    return new ClientRequest(wikidataServiceManager, payload)
+        .refreshLayoutPositions()
+        .mapLeft(Err::mapErrResponse)
+        .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
   private ResponseEntity<RequestResponseBody> buildSuccessResponse(RequestResponseBody responseBody) {

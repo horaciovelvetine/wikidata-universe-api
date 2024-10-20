@@ -44,4 +44,17 @@ public class IncompleteDataQueue {
     entitiesToFetch.remove(target);
     datesToFetch.remove(target);
   }
+
+  /**
+   * Helper checks both queues for known invalid targets often found in the Wikidata API:
+   * - Any entity or date containing charcters outside of {regex} a-z, A-Z, 0-9, and listed special charcters
+   * - Any entity id which doesnt follow the known "PXXX || QXXX" conventions this application uses
+   */
+  public void removeInvalidCharTargetsFromQueue() {
+    String regex = "^[a-zA-Z0-9,\\.\\-:!?]+$";
+    String pattern = "^[PQ][0-9]+$";
+    entitiesToFetch
+        .removeIf(target -> !target.matches(regex) || (!target.matches(pattern) && target.matches("^[A-Z][0-9]+$")));
+    datesToFetch.removeIf(target -> !target.matches(regex));
+  }
 }

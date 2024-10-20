@@ -1,6 +1,7 @@
 package edu.velv.wikidata_universe_api.services;
 
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.vavr.control.Either;
@@ -13,6 +14,7 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import edu.velv.wikidata_universe_api.models.ClientRequest;
+import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.IncompleteDataQueue;
 import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.Vertex;
@@ -63,6 +65,8 @@ public class WikidataServiceManager implements Printable {
     IncompleteDataQueue taskQueue = new IncompleteDataQueue(req);
     Optional<Err> apiOffline = Optional.empty();
 
+    taskQueue.removeInvalidCharTargetsFromQueue(); // remove any target from fetch which may contain invalid chars, cleanup will remove these from mention
+
     while (!taskQueue.isEmpty()) {
       List<String> tgtBatch = taskQueue.getEntityBatch();
 
@@ -80,6 +84,7 @@ public class WikidataServiceManager implements Printable {
       }
     }
     cleanUpUnfetchedGraphVerts(req);
+    cleanUpUnusedProperties(req);
     return apiOffline;
   }
 
@@ -97,7 +102,7 @@ public class WikidataServiceManager implements Printable {
   private void processEntityDocument(EntityDocument entityDoc, ClientRequest req) {
     // Doc already exists as Vertex, update unknown values and ingest edge data
     Optional<Vertex> existingVert = req.graph().getVertexByIdOrLabel(entityDoc);
-    if (existingVert.isPresent()) {
+    if (existingVert.isPresent() && entityDoc instanceof ItemDocumentImpl) {
       ItemDocumentImpl itemDoc = (ItemDocumentImpl) entityDoc;
       Vertex vertex = existingVert.get();
       vertex.updateUnfetchedValues(itemDoc, api().enLangKey());
@@ -200,11 +205,28 @@ public class WikidataServiceManager implements Printable {
       if (!vert.fetched()) {
         if (vert.id() != null) {
           req.graph().removeTargetValueFromGraph(vert.id());
-        } else if (vert.label() != null) {
-          req.graph().removeTargetValueFromGraph(vert.label());
-        } else {
-          print("What is going on here");
         }
+        if (vert.label() != null) {
+          req.graph().removeTargetValueFromGraph(vert.label());
+        }
+      }
+    }
+  }
+
+  /**
+   * Remove mentions of currently unused Properties (which have been removed after the unfetched vertices) by iterating over the remaining edges storing the used property PIDs then checks those against all of the Properties.
+   */
+  private void cleanUpUnusedProperties(ClientRequest req) {
+    List<String> includeProps = new ArrayList<>();
+
+    for (Edge edge : req.graph().edges()) {
+      if (edge.propertyId() != null) {
+        includeProps.add(edge.propertyId());
+      }
+    }
+    for (Property prop : req.graph().properties()) {
+      if (!includeProps.contains(prop.id())) {
+        req.graph().removeTargetValueFromGraph(prop.id());
       }
     }
   }

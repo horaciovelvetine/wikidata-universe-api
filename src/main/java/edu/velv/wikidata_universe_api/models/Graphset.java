@@ -79,7 +79,17 @@ public class Graphset {
   }
 
   /**
-   * Checks Vertices, Edges & Property are empty.
+   * @apiNote - unlocks each vertex, excluding the origin.
+   */
+  public void unlockAll() {
+    for (Vertex vert : vertices()) {
+      if (!vert.origin())
+        vert.unlock();
+    }
+  }
+
+  /**
+   * @apiNote - isEmpty() call for each Data model.
    */
   public boolean isEmpty() {
     return properties.isEmpty() || vertices.isEmpty() || edges.isEmpty();

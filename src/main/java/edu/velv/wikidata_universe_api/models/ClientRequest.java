@@ -7,7 +7,6 @@ import io.vavr.control.Either;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.FR3DLayoutProcessError;
-import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
@@ -16,22 +15,25 @@ public class ClientRequest implements Printable {
   protected Dimension dimensions;
   protected Graphset graph;
   protected FR3DLayout layout;
+  protected FR3DConfig layoutConfig;
 
   private final WikidataServiceManager wikidata;
 
-  public ClientRequest(WikidataServiceManager wd, FR3DConfig config, String query) {
+  public ClientRequest(WikidataServiceManager wd, String query) {
     this.query = this.sanitizeQueryString(query);
-    this.dimensions = new Dimension(800, 600); // init w/ a default size, which will be scaled 
+    this.dimensions = new Dimension(800, 600); //default size scaled on init of layout 
     this.graph = new Graphset();
-    this.layout = new FR3DLayout(this, config);
+    this.layoutConfig = new FR3DConfig();
+    this.layout = new FR3DLayout(this);
     this.wikidata = wd;
   }
 
-  public ClientRequest(WikidataServiceManager wd, FR3DConfig config, RequestPayloadData payload) {
+  public ClientRequest(WikidataServiceManager wd, RequestPayloadData payload) {
     this.query = payload.query();
     this.dimensions = payload.dimensions();
     this.graph = new Graphset(payload.vertices(), payload.edges(), payload.properties());
-    this.layout = new FR3DLayout(this, config);
+    this.layoutConfig = payload.layoutConfig();
+    this.layout = new FR3DLayout(this);
     this.wikidata = wd;
   }
 
@@ -96,16 +98,28 @@ public class ClientRequest implements Printable {
   public Either<Err, RequestResponseBody> getClickTargetData() {
     graph().lockAll(); // lock all vertices to their coordinates 
     Optional<Err> clickTargetTask = wikidata.fetchInitialQueryData(this);
+
     if (clickTargetTask.isPresent()) {
       return Either.left(clickTargetTask.get());
     }
 
     clickTargetTask = wikidata.fetchIncompleteData(this);
+
     if (clickTargetTask.isEmpty()) {
       clickTargetTask = runFR3DLayoutProcess();
     }
 
     return clickTargetTask.isPresent() ? Either.left(clickTargetTask.get())
+        : Either.right(new RequestResponseBody(this));
+  }
+
+  /**
+   * Locks the origin and re-runs the layout.step() algo
+   */
+  public Either<Err, RequestResponseBody> refreshLayoutPositions() {
+    graph().unlockAll();
+    Optional<Err> refreshLayoutTask = runFR3DLayoutProcess();
+    return refreshLayoutTask.isPresent() ? Either.left(refreshLayoutTask.get())
         : Either.right(new RequestResponseBody(this));
   }
 
@@ -121,7 +135,7 @@ public class ClientRequest implements Printable {
 
   private Optional<Err> runFR3DLayoutProcess() {
     try {
-      layout.initializeLayout();
+      layout.initializeLayout(this.layoutConfig);
       while (!layout.done()) {
         layout.step();
       }

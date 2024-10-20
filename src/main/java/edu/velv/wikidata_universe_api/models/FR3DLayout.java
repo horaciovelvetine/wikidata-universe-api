@@ -3,7 +3,6 @@ package edu.velv.wikidata_universe_api.models;
 import java.awt.Dimension;
 import java.util.Set;
 import java.util.ConcurrentModificationException;
-import java.util.HashSet;
 import java.util.Optional;
 
 import com.google.common.base.Function;
@@ -12,7 +11,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.Printable;
 import io.vavr.Tuple2;
 
@@ -37,27 +35,29 @@ public class FR3DLayout implements Printable {
     }
   });
 
-  // protected Dimension size;
-  protected final FR3DConfig config;
   protected final double EPSILON = 0.000001D; // prevents 0 div
   protected int curIteration;
   protected double temperature;
   protected double forceConst;
   protected double attrConst;
   protected double repConst;
+  // Constant, not Client Configureable
+  private final Integer tempMult = 10;
+  private final Integer maxStepIterations = 250;
+  private final Integer maxIterMvmnt = 30;
 
-  public FR3DLayout(ClientRequest request, FR3DConfig config) {
+  // Construction
+  public FR3DLayout(ClientRequest request) {
     this.request = request;
-    this.config = config;
   }
 
   /**
    * Calls each each initializer method in a single helper, scaling dimensions, initializing positions, then calculating and intializing layout constants related to force and step iterations.
    */
-  public void initializeLayout() {
-    scaleDimensionsToGraphsetSize();
+  public void initializeLayout(FR3DConfig layoutConfig) {
+    scaleDimensionsToGraphsetSize(layoutConfig);
     initializeRandomPositions();
-    initializeLayoutConstants();
+    initializeLayoutConstants(layoutConfig);
   }
 
   /**
@@ -67,7 +67,7 @@ public class FR3DLayout implements Printable {
   *
   * @apinote Uses the maximum of Width || Height for Depth
   */
-  private void scaleDimensionsToGraphsetSize() {
+  private void scaleDimensionsToGraphsetSize(FR3DConfig config) {
     if (!request.graph().isEmpty()) {
       int totalVerts = request.graph().vertexCount();
       int initWidth = (int) request.dimensions().getWidth();
@@ -77,7 +77,7 @@ public class FR3DLayout implements Printable {
 
       double initVol = initWidth * initHeight * initDepth;
 
-      double initDens = (totalVerts * Math.pow(Vertex.RADIUS, 3) / initVol);
+      double initDens = (totalVerts * Math.pow(20, 3) / initVol);
 
       double scale = Math.cbrt(initDens / config.targetDensity());
       int scWidth = (int) Math.ceil(initWidth * scale);
@@ -90,9 +90,9 @@ public class FR3DLayout implements Printable {
   /**
    * Sets the 'physical' constants used in each calculation for the layout, these define the overall shape
    */
-  private void initializeLayoutConstants() {
+  private void initializeLayoutConstants(FR3DConfig config) {
     curIteration = 0;
-    temperature = request.dimensions.getWidth() / config.tempMult();
+    temperature = request.dimensions.getWidth() / tempMult;
     forceConst = Math
         .sqrt(request.dimensions.getHeight() * request.dimensions.getWidth() / request.graph().vertexCount());
     attrConst = forceConst * config.attrMult();
@@ -182,7 +182,7 @@ public class FR3DLayout implements Printable {
    * Checks wether or not the current layout has reached either the maximum iterations or an acceptable temperature.
   */
   public boolean done() {
-    return curIteration > 100 || temperature < 1.0 / maxDim();
+    return curIteration > maxStepIterations || temperature < 1.0 / maxDim();
   }
 
   //=====================================================================================================================>
@@ -262,8 +262,8 @@ public class FR3DLayout implements Printable {
     double yDisp = (yDelt(p1, p2) / deltaLen) * force;
     double zDisp = (zDelt(p1, p2) / deltaLen) * force;
 
-    int v1Scale = v2.locked() ? 2 : 1;
-    int v2Scale = v1.locked() ? 2 : 1;
+    int v1Scale = v2.locked() ? 4 : 1;
+    int v2Scale = v1.locked() ? 4 : 1;
     // negative to push in opposite directions
     updateOffset(v1, -xDisp, -yDisp, -zDisp, v1Scale);
     updateOffset(v2, xDisp, yDisp, zDisp, v2Scale);
@@ -290,9 +290,9 @@ public class FR3DLayout implements Printable {
     if (Double.isNaN(xDisp) || Double.isNaN(yDisp) || Double.isNaN(zDisp))
       throw new IllegalArgumentException("NaN value found in update position displacement calcs");
 
-    double nX = location.getX() + clampToMaxIterMvmnt(xDisp);
-    double nY = location.getY() + clampToMaxIterMvmnt(yDisp);
-    double nZ = location.getZ() + clampToMaxIterMvmnt(zDisp);
+    double nX = location.getX() + clampToMaxIterMvmnt(xDisp, v);
+    double nY = location.getY() + clampToMaxIterMvmnt(yDisp, v);
+    double nZ = location.getZ() + clampToMaxIterMvmnt(zDisp, v);
 
     location.setLocation(clampNewPositionsToDimensions(nX, nY, nZ));
   }
@@ -359,10 +359,7 @@ public class FR3DLayout implements Printable {
    * the algorithim steps, allowing for less overall movement and a measure of 'completeness'
    */
   protected void cool() {
-    temperature *= (1.0 - curIteration / (double) config.maxIters());
-    if (curIteration % 25 == 0) {
-      adjustForceConstants();
-    }
+    temperature *= (1.0 - curIteration / (double) maxStepIterations);
   }
 
   /**
@@ -437,10 +434,11 @@ public class FR3DLayout implements Printable {
   }
 
   /**
-   * Clamps the magnitude of the movement allowed on any iteration to the set constant  
+   * Clamps the magnitude of the movement allowed on any iteration within the application.properties set limit, also limiting the movement if the Vertex is currently locked  
    */
-  protected double clampToMaxIterMvmnt(double disp) {
-    return Math.max(-config.maxIterMvmnt(), Math.min(config.maxIterMvmnt(), disp));
+  protected double clampToMaxIterMvmnt(double disp, Vertex vert) {
+    double maxMvmntLim = maxIterMvmnt;
+    return Math.max(-maxMvmntLim, Math.min(maxMvmntLim, disp));
   }
 
   /**

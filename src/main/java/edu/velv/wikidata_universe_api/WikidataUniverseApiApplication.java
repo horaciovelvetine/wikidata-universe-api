@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import edu.velv.wikidata_universe_api.services.EntDocProc;
-import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.FetchBroker;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
@@ -29,10 +28,5 @@ public class WikidataUniverseApiApplication {
 	@Bean
 	FetchBroker fetchBroker() {
 		return new FetchBroker();
-	}
-
-	@Bean
-	FR3DConfig fr3dConfig() {
-		return new FR3DConfig();
 	}
 }

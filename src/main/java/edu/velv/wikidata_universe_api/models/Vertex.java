@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Vertex {
-  public static final Integer RADIUS = 20;
 
   private String id;
   private String label;
   private String description;
   private boolean fetched;
   private boolean origin;
+  private final Integer radius = 20;
   private boolean locked = false;
   private Point3D coords;
 
@@ -95,6 +95,10 @@ public class Vertex {
 
   public boolean locked() {
     return this.locked;
+  }
+
+  public Integer radius() {
+    return this.radius;
   }
 
   /**
