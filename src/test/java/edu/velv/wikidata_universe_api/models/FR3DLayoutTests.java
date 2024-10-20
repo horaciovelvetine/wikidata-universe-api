@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import edu.velv.wikidata_universe_api.services.FR3DConfig;
 import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
@@ -31,10 +30,10 @@ public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestData
   ClientRequest genReqData;
 
   @BeforeEach
-  void initializeGenericClientRequestData() {
-    genReqData = new ClientRequest(wikidataSrvc, config, buildGenericRequestPayload());
-    allVerticesPositionedAtOrigin();
-  }
+  // void initializeGenericClientRequestData() {
+  //   genReqData = new ClientRequest(wikidataSrvc, config, buildGenericRequestPayload());
+  //   allVerticesPositionedAtOrigin();
+  // }
 
   // @Test
   // void constructs_with_default_graphset_using_spring_context() {
