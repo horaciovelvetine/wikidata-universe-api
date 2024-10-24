@@ -15,7 +15,7 @@ public class ClientRequest implements Printable {
   protected Dimension dimensions;
   protected Graphset graph;
   protected FR3DLayout layout;
-  protected FR3DConfig layoutConfig;
+  protected LayoutConfig layoutConfig;
 
   private final WikidataServiceManager wikidata;
 
@@ -23,7 +23,7 @@ public class ClientRequest implements Printable {
     this.query = this.sanitizeQueryString(query);
     this.dimensions = new Dimension(800, 600); //default size scaled on init of layout 
     this.graph = new Graphset();
-    this.layoutConfig = new FR3DConfig();
+    this.layoutConfig = new LayoutConfig();
     this.layout = new FR3DLayout(this);
     this.wikidata = wd;
   }
@@ -60,7 +60,7 @@ public class ClientRequest implements Printable {
     return layout;
   }
 
-  public FR3DConfig layoutConfig() {
+  public LayoutConfig layoutConfig() {
     return layoutConfig;
   }
 

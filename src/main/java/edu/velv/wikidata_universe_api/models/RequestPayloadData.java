@@ -11,5 +11,5 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record RequestPayloadData(String query, Dimension dimensions, List<Vertex> vertices,
-        List<Edge> edges, List<Property> properties, FR3DConfig layoutConfig) {
+        List<Edge> edges, List<Property> properties, LayoutConfig layoutConfig) {
 }

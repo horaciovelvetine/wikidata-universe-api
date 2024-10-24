@@ -3,13 +3,13 @@ package edu.velv.wikidata_universe_api.models;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class FR3DConfig {
+public class LayoutConfig {
   //Constant, Client Configureable
   private double dataDensity = 0.0001;
-  private double repMult = 0.25;
-  private double attrMult = 9.75;
+  private double repulsionMult = 0.25;
+  private double attractionMult = 9.75;
 
-  public FR3DConfig() {
+  public LayoutConfig() {
     //DEFAULT Constructs...
   }
 
@@ -18,11 +18,11 @@ public class FR3DConfig {
   }
 
   public double repMult() {
-    return repMult;
+    return repulsionMult;
   }
 
   public double attrMult() {
-    return attrMult;
+    return attractionMult;
   }
 
   public void targetDensity(Double newTgt) {
@@ -30,10 +30,10 @@ public class FR3DConfig {
   }
 
   public void repMult(Double newMult) {
-    this.repMult = newMult;
+    this.repulsionMult = newMult;
   }
 
   public void attrMult(Double newMult) {
-    this.attrMult = newMult;
+    this.attractionMult = newMult;
   }
 }

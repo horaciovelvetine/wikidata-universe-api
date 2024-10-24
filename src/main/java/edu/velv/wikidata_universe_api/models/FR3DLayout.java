@@ -54,7 +54,7 @@ public class FR3DLayout implements Printable {
   /**
    * Calls each each initializer method in a single helper, scaling dimensions, initializing positions, then calculating and intializing layout constants related to force and step iterations.
    */
-  public void initializeLayout(FR3DConfig layoutConfig) {
+  public void initializeLayout(LayoutConfig layoutConfig) {
     scaleDimensionsToGraphsetSize(layoutConfig);
     initializeRandomPositions();
     initializeLayoutConstants(layoutConfig);
@@ -67,7 +67,7 @@ public class FR3DLayout implements Printable {
   *
   * @apinote Uses the maximum of Width || Height for Depth
   */
-  private void scaleDimensionsToGraphsetSize(FR3DConfig config) {
+  private void scaleDimensionsToGraphsetSize(LayoutConfig config) {
     if (!request.graph().isEmpty()) {
       int totalVerts = request.graph().vertexCount();
       int initWidth = (int) request.dimensions().getWidth();
@@ -90,7 +90,7 @@ public class FR3DLayout implements Printable {
   /**
    * Sets the 'physical' constants used in each calculation for the layout, these define the overall shape
    */
-  private void initializeLayoutConstants(FR3DConfig config) {
+  private void initializeLayoutConstants(LayoutConfig config) {
     curIteration = 0;
     temperature = request.dimensions.getWidth() / tempMult;
     forceConst = Math

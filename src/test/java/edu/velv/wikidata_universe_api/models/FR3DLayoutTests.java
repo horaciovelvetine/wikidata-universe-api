@@ -20,7 +20,7 @@ public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestData
   private final String src_ = "@FR3DLayoutTests:: ";
 
   @Autowired
-  FR3DConfig config;
+  LayoutConfig config;
 
   @Autowired
   WikidataServiceManager wikidataSrvc;

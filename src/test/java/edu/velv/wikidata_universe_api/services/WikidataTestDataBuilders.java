@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.Edge;
-import edu.velv.wikidata_universe_api.models.FR3DConfig;
+import edu.velv.wikidata_universe_api.models.LayoutConfig;
 import edu.velv.wikidata_universe_api.models.Graphset;
 import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
@@ -114,7 +114,7 @@ public interface WikidataTestDataBuilders extends Printable {
     List<Edge> edges = gs.edges().stream().toList();
     List<Property> props = gs.properties().stream().toList();
     return new RequestPayloadData("generic_graphset_test", buildDimensions_generic(), verts, edges,
-        props, new FR3DConfig());
+        props, new LayoutConfig());
   }
 
   /**

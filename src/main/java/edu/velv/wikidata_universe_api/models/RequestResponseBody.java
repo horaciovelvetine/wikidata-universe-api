@@ -20,7 +20,7 @@ public class RequestResponseBody {
   Collection<Vertex> vertices = new ArrayList<>();
   Collection<Edge> edges = new ArrayList<>();
   Collection<Property> properties = new ArrayList<>();
-  FR3DConfig layoutConfig;
+  LayoutConfig layoutConfig;
   Err err;
 
   /**

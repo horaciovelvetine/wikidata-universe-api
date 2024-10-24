@@ -19,7 +19,7 @@ import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.*;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
-import edu.velv.wikidata_universe_api.models.FR3DConfig;
+import edu.velv.wikidata_universe_api.models.LayoutConfig;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 
 import io.vavr.control.Either;
@@ -30,7 +30,7 @@ public class WikidataServiceManagerTests implements WikidataTestDataBuilders, Fa
   private final String kbQuery = "Kevin Bacon";
 
   @Autowired
-  private FR3DConfig config;
+  private LayoutConfig config;
 
   @Autowired
   private EntDocProc docProc;
