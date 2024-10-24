@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 public class FR3DConfig {
   //Constant, Client Configureable
   private double dataDensity = 0.0001;
-  private double repMult = 0.55;
-  private double attrMult = 1.75;
+  private double repMult = 0.25;
+  private double attrMult = 9.75;
 
   public FR3DConfig() {
     //DEFAULT Constructs...

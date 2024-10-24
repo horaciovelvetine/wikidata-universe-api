@@ -25,7 +25,7 @@ public class WikidataUniverseApiApplication {
 		return new EntDocProc();
 	}
 
-	@Bean
+	@Bean 
 	FetchBroker fetchBroker() {
 		return new FetchBroker();
 	}

@@ -123,6 +123,10 @@ public class ClientRequest implements Printable {
   public Either<Err, RequestResponseBody> refreshLayoutPositions() {
     graph().unlockAll();
     Optional<Err> refreshLayoutTask = runFR3DLayoutProcess();
+
+    //TODO REMOVE
+    // logClientRequestData(this);
+
     return refreshLayoutTask.isPresent() ? Either.left(refreshLayoutTask.get())
         : Either.right(new RequestResponseBody(this));
   }
@@ -134,7 +138,7 @@ public class ClientRequest implements Printable {
     if (query == null || query.isBlank()) {
       return null;
     }
-    return query.replaceAll("[^\\w\\s]", "").trim();
+    return query.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
   }
 
   private Optional<Err> runFR3DLayoutProcess() {
