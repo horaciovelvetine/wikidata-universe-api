@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 public class LayoutConfig {
   //Constant, Client Configureable
   private double dataDensity = 0.0001;
-  private double repulsionMult = 0.25;
-  private double attractionMult = 9.75;
+  private double repulsionMult = 0.55;
+  private double attractionMult = 0.85;
 
   public LayoutConfig() {
     //DEFAULT Constructs...

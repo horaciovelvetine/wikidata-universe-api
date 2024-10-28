@@ -19,6 +19,15 @@ public class ClientRequest implements Printable {
 
   private final WikidataServiceManager wikidata;
 
+  public ClientRequest(WikidataServiceManager wd) {
+    this.query = "About the Wikiverse"; // DEFAULT RESPONSE FOR ABOUT QUESTIONS
+    this.dimensions = new Dimension(800, 600);
+    this.graph = new Graphset();
+    this.layoutConfig = new LayoutConfig();
+    this.layout = new FR3DLayout(this);
+    this.wikidata = wd;
+  }
+
   public ClientRequest(WikidataServiceManager wd, String query) {
     this.query = this.sanitizeQueryString(query);
     this.dimensions = new Dimension(800, 600); //default size scaled on init of layout 

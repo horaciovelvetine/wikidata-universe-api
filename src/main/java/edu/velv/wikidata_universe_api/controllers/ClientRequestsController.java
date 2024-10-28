@@ -13,6 +13,8 @@ import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin
 @RestController
@@ -20,9 +22,14 @@ public class ClientRequestsController implements Printable {
   @Autowired
   private WikidataServiceManager wikidataServiceManager;
 
-  @GetMapping("api/status")
-  public ResponseEntity<RequestResponseBody> getMethodName() {
+  @GetMapping("api/current-status")
+  public ResponseEntity<RequestResponseBody> getCurrentStatus() {
     return ResponseEntity.status(200).body(new RequestResponseBody("API Online."));
+  }
+
+  @GetMapping("api/about-details")
+  public ResponseEntity<RequestResponseBody> getAboutDetailsSketchData() {
+    return this.buildSuccessResponse(new RequestResponseBody(new ClientRequest(wikidataServiceManager)));
   }
 
   @GetMapping("api/query-data")
