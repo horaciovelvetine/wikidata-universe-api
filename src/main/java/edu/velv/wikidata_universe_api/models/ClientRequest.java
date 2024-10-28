@@ -133,9 +133,6 @@ public class ClientRequest implements Printable {
     graph().unlockAll();
     Optional<Err> refreshLayoutTask = runFR3DLayoutProcess();
 
-    //TODO REMOVE
-    // logClientRequestData(this);
-
     return refreshLayoutTask.isPresent() ? Either.left(refreshLayoutTask.get())
         : Either.right(new RequestResponseBody(this));
   }
