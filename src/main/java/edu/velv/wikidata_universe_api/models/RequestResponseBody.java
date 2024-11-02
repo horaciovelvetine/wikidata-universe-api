@@ -20,21 +20,14 @@ public class RequestResponseBody {
   Collection<Vertex> vertices = new ArrayList<>();
   Collection<Edge> edges = new ArrayList<>();
   Collection<Property> properties = new ArrayList<>();
-  LayoutConfig layoutConfig;
-  Err err;
+  LayoutConfig layoutConfig = null;
+  Err err = null;
 
-  /**
-   * Represents an Error in the service process 
-   */
   public RequestResponseBody(Err error) {
     this.err = error;
   }
 
-  /**
-   * Payload Data store passed back and forth between the Client and API
-   */
   public RequestResponseBody(ClientRequest request) {
-    this.err = null;
     this.query = request.query();
     this.dimensions = request.dimensions();
     this.vertices = request.graph().vertices();
@@ -43,16 +36,17 @@ public class RequestResponseBody {
     this.layoutConfig = request.layoutConfig();
   }
 
-  /**
-   * Response Status Message container for the initial request from the Client (application)
-   */
   public RequestResponseBody(String apiStatusMessageString) {
-    this.err = null;
     this.query = apiStatusMessageString;
     this.dimensions = new Dimension();
-    this.vertices = null;
-    this.edges = null;
-    this.properties = null;
-    this.layoutConfig = null;
+  }
+
+  public RequestResponseBody(AboutRequest request) {
+    this.query = request.stage();
+    this.dimensions = request.dimensions();
+    this.vertices = request.graph().vertices();
+    this.edges = request.graph().edges();
+    this.properties = request.graph().properties();
+    this.layoutConfig = request.layoutConfig();
   }
 }
