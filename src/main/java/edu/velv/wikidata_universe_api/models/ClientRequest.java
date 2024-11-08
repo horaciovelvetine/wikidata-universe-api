@@ -129,16 +129,9 @@ public class ClientRequest implements Printable {
   }
 
   /**
-  * Removes portential garbage from the provided query value recieved as a query param from the client.
-  */
-  private String sanitizeQueryString(String query) {
-    if (query == null || query.isBlank()) {
-      return null;
-    }
-    return query.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
-  }
-
-  private Optional<Err> runFR3DLayoutProcess() {
+   * Helper to call the layout process in its entirety and build a layout for the Request
+   */
+  public Optional<Err> runFR3DLayoutProcess() {
     try {
       layout.initializeLayout(this.layoutConfig);
       while (!layout.done()) {
@@ -150,4 +143,15 @@ public class ClientRequest implements Printable {
       return Optional.of(new FR3DLayoutProcessError("runFR3DLayoutProcessFailed", e));
     }
   }
+
+  /**
+  * Removes portential garbage from the provided query value recieved as a query param from the client.
+  */
+  private String sanitizeQueryString(String query) {
+    if (query == null || query.isBlank()) {
+      return null;
+    }
+    return query.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
+  }
+
 }
