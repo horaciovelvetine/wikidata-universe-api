@@ -27,7 +27,8 @@ public class AboutRequestsController implements Printable {
 
   @GetMapping("api/about-details")
   public ResponseEntity<RequestResponseBody> getInitialAboutDetails() {
-    return buildSuccessResponse(new RequestResponseBody(new AboutRequest(wikidataServiceManager)));
+    return new AboutRequest(wikidataServiceManager).getStage("init").mapLeft(Err::mapErrResponse)
+        .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
   @GetMapping("api/about")
