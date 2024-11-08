@@ -82,6 +82,8 @@ public class WikidataServiceManager implements Printable {
           apiOffline = err;
         }
       }
+      // ensure no incomplete properties are ever returned.
+      taskQueue.addUnfetchedPropertiesToQueue(req);
     }
     cleanUpUnfetchedGraphVerts(req);
     cleanUpUnusedProperties(req);
