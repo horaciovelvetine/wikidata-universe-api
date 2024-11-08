@@ -42,7 +42,7 @@ public class RequestResponseBody {
   }
 
   public RequestResponseBody(AboutRequest request) {
-    this.query = request.stage();
+    this.query = request.message();
     this.dimensions = request.dimensions();
     this.vertices = request.graph().vertices();
     this.edges = request.graph().edges();

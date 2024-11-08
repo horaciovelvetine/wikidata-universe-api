@@ -9,23 +9,8 @@ public class IncompleteDataQueue {
   private final List<String> datesToFetch = new ArrayList<>();
 
   public IncompleteDataQueue(ClientRequest req) {
-    initializeUnfetchedDetails(req);
-  }
-
-  public void initializeUnfetchedDetails(ClientRequest req) {
-    req.graph().getUnfetchedVertices().forEach(vertex -> {
-      if (vertex.id() != null) {
-        entitiesToFetch.add(vertex.id());
-      } else if (vertex.label() != null) {
-        datesToFetch.add(vertex.label());
-      }
-    });
-
-    req.graph().getUnfetchedProperties().forEach(property -> {
-      if (property.id() != null) {
-        entitiesToFetch.add(property.id());
-      }
-    });
+    addUnfetchedVerticesToQueue(req);
+    addUnfetchedPropertiesToQueue(req);
   }
 
   public List<String> getEntityBatch() {
@@ -43,6 +28,24 @@ public class IncompleteDataQueue {
   public void removeFromQueue(String target) {
     entitiesToFetch.remove(target);
     datesToFetch.remove(target);
+  }
+
+  public void addUnfetchedPropertiesToQueue(ClientRequest req) {
+    req.graph().getUnfetchedProperties().forEach(prop -> {
+      if (prop.id() != null) {
+        entitiesToFetch.add(prop.id());
+      }
+    });
+  }
+
+  public void addUnfetchedVerticesToQueue(ClientRequest req) {
+    req.graph().getUnfetchedVertices().forEach(vertex -> {
+      if (vertex.id() != null) {
+        entitiesToFetch.add(vertex.id());
+      } else if (vertex.label() != null) {
+        datesToFetch.add(vertex.label());
+      }
+    });
   }
 
   /**
