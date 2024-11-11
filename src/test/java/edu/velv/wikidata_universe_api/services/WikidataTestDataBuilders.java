@@ -20,6 +20,7 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.velv.wikidata_universe_api.interfaces.Loggable;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.LayoutConfig;
@@ -32,7 +33,7 @@ import edu.velv.wikidata_universe_api.models.RequestResponseBody;
 import edu.velv.wikidata_universe_api.models.SnakData;
 import edu.velv.wikidata_universe_api.models.ValueData;
 
-public interface WikidataTestDataBuilders extends Printable {
+public interface WikidataTestDataBuilders extends Loggable {
   // dir for sampled test data which has been stored
   final String testDataDir = "src/test/java/edu/velv/wikidata_universe_api/data/";
   final String json = ".json";

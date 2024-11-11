@@ -19,6 +19,7 @@ import edu.velv.wikidata_universe_api.models.IncompleteDataQueue;
 import edu.velv.wikidata_universe_api.models.Property;
 import edu.velv.wikidata_universe_api.models.Vertex;
 import edu.velv.wikidata_universe_api.errors.Err;
+import edu.velv.wikidata_universe_api.interfaces.Printable;
 
 public class WikidataServiceManager implements Printable {
 
