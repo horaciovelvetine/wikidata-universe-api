@@ -11,7 +11,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import edu.velv.wikidata_universe_api.services.Printable;
+import edu.velv.wikidata_universe_api.interfaces.Printable;
 import io.vavr.Tuple2;
 
 /**

@@ -7,7 +7,7 @@ import io.vavr.control.Either;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.FR3DLayoutProcessError;
-import edu.velv.wikidata_universe_api.services.Printable;
+import edu.velv.wikidata_universe_api.interfaces.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 public class ClientRequest implements Printable {

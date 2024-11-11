@@ -9,14 +9,14 @@ import org.springframework.http.ResponseEntity;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.RequestErrResponse;
-import edu.velv.wikidata_universe_api.models.AboutRequest;
+import edu.velv.wikidata_universe_api.interfaces.Printable;
+import edu.velv.wikidata_universe_api.models.TutorialRequest;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
-import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 @CrossOrigin
 @RestController
-public class AboutRequestsController implements Printable {
+public class TutorialRequestsController implements Printable {
   @Autowired
   private WikidataServiceManager wikidataServiceManager;
 
@@ -25,15 +25,9 @@ public class AboutRequestsController implements Printable {
     return buildSuccessResponse(new RequestResponseBody("API Online."));
   }
 
-  @GetMapping("api/about-details")
-  public ResponseEntity<RequestResponseBody> getInitialAboutDetails() {
-    return new AboutRequest(wikidataServiceManager).getStage("init").mapLeft(Err::mapErrResponse)
-        .fold(this::buildErrorResponse, this::buildSuccessResponse);
-  }
-
-  @GetMapping("api/about")
-  public ResponseEntity<RequestResponseBody> getNextAboutDetails(@RequestParam String target) {
-    return new AboutRequest(wikidataServiceManager).getStage(target).mapLeft(Err::mapErrResponse)
+  @GetMapping("api/tutorial")
+  public ResponseEntity<RequestResponseBody> getTutorialSlideDetails(@RequestParam String target) {
+    return new TutorialRequest(wikidataServiceManager).getSlide(target).mapLeft(Err::mapErrResponse)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 

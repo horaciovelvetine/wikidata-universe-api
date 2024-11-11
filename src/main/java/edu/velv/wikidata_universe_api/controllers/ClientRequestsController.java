@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.RequestErrResponse;
+import edu.velv.wikidata_universe_api.interfaces.Printable;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
-import edu.velv.wikidata_universe_api.services.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 @CrossOrigin

@@ -41,7 +41,7 @@ public class RequestResponseBody {
     this.dimensions = new Dimension();
   }
 
-  public RequestResponseBody(AboutRequest request) {
+  public RequestResponseBody(TutorialRequest request) {
     this.query = request.message();
     this.dimensions = request.dimensions();
     this.vertices = request.graph().vertices();
