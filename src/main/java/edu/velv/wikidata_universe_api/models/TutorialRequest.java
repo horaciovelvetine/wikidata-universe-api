@@ -101,6 +101,10 @@ public class TutorialRequest implements Loggable {
   }
 
   private void slide7() {
+    // no data creation needed
+  }
+
+  private void slide8() {
     Vertex vert = kbOriginVert();
     this.graph().addVertex(vert);
 
@@ -113,6 +117,7 @@ public class TutorialRequest implements Loggable {
     edge.srcId("Q3454165");
     edge.tgtId("Q33999");
     edge.propertyId("P106");
+    edge.fetched(true);
     this.graph().addEdge(edge);
 
     Property property = new Property();
@@ -120,33 +125,30 @@ public class TutorialRequest implements Loggable {
     property.label("occupation");
     property.description(
         "occupation of a person; see also \"field of work\" (Property:P101), \"position held\" (Property:P39)");
+    property.fetched(true);
     this.graph().addProperty(property);
   }
 
-  private void slide8() {
-    // no data needed for request
+  private void slide9() {
+    // no data creation needed
   }
 
-  private void slide9() {
+  private void slide10() {
     Vertex vert = kbOriginVert();
     this.graph().addVertex(vert);
-
   }
 
-  private Optional<Err> slide10() {
+  private Optional<Err> slide11() {
     Optional<Err> kbResultsTask = getInitKevinBaconResult();
-
     return kbResultsTask.isPresent() ? Optional.of(kbResultsTask.get()) : Optional.empty();
   }
 
-  private void slide11() {
-
-  }
-
   private void slide12() {
+    // no data creation needed
   }
 
   private void slide13() {
+    // no data creation needed
   }
 
   private Vertex kbOriginVert() {

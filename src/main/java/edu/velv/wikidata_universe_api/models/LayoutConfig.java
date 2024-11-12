@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class LayoutConfig {
-  //Constant, Client Configureable
+  //Constants which are Client Configureable
   private double dataDensity = 0.0001;
-  private double repulsionMult = 0.75;
+  private double repulsionMult = 0.4;
   private double attractionMult = 1.25;
 
   public LayoutConfig() {

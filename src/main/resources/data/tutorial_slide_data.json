@@ -13,7 +13,7 @@
 			"nav": "topics"
 		},
 		"3": {
-			"title": "navigating in 3D space", 
+			"title": "navigating in 3D space",
 			"body": ": As previously mentioned, a cube can be any topic you find in Wikipedia. What makes a cube unique is it’s topic, but also where it’s put in 3D space. Let’s look around and get a feel for just what ‘3D space’ means. Use your mouse to do a bit of exploring: when you left-click on a cube your screen will focus on it, but if you left-click and drag your mouse you can move yourself all around whatever you select.",
 			"inst": "another new topic was above you and to the left, click on it when you’re ready to continue",
 			"nav": "topics"
@@ -21,7 +21,7 @@
 		"4": {
 			"title": "Kevin Bacon",
 			"body": "Next, this topic represents Kevin Bacon (the actor). Notice how each topic has it’s own cube on the screen, and each cube occupies a unique position around you in 3D space. As you explore (i.e. click on topics) you add new cubes to your own 3D world, constructing a constellation of cubes floating in 3D space. Using your scroll wheel (mouse highly suggested!) you can zoom in and out on your world and get a new perspective on the topic you’re exploring. Take some time to get the hang of zooming and exploring using your mouse.",
-			"inst": "click on Kevin Bacon when you're ready to start your first search",
+			"inst": "click on Kevin Bacon again to reset and start you're first search",
 			"nav": "topics"
 		},
 		"5": {
@@ -45,7 +45,7 @@
 		"8": {
 			"title": "Kevin Bacon is an actor",
 			"body": "Using the statement’s convention mentioned previously (source, property, and target) the Wikiverse can store a lot about eh nature of how complex topics are connected. While exploring the previous full results, and now in this simplified example you’ll see that statements (the lines) are represented in 3 colors. Each color represents the direction that the statement flows based on the currently selected topic. In this example starting at the source ‘Kevin Bacon’, through the property of ‘occupation of’, and ending at the target ‘actor’/ The line is red when that statement flows out of the of the topic, colored blue when the statement flow in, and purple when 2 matching statements connect a single pair of topics.",
-			"inst": ": click on the ‘actor’ vertex to continue",
+			"inst": "click on the ‘actor’ vertex to continue",
 			"nav": "statements"
 		},
 		"9": {

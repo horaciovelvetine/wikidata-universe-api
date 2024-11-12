@@ -224,8 +224,7 @@ public class FR3DLayout implements Printable {
         double xDisp = (xDelt(p1, p2) / deltaLen) * force;
         double yDisp = (yDelt(p1, p2) / deltaLen) * force;
         double zDisp = (zDelt(p1, p2) / deltaLen) * force;
-        double scale = v2.locked() ? 2 : 1; // move twice as far since the opposing vertex is locked
-        updateOffset(v1, xDisp, yDisp, zDisp, scale);
+        updateOffset(v1, xDisp, yDisp, zDisp, 1);
       }
     } catch (ConcurrentModificationException cme) {
       calcRepulsion(v1);
@@ -262,8 +261,8 @@ public class FR3DLayout implements Printable {
     double yDisp = (yDelt(p1, p2) / deltaLen) * force;
     double zDisp = (zDelt(p1, p2) / deltaLen) * force;
 
-    int v1Scale = v2.locked() ? 4 : 1;
-    int v2Scale = v1.locked() ? 4 : 1;
+    int v1Scale = v2.locked() ? 5 : 1;
+    int v2Scale = v1.locked() ? 5 : 1;
     // negative to push in opposite directions
     updateOffset(v1, -xDisp, -yDisp, -zDisp, v1Scale);
     updateOffset(v2, xDisp, yDisp, zDisp, v2Scale);
