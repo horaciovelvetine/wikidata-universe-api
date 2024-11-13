@@ -7,10 +7,11 @@ import io.vavr.control.Either;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.FR3DLayoutProcessError;
+import edu.velv.wikidata_universe_api.interfaces.Loggable;
 import edu.velv.wikidata_universe_api.interfaces.Printable;
 import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
-public class ClientRequest implements Printable {
+public class ClientRequest implements Loggable {
   protected String query;
   protected Dimension dimensions;
   protected Graphset graph;
@@ -73,6 +74,7 @@ public class ClientRequest implements Printable {
    */
   public Either<Err, RequestResponseBody> getInitialQueryData() {
     Optional<Err> fetchInitQueryTask = wikidata.fetchInitialQueryData(this);
+    print("fetchInitialQueryData() ends.");
     return fetchInitQueryTask.isPresent() ? Either.left(fetchInitQueryTask.get())
         : Either.right(new RequestResponseBody(this));
   }
@@ -87,11 +89,11 @@ public class ClientRequest implements Printable {
   public Either<Err, RequestResponseBody> getUnfetchedData() {
     graph().getOriginVertex().lock();
     Optional<Err> fetchIncompleteDataTask = wikidata.fetchIncompleteData(this);
-
+    print("fetchIncompleteData() ends");
     if (fetchIncompleteDataTask.isEmpty()) {
       fetchIncompleteDataTask = runFR3DLayoutProcess();
     }
-
+    print("runLayoutProcess() ends");
     return fetchIncompleteDataTask.isPresent() ? Either.left(fetchIncompleteDataTask.get())
         : Either.right(new RequestResponseBody(this));
   }
