@@ -6,10 +6,15 @@ package edu.velv.wikidata_universe_api.interfaces;
 public interface Printable {
 
   default void print(String message) {
+    System.out.println(timestamp());
     System.out.println(message);
   }
 
   default void print(Exception excepts) {
     System.err.print(excepts.getMessage());
+  }
+
+  default String timestamp() {
+    return Long.toString(System.currentTimeMillis());
   }
 }

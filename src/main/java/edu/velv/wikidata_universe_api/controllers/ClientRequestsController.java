@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.RequestErrResponse;
-import edu.velv.wikidata_universe_api.interfaces.Printable;
+import edu.velv.wikidata_universe_api.interfaces.Loggable;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
@@ -18,12 +18,13 @@ import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 @CrossOrigin
 @RestController
-public class ClientRequestsController implements Printable {
+public class ClientRequestsController implements Loggable {
   @Autowired
   private WikidataServiceManager wikidataServiceManager;
 
   @GetMapping("api/query-data")
   public ResponseEntity<RequestResponseBody> getInitialQueryData(@RequestParam(required = true) String query) {
+    print("Get Query Data: " + query);
     return new ClientRequest(
         wikidataServiceManager, query)
         .getInitialQueryData()
@@ -33,6 +34,7 @@ public class ClientRequestsController implements Printable {
 
   @PostMapping("api/fetch-related")
   public ResponseEntity<RequestResponseBody> fetchRelatedDataDetails(@RequestBody RequestPayloadData payload) {
+    print("Get Related Data: " + payload.query());
     return new ClientRequest(wikidataServiceManager, payload)
         .getUnfetchedData()
         .mapLeft(Err::mapErrResponse)
@@ -56,6 +58,7 @@ public class ClientRequestsController implements Printable {
   }
 
   private ResponseEntity<RequestResponseBody> buildSuccessResponse(RequestResponseBody responseBody) {
+    print("Res: " + toString());
     return ResponseEntity.status(200).body(responseBody);
   }
 

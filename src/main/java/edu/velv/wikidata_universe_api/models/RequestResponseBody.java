@@ -15,11 +15,11 @@ import java.awt.Dimension;
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class RequestResponseBody {
-  String query;
+  public String query = null;
   Dimension dimensions;
-  Collection<Vertex> vertices = new ArrayList<>();
-  Collection<Edge> edges = new ArrayList<>();
-  Collection<Property> properties = new ArrayList<>();
+  public Collection<Vertex> vertices = new ArrayList<>();
+  public Collection<Edge> edges = new ArrayList<>();
+  public Collection<Property> properties = new ArrayList<>();
   LayoutConfig layoutConfig = null;
   Err err = null;
 
@@ -49,4 +49,11 @@ public class RequestResponseBody {
     this.properties = request.graph().properties();
     this.layoutConfig = request.layoutConfig();
   }
+
+  @Override
+  public String toString() {
+    return "{query: " + this.query + ", verts: " + vertices.size() + ", props:" + properties.size() + ", edges: "
+        + edges.size() + "}";
+  }
+
 }
