@@ -9,6 +9,10 @@ import io.vavr.control.Either;
 
 import java.awt.Dimension;
 import java.util.Optional;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -27,7 +31,7 @@ public class TutorialRequest implements Loggable {
   private final WikidataServiceManager wikidata;
   private Map<String, AboutSlide> slideData;
 
-  private static final String SLIDE_DATA_PATH = "./data/tutorial_slide_data.json";
+  private static final String SLIDE_DATA_PATH = "data/tutorial_slide_data.json";
 
   public TutorialRequest(WikidataServiceManager wd) {
     this.message = null;
@@ -202,7 +206,7 @@ public class TutorialRequest implements Loggable {
    * @method loadSlide() - called to load the data and slides for the tutorial to construct the response message strings
    */
   private Map<String, AboutSlide> loadSlides(String filePath) throws IOException {
-    JsonNode rootNode = mapper.readTree(new File(filePath));
+    JsonNode rootNode = mapper.readTree(loadAboutSlideResource(filePath).getFile());
     JsonNode slidesNode = rootNode.path("slides");
 
     Map<String, AboutSlide> slides = new HashMap<>();
@@ -215,6 +219,10 @@ public class TutorialRequest implements Loggable {
       slides.put(key, slide);
     }
     return slides;
+  }
+
+  private Resource loadAboutSlideResource(String filePath) {
+    return new ClassPathResource(filePath);
   }
 
 }
