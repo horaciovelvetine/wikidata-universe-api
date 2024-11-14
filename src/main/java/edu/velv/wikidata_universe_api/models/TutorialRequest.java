@@ -27,7 +27,7 @@ public class TutorialRequest implements Loggable {
   private final WikidataServiceManager wikidata;
   private Map<String, AboutSlide> slideData;
 
-  private static final String SLIDE_DATA_PATH = "target/classes/data/tutorial_slide_data.json";
+  private static final String SLIDE_DATA_PATH = "./data/tutorial_slide_data.json";
 
   public TutorialRequest(WikidataServiceManager wd) {
     this.message = null;
