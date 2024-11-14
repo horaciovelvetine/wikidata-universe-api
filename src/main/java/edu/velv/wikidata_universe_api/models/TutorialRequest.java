@@ -16,7 +16,6 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -206,8 +205,9 @@ public class TutorialRequest implements Loggable {
    * @method loadSlide() - called to load the data and slides for the tutorial to construct the response message strings
    */
   private Map<String, AboutSlide> loadSlides(String filePath) throws IOException {
-    JsonNode rootNode = mapper.readTree(loadAboutSlideResource(filePath).getFile());
-    JsonNode slidesNode = rootNode.path("slides");
+    // JsonNode rootNode = mapper.readTree(loadAboutSlideResource(filePath).getFile());
+    JsonNode rJsonNode = mapper.readTree(loadAboutSlideResource(filePath).getInputStream());
+    JsonNode slidesNode = rJsonNode.path("slides");
 
     Map<String, AboutSlide> slides = new HashMap<>();
     Iterator<Map.Entry<String, JsonNode>> fields = slidesNode.fields();
