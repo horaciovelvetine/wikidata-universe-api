@@ -2,79 +2,79 @@
 	"slides": {
 		"1": {
 			"title": "a quick intro",
-			"body": "This app, Wikiverse, is built to explore Wikipedia data in a 3D world – the one you create. This tutorial puts you inside of your Wikipedia topic and gives you the freedom to move around and explore. Start by searching for any topic just like you would on Wikipedia. Wikiverse finds it and draws it in front of you, but that’s just the start. Wikiverse finds all the things it knows related to your topic, and with just a click, you can explore related ideas, things, people, and places, a never-ending rabbit hole generator. The cube drawn below represents ‘The Moon’, and it’s the first topic you’re going to explore in this short guided tutorial.",
+			"body": "This app, Wikiverse, is built to explore Wikipedia data in a 3D world – the one you create. This tutorial puts you inside of your Wikipedia topic and gives you the freedom to move around and explore. Start by searching for any topic just like you would on Wikipedia. Wikiverse finds it and draws it in front of you, but that’s just the start. Wikiverse finds all the things it knows related to your topic, and with just a click, you can explore related ideas, things, people, and places -- a never-ending rabbit hole generator. The cube drawn below represents ‘The Moon’, and its the first topic you’re going to explore in this short guided tutorial.",
 			"inst": "click on the cube when you're ready to continue",
 			"nav": "intro"
 		},
 		"2": {
 			"title": "what the Wikiverse is made of",
-			"body": "This cube is called a topic in the Wikiverse, by clicking on it you display its name: ‘Moon’ and a short description on the lower left of your screen. Since all of the Wikiverse’s data is from Wikipedia’s source database (Wikidata), clicking on the title in the bottom left will take you to the original source page. Wikidata contains information about over 100 million different topics, and in the Wikiverse these cubes could represent any one of them.",
-			"inst": "a new topic ‘Apollo 13 (film)’ was added on your left, click it when you’re ready to continue",
+			"body": "This cube is called a topic in the Wikiverse, by clicking on it you display its name: ‘Moon’, and a short description on the lower left of your screen. Since all of the Wikiverse’s data is from Wikipedia’s source database (Wikidata), clicking on the title in the bottom left will take you to the original source page. Wikidata contains information about over 100 million different topics, and in the Wikiverse these cubes could represent any one of them.",
+			"inst": "a new topic ‘Apollo 13 (film)’ was added on your left - click it when you’re ready to continue",
 			"nav": "topics"
 		},
 		"3": {
 			"title": "navigating in 3D space",
-			"body": ": As previously mentioned, a cube can be any topic you find in Wikipedia. What makes a cube unique is it’s topic, but also where it’s put in 3D space. Let’s look around and get a feel for just what ‘3D space’ means. Use your mouse to do a bit of exploring: when you left-click on a cube your screen will focus on it, but if you left-click and drag your mouse you can move yourself all around whatever you select.",
-			"inst": "another new topic was above you and to the left, click on it when you’re ready to continue",
+			"body": ": As previously mentioned, a cube can be any topic you find in Wikipedia. What makes a cube unique is it’s topic, but also where its put in 3D space. Let’s look around and get a feel for just what ‘3D space’ means. Use your mouse to do a bit of exploring: when you left-click on a cube your screen will focus on it, but if you left-click and drag your mouse you can move yourself all around whatever you select. Using your scroll wheel (mouse recommended!) you can zoom in and out to change your perspective.",
+			"inst": "another new topic was above you and to the left - click on it when you're ready to continue",
 			"nav": "topics"
 		},
 		"4": {
 			"title": "Kevin Bacon",
-			"body": "Next, this topic represents Kevin Bacon (the actor). Notice how each topic has it’s own cube on the screen, and each cube occupies a unique position around you in 3D space. As you explore (i.e. click on topics) you add new cubes to your own 3D world, constructing a constellation of cubes floating in 3D space. Using your scroll wheel (mouse highly suggested!) you can zoom in and out on your world and get a new perspective on the topic you’re exploring. Take some time to get the hang of zooming and exploring using your mouse.",
-			"inst": "click on Kevin Bacon again to reset and start you're first search",
+			"body": "This topic represents Kevin Bacon (the actor). Notice how each topic has its own cube on the screen, and each cube occupies a unique position in 3D space. As you explore (i.e., click on topics) you add new cubes to your own 3D world, constructing a constellation of cubes floating in 3D space. In the Wikiverse this accumulation of topics provides a unique context, and history to the idea of searching on Wikipedia.",
+			"inst": "click on Kevin Bacon again to reset and start your first search",
 			"nav": "topics"
 		},
 		"5": {
-			"title": "connecting the dots",
-			"body": "When you search for something the Wikivers places the result in front of you. In the background, however, it continues the search by fetching any related topics and drawing them on screen around your original topic. To describe these relationships the Wikiverse uses the humble ‘statement’ which follows a simple convention: e.g. ‘Kevin Bacon is an actor’. Statements always consist of a source: ‘Kevin Bacon’, a property: ‘occupation of’, and a target: ‘actor’. This paradigm provides a meaningful way to describe relationships and is the foundational concept underpinning how vertices are connected in the Wikiverse.",
-			"inst": "click on Kevin Bacon again to show the related topic results",
+			"title": "connect the dots",
+			"body": "When you search for something the Wikiverse places the result in front of you. In the background, however, it continues the search by fetching any related topics and drawing them on screen around your original topic. To describe these relationships the Wikiverse uses the humble ‘statement’ which follows a simple convention e.g., ‘Kevin Bacon is an actor’. Statements always consist of a source: ‘Kevin Bacon’, a property: ‘occupation of’, and a target: ‘actor’. This paradigm provides a meaningful way to describe relationships and is the foundational concept underpinning how topics are connected in the Wikiverse.",
+			"inst": "click again to show the related topic results - this may take a sec (as Kevin's agent would contest 'he's so much more than just an actor').",
 			"nav": "statements"
 		},
 		"6": {
 			"title": "first results",
-			"body": "On screen are the full results you get when searching for ‘Kevin Bacon’. The Kevin Bacon cube is still positioned in the middle, find it and click to explore all the relationships the Wikiverse found. Each new cube hovering around ‘Kevin Bacon’ is a related topic Wikipedia knows about, just waiting to be discovered. By adding the related topics a few new things have also been drawn on the screen. In the bottom right is all of the related topics the Wikiverse found as a convenient list of statements, and the cube on screen has a series of colored lines connecting it to it’s related topics. More on this to follow.",
+			"body": "On screen are the full results you get when searching for ‘Kevin Bacon’. The Kevin Bacon cube is still positioned in the middle: find it, and click to explore all the relationships the Wikiverse found. Each new cube hovering around ‘Kevin Bacon’ is a related topic Wikipedia knows about, just waiting to be discovered. By adding the related topics a few new things have also been drawn on the screen. In the bottom right are all of the related topics the Wikiverse found as a convenient list of statements, and the cube on screen has a series of colored lines connecting it to it’s related topics. More on this to follow.",
 			"inst": "press the spacebar when you're ready to continue",
 			"nav": "results"
 		},
 		"7": {
 			"title": "connecting lines",
-			"body": "Each time you select (or hover) over a topic, the Wikiverse will display all the statements which connect to and from that topic. These statements are drawn on screen as lines which connect the cubes in 3D space. As these lines pull related vertices towards one another, any unrelated vertices are in turn pushed away, this process positions them in 3D space and forms the web of topics drawn around you to explore. To learn a bit more let’s simplify things and focus on the original example ‘Kevin Bacon is an actor",
+			"body": "Each time you select a topic, the Wikiverse will display all the statements (relationships) which connect to and from that topic. These relationships are drawn on screen as lines which connect the cubes in 3D space. As these lines pull related vertices towards one another, any unrelated vertices are in turn pushed away. This process positions them in 3D space and forms the web of topics drawn around you to explore. To learn a bit more let’s simplify things and focus on the original example, ‘Kevin Bacon is an actor",
 			"inst": "press the spacebar when you’re ready to continue",
 			"nav": "results"
 		},
 		"8": {
 			"title": "Kevin Bacon is an actor",
-			"body": "Using the statement’s convention mentioned previously (source, property, and target) the Wikiverse can store a lot about eh nature of how complex topics are connected. While exploring the previous full results, and now in this simplified example you’ll see that statements (the lines) are represented in 3 colors. Each color represents the direction that the statement flows based on the currently selected topic. In this example starting at the source ‘Kevin Bacon’, through the property of ‘occupation of’, and ending at the target ‘actor’/ The line is red when that statement flows out of the of the topic, colored blue when the statement flow in, and purple when 2 matching statements connect a single pair of topics.",
-			"inst": "click on the ‘actor’ vertex to continue",
+			"body": "Using the statement’s convention mentioned previously (source, property, and target) the Wikiverse can store a lot about eh nature of how complex topics are connected. While exploring the previous full results, and now in this simplified example, you’ll see that statements (the lines) are represented in 3 colors. Each color represents the direction that the statement flows based on the currently selected topic. In this example starting at the source ‘Kevin Bacon’, through the property of ‘occupation of’, and ending at the target ‘actor’, the line is red when that statement flows out of the topic, it's colored blue when the statement flows in, and it's purple when 2 matching statements connect a single pair of topics.",
+			"inst": "click on the ‘actor’ cube to continue",
 			"nav": "statements"
 		},
 		"9": {
 			"title": "actor is not Kevin Bacon",
-			"body": "After selecting ‘actor’, you’ll notice that the color of line connecting Kevin Bacon and actor has changed color to blue. This is because statements have a natural direction, and this direction is determined using whatever topic is currently selected. While Kevin Bacon may be an actor (red line), not all actors are ‘Kevin Bacon’, and so the line changes to blue. In the bottom right of your screen these relationships are listed as individual statements where: their source (currently selected) topic is pictured as the yellow cube, the property is highlighted in the directional color, arrows indicate this statements direction, and finally the title of the target topic. Clicking inside this display on either icon will move your focus to that position in the Wikiverse, and clicking the property will take you to the Wikidata source page to learn more about how this pair of vertices’ connection is described (the property).",
+			"body": "After selecting ‘actor’, you’ll notice that the color of line connecting 'Kevin Bacon' and 'actor' has changed color to blue. This is because statements have a natural direction, and this direction is determined using whatever topic is currently selected. While Kevin Bacon may be an actor (red line), not all actors are ‘Kevin Bacon’, and so the line changes to blue. In the bottom right of your screen relationships are listed as statements. The source topic, which is also the currently selected topic, is pictured as a yellow cube. The property is surrounded by arrows indicating the statements direction and is highlighted in the correlated directional color. Finally, a white cube and topic title are the target topic. Clicking any topic in this list will change your focus to be on that topic's location inside the Wikiverse. Clicking a property will take you to the Wikidata source page to learn more about how the topics are related.",
 			"inst": "press the space bar to continue",
 			"nav": "statements"
 		},
 		"10": {
-			"title": "building a search in 3D’",
-			"body": "Using statements the Wikiverse finds and places the topics and context of your search around you. Searching this way is meant to encourage and foster topic discovery, and is central to the Wikiverse itself, leaving just one thing to understand about exploring: adding topics. Each time you click on a new topic (cube) related topics are found and added to your current search, placed according to their own statements possibly even connecting them back to existing topics in your search.",
-			"inst": "click on the vertex when you’re ready to return to the original search results",
+			"title": "building a search in 3D",
+			"body": "Using statements, the Wikiverse finds and places the topics and context of your search around you. Searching this way is meant to encourage and foster topic discovery, and is central to the Wikiverse itself. That leaves just one thing to understand about exploring: adding topics. Each time you click on a new topic (cube) related topics are found and added to your current search. They are placed according to their own statements, possibly even connecting them back to existing topics in your search.",
+			"inst": "click on the cube when you’re ready to return to the original search results",
 			"nav": "statements"
 		},
 		"11": {
 			"title": "click to explore",
-			"body": "Now back to the original results for ‘Kevin Bacon’. Click on any of the related vertices while zoomed out a bit. After a moment (or two), new cubes (topics) are added for you to explore. Hovering your mouse over any cube will display its details in the upper left corner of your screen. As soon as you click on that cube, however, the Wikiverse will add related topics to your search’s wider contextual universe, expanding topics for you to explore and building a broader constellation.",
+			"body": "Now we're back to the original results for ‘Kevin Bacon’. Click on any of the related vertices while zoomed out a bit. After a moment (or two), new cubes (topics) are added for you to explore. Hovering your mouse over any cube will display its details in the upper left corner of your screen. As soon as you click on that cube, however, the Wikiverse will add related topics to your search’s wider contextual universe, expanding topics for you to explore and building a broader constellation.",
 			"inst": "press the spacebar when you’re ready to continue",
 			"nav": "building"
 		},
 		"12": {
 			"title": "a few final details",
-			"body": "A few more details to understand before jumping in to explore with both feet: In the upper right-hand corner of your screen are two icons: the magnifying glass will let you start over fresh with a new search (when you’re not in the Tutorial), and the gear icon provides a few tools to modify what's on screen. Graph details can be toggled on/off to show the number of vertices and statements currently on screen, as well as where you're currently looking in 3D space (Camera position and focus). The Axis Orientation and Bounding Box draw some helpful indicators on screen to help keep you oriented in your search. The final settings are experimental features which re-run the layout process, changing the position of all the vertices in the current search. Suggestions welcome if these are helpful!",
+			"body": "A few more details to understand before jumping in to explore with both feet. In the upper right-hand corner of your screen are two icons. The magnifying glass will let you start over with a new search (when you’re not in the Tutorial), and the gear icon provides a few tools to modify what's on screen. Graph details can be toggled on/off to show the number of vertices and statements currently on screen, as well as where you're currently looking in 3D space (Camera Position and Camera Focus). The Axis Orientation and Bounding Box draw some helpful indicators on screen to help keep you oriented in your search. The final settings are experimental features which re-run the layout process, changing the position of all the vertices in the current search. Suggestions welcome if these are helpful!",
 			"inst": "press the spacebar when you’re ready to continue",
 			"nav": "settings"
 		},
 		"13": {
 			"title": "time to explore",
-			"body": "That should be all you need to know to get started exploring the Wikiverse. You can continue to explore this search here, or start a new search using the magnifying icon or refreshing the page. Feedback is always appreciated @horaciovelvetine on Github. Hope you enjoy and have plenty of fun out there exploring the Wikiverse.",
+			"body": "You now have all you need to know to get started exploring the Wikiverse. You can continue to explore this search here, or start a new search vy refreshing the page whenever you're ready. Feedback is always appreciated @horaciovelvetine on Github. Hope you enjoy -- and have plenty of fun out there exploring the Wikiverse!",
 			"inst": "press the spacebar when you’re ready to exit ",
 			"nav": "exit"
 		}
