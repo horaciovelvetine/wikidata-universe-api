@@ -3,7 +3,7 @@
   <h2>
     <a href=https://github.com/horaciovelvetine/wikidata-universe-client>Frontend</a> |
     <a href=https://github.com/horaciovelvetine/wikidata-universe-api>Backend</a> |
-    <a href=#Documentation-&-Resources>Documentation & Resources </a>
+    <a href=https://github.com/horaciovelvetine/horaciovelvetine/blob/main/assets/docs/THE_WIKIVERSE_OVERVIEW.md>Documentation & Resources </a>
   </h2>
 </ul>
 
@@ -12,7 +12,7 @@
 <img align=center src=.github/readme_assets/wikipedia_in3D_v0.0.1.png>
 <p align=center>This is what Wikipedia looks like in 3D space, just to get that answer out of the way</p>  
 
-<h4>Special attention has been taken throughout the development process to ensure any learning opportunity encountered was well documented. The <a href=#Documentation-&-Resources>Documentation & Resources</a> section includes links to additional write-ups, copies of reference material, links to code, sample & pseudo code, and a record of the complete prototyping process from question to deploy</h4>
+<h4>Special attention has been taken throughout the development process to ensure any learning opportunity encountered was well documented. The <a href=https://github.com/horaciovelvetine/horaciovelvetine/blob/main/assets/docs/THE_WIKIVERSE_OVERVIEW.md>Documentation & Resources</a> section includes links to additional write-ups, copies of reference material, links to code, sample & pseudo code, and a record of the complete prototyping process from question to deploy</h4>
 
 ## `main` Azure Deployment
 
@@ -31,6 +31,6 @@
 - **Stateless Data:** All requests are posted with the needed data, or only use search params to assemble the correct response data. No state is stored for the client or by the API for any request.
 - **Creates a 3D Layout:** Positions Vertices (Item Documents) in a scaled 3D space based on Edges created from Statements to cluster things based on their relationship to one another.
 - **Tutorial:** Serves and builds data in coordination with client for effective an introduction to the Wikiverse.    
- 
-## Documentation & Resources
+
+
 
