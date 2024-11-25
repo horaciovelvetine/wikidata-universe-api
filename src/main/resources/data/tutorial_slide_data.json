@@ -27,7 +27,7 @@
 		"5": {
 			"title": "connect the dots",
 			"body": "When you search for something the Wikiverse places the result in front of you. In the background, however, it continues the search by fetching any related topics and drawing them on screen around your original topic. To describe these relationships the Wikiverse uses the humble ‘statement’ which follows a simple convention e.g., ‘Kevin Bacon is an actor’. Statements always consist of a source: ‘Kevin Bacon’, a property: ‘occupation of’, and a target: ‘actor’. This paradigm provides a meaningful way to describe relationships and is the foundational concept underpinning how topics are connected in the Wikiverse.",
-			"inst": "click again to show the related topic results. This may take a sec (as Kevin's agent would contest, "He's so much more than just an actor").",
+			"inst": "click again to show the related topic results. This may take a sec (as Kevin's agent would contest, he's so much more than just an actor).",
 			"nav": "statements"
 		},
 		"6": {
