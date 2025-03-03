@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 
 import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
-import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataTestDataBuilders;
 
 public class PropertyTests implements WikidataTestDataBuilders, FailedTestMsgTemplates {
   private final String src_ = "@PropertyTests:: ";

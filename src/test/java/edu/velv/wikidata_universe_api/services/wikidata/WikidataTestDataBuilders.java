@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api.services.wikidata;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

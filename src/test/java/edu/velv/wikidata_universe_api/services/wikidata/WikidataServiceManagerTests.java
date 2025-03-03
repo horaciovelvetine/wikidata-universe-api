@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api.services.wikidata;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -21,7 +21,9 @@ import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.*;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.LayoutConfig;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
-
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
+import edu.velv.wikidata_universe_api.services.wikidata.EntDocProc;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
 import io.vavr.control.Either;
 
 @SpringBootTest

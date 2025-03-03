@@ -5,11 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Used to represent large chunks of text information displayed on screen for the client when they are using the tutorial to guide them through using the Wikiverse
  */
-public class AboutSlide {
-
-  @JsonProperty("title")
-  private String title;
-
+public class TutorialSlide {
   @JsonProperty("body")
   private String body;
 
@@ -18,14 +14,6 @@ public class AboutSlide {
 
   @JsonProperty("nav")
   private String nav;
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
 
   public String getBody() {
     return body;
@@ -57,6 +45,6 @@ public class AboutSlide {
   @Override
   public String toString() {
     String delim = "::";
-    return getNav() + delim + getTitle() + delim + getBody() + delim + getInst();
+    return getNav() + delim + getBody() + delim + getInst();
   }
 }

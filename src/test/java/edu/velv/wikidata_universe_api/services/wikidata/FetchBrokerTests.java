@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api.services.wikidata;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -22,6 +22,8 @@ import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.ApiUnavailableError;
 import edu.velv.wikidata_universe_api.errors.Err.WikidataServiceError.NoSuchEntityFoundError;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
+import edu.velv.wikidata_universe_api.services.wikidata.FetchBroker;
 
 public class FetchBrokerTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {
   private final String src_ = "@FetchBrokerTests";

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import edu.velv.wikidata_universe_api.models.ValueData.ValueType;
 import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
-import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataTestDataBuilders;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
