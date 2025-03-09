@@ -2,24 +2,14 @@ package edu.velv.wikidata_universe_api.models;
 
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.TutorialSlideDataUnavailableError;
-import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 import edu.velv.wikidata_universe_api.interfaces.Loggable;
-
+import edu.velv.wikidata_universe_api.services.tutorial.TutorialSlideData;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
 import io.vavr.control.Either;
 
 import java.awt.Dimension;
 import java.util.Optional;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class TutorialRequest implements Loggable {
   private String message;
@@ -28,15 +18,14 @@ public class TutorialRequest implements Loggable {
   protected LayoutConfig layoutConfig = new LayoutConfig();
 
   private final WikidataServiceManager wikidata;
-  private Map<String, AboutSlide> slideData;
+  private final TutorialSlideData slideData;
 
-  private static final String SLIDE_DATA_PATH = "data/tutorial_slide_data.json";
-
-  public TutorialRequest(WikidataServiceManager wd) {
+  public TutorialRequest(WikidataServiceManager wd, TutorialSlideData sd) {
     this.message = null;
     this.dimensions = new Dimension(1600, 1200);
     this.graph = new Graphset();
     this.wikidata = wd;
+    this.slideData = sd;
   }
 
   public String message() {
@@ -57,16 +46,14 @@ public class TutorialRequest implements Loggable {
 
   public Either<Err, RequestResponseBody> getSlide(String tgtSlide) {
     try {
-      slideData = loadSlides(SLIDE_DATA_PATH);
-      int stageNumber = Integer.parseInt(tgtSlide);
-      Method method = this.getClass().getDeclaredMethod("slide" + stageNumber);
+      Method method = this.getClass().getDeclaredMethod("slide" + Integer.parseInt(tgtSlide));
       method.setAccessible(true);
       method.invoke(this);
     } catch (Exception e) {
       return Either.left(new TutorialSlideDataUnavailableError("Unable to get slide data for AboutSketch", e));
     }
     // set unique message response per slide //
-    this.message = slideData.get(tgtSlide).toString();
+    this.message = slideData.getSlideData(tgtSlide).toString();
     return Either.right(new RequestResponseBody(this));
   }
 
@@ -200,29 +187,4 @@ public class TutorialRequest implements Loggable {
     this.dimensions = request.dimensions();
     return Optional.empty();
   }
-
-  /**
-   * @method loadSlide() - called to load the data and slides for the tutorial to construct the response message strings
-   */
-  private Map<String, AboutSlide> loadSlides(String filePath) throws IOException {
-    // JsonNode rootNode = mapper.readTree(loadAboutSlideResource(filePath).getFile());
-    JsonNode rJsonNode = mapper.readTree(loadAboutSlideResource(filePath).getInputStream());
-    JsonNode slidesNode = rJsonNode.path("slides");
-
-    Map<String, AboutSlide> slides = new HashMap<>();
-    Iterator<Map.Entry<String, JsonNode>> fields = slidesNode.fields();
-    while (fields.hasNext()) {
-      Map.Entry<String, JsonNode> field = fields.next();
-      String key = field.getKey();
-      JsonNode value = field.getValue();
-      AboutSlide slide = mapper.treeToValue(value, AboutSlide.class);
-      slides.put(key, slide);
-    }
-    return slides;
-  }
-
-  private Resource loadAboutSlideResource(String filePath) {
-    return new ClassPathResource(filePath);
-  }
-
 }

@@ -197,22 +197,25 @@ public class Graphset {
   }
 
   /**
-   * Gets any Vertex object from the set where fetched is falsey
+   * @return any Vertex object from the set where fetched is falsey
    */
   public List<Vertex> getUnfetchedVertices() {
     return vertices().stream().filter(v -> !v.fetched()).toList();
   }
 
   /**
-   * Gets any Property object from the set where fetched is falsey
+   * @return any Property object from the set where fetched is falsey
    */
   public List<Property> getUnfetchedProperties() {
     return properties().stream().filter(p -> !p.fetched()).toList();
   }
 
+  /**
+   * @return the origin Vertex using it's properties, or null if none is found
+   */
   public Vertex getOriginVertex() {
     return vertices.stream()
-        .filter(Vertex::fetched)
+        .filter(Vertex::origin)
         .findFirst()
         .orElse(null);
   }

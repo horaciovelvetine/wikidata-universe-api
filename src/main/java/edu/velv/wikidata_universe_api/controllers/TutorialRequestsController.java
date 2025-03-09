@@ -11,14 +11,18 @@ import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.RequestErrResponse;
 import edu.velv.wikidata_universe_api.interfaces.Printable;
 import edu.velv.wikidata_universe_api.models.TutorialRequest;
+import edu.velv.wikidata_universe_api.services.tutorial.TutorialSlideData;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
-import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 
 @CrossOrigin
 @RestController
 public class TutorialRequestsController implements Printable {
   @Autowired
   private WikidataServiceManager wikidataServiceManager;
+
+  @Autowired
+  private TutorialSlideData tutorialSlideData;
 
   @GetMapping("api/current-status")
   public ResponseEntity<RequestResponseBody> getCurrentStatus() {
@@ -27,7 +31,7 @@ public class TutorialRequestsController implements Printable {
 
   @GetMapping("api/tutorial")
   public ResponseEntity<RequestResponseBody> getTutorialSlideDetails(@RequestParam String target) {
-    return new TutorialRequest(wikidataServiceManager).getSlide(target).mapLeft(Err::mapErrResponse)
+    return new TutorialRequest(wikidataServiceManager, tutorialSlideData) .getSlide(target).mapLeft(Err::mapErrResponse)
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 

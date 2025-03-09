@@ -14,7 +14,7 @@ import edu.velv.wikidata_universe_api.interfaces.Loggable;
 import edu.velv.wikidata_universe_api.models.ClientRequest;
 import edu.velv.wikidata_universe_api.models.RequestPayloadData;
 import edu.velv.wikidata_universe_api.models.RequestResponseBody;
-import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
 
 @CrossOrigin
 @RestController
@@ -32,6 +32,9 @@ public class ClientRequestsController implements Loggable {
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
+  /**
+  * @apiNote - Expects a mostly (data) incomplete payload from the client and complete that @see Graphset. 
+  */
   @PostMapping("api/fetch-related")
   public ResponseEntity<RequestResponseBody> fetchRelatedDataDetails(@RequestBody RequestPayloadData payload) {
     print("fetchRelatedDataDetails() start: " + payload.query());
@@ -41,6 +44,9 @@ public class ClientRequestsController implements Loggable {
         .fold(this::buildErrorResponse, this::buildSuccessResponse);
   }
 
+  /**
+   * @apiNote - Expects a data complete request, fetching new data at an N1 depth based on an altQuery target provided in the payload
+   */
   @PostMapping("api/click-target")
   public ResponseEntity<RequestResponseBody> fetchClickTargetRelatedDetails(@RequestBody RequestPayloadData payload) {
     return new ClientRequest(wikidataServiceManager, payload)

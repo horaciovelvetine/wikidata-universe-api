@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api.services.wikidata;
 
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
@@ -6,6 +6,8 @@ import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
 import edu.velv.wikidata_universe_api.models.Edge;
 import edu.velv.wikidata_universe_api.models.Vertex;
+import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
+import edu.velv.wikidata_universe_api.services.wikidata.EntDocProc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

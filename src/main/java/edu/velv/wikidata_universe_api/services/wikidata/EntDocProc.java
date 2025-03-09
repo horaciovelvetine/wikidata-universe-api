@@ -1,4 +1,4 @@
-package edu.velv.wikidata_universe_api.services;
+package edu.velv.wikidata_universe_api.services.wikidata;
 
 import java.util.HashSet;
 import java.util.Iterator;

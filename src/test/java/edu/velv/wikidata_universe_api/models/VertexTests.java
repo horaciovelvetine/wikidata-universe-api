@@ -11,7 +11,7 @@ import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
-import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataTestDataBuilders;
 
 // import edu.velv.wikidata_universe_api.Constables;
 
