@@ -30,9 +30,4 @@ public class WikidataUniverseApiApplication {
 	FetchBroker fetchBroker() {
 		return new FetchBroker();
 	}
-
-	@Bean
-	TutorialSlideData tutorialSlideData() {
-		return new TutorialSlideData();
-	}
 }

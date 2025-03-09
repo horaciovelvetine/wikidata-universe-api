@@ -28,6 +28,5 @@ public class WikidataUniverseApiApplicationTests implements FailedTestMsgTemplat
     assertNotNull(wikidataSrvcMngr.api().iri(), src_ + unableToFind + "Wikidata iri()");
     assertNotNull(wikidataSrvcMngr.docProc().excludedDataTypes(), src_ + unableToFind + "Wikidata excludedDataTypes()");
     assertNotNull(wikidataSrvcMngr.docProc().excludedIds(), src_ + unableToFind + "Wikidata excludedIds()");
-
   }
 }
