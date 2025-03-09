@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
-import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
-import edu.velv.wikidata_universe_api.services.WikidataTestDataBuilders;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataTestDataBuilders;
 
 @SpringBootTest
 public class FR3DLayoutTests implements FailedTestMsgTemplates, WikidataTestDataBuilders {

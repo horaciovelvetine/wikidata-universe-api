@@ -8,7 +8,7 @@ import io.vavr.control.Either;
 import edu.velv.wikidata_universe_api.errors.Err;
 import edu.velv.wikidata_universe_api.errors.Err.WikiverseServiceError.FR3DLayoutProcessError;
 import edu.velv.wikidata_universe_api.interfaces.Loggable;
-import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
 
 public class ClientRequest implements Loggable {
   protected String query;

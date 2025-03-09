@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import edu.velv.wikidata_universe_api.services.WikidataServiceManager;
 import edu.velv.wikidata_universe_api.services.FailedTestMsgTemplates;
+import edu.velv.wikidata_universe_api.services.wikidata.WikidataServiceManager;
 
 @SpringBootTest
 public class WikidataUniverseApiApplicationTests implements FailedTestMsgTemplates {
