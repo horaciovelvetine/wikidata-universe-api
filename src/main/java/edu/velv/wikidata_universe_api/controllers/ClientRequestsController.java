@@ -22,6 +22,11 @@ public class ClientRequestsController implements Loggable {
   @Autowired
   private WikidataServiceManager wikidataServiceManager;
 
+  @GetMapping("api/current-status")
+  public ResponseEntity<RequestResponseBody> getCurrentStatus() {
+    return buildSuccessResponse(new RequestResponseBody("API Online."));
+  }
+
   @GetMapping("api/query-data")
   public ResponseEntity<RequestResponseBody> getInitialQueryData(@RequestParam(required = true) String query) {
     print("getInitialQueryData() start: " + query);
